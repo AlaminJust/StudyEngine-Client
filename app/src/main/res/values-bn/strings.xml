@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">স্টাডি ইঞ্জিন</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">হোম</string>
+    <string name="nav_books">বই</string>
+    <string name="nav_sessions">সেশন</string>
+    <string name="nav_settings">সেটিংস</string>
+
+    <!-- Auth -->
+    <string name="sign_in">সাইন ইন</string>
+    <string name="sign_in_with_google">গুগল দিয়ে সাইন ইন করুন</string>
+    <string name="sign_out">সাইন আউট</string>
+    <string name="welcome_back">স্বাগতম!</string>
+    <string name="welcome_message">আপনার পড়াশোনার সেশন সংগঠিত করুন এবং লক্ষ্য অর্জন করুন</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard">ড্যাশবোর্ড</string>
+    <string name="today_sessions">আজকের সেশন</string>
+    <string name="upcoming_sessions">আসন্ন সেশন</string>
+    <string name="no_sessions_today">আজকের জন্য কোন সেশন নির্ধারিত নেই</string>
+    <string name="sessions_completed">%1$d টির মধ্যে %2$d টি সম্পন্ন</string>
+    <string name="quick_actions">দ্রুত কাজ</string>
+    <string name="add_book">বই যোগ করুন</string>
+    <string name="view_all">সব দেখুন</string>
+    <string name="your_progress">আপনার অগ্রগতি</string>
+    <string name="pages_read_today">আজ পড়া পৃষ্ঠা</string>
+    <string name="study_streak">পড়ার ধারা</string>
+    <string name="days">দিন</string>
+
+    <!-- Books -->
+    <string name="books">বই</string>
+    <string name="my_books">আমার বই</string>
+    <string name="no_books">এখনও কোন বই নেই</string>
+    <string name="add_your_first_book">পরিকল্পনা শুরু করতে আপনার প্রথম বই যোগ করুন</string>
+    <string name="book_title">শিরোনাম</string>
+    <string name="book_subject">বিষয়</string>
+    <string name="total_pages">মোট পৃষ্ঠা</string>
+    <string name="difficulty">কঠিনতা</string>
+    <string name="priority">অগ্রাধিকার</string>
+    <string name="target_end_date">লক্ষ্য শেষ তারিখ</string>
+    <string name="chapters">অধ্যায়</string>
+    <string name="add_chapter">অধ্যায় যোগ করুন</string>
+    <string name="chapter_title">অধ্যায়ের শিরোনাম</string>
+    <string name="start_page">শুরুর পৃষ্ঠা</string>
+    <string name="end_page">শেষ পৃষ্ঠা</string>
+    <string name="ignored">বাদ দেওয়া</string>
+    <string name="ignore_chapter">অধ্যায় বাদ দিন</string>
+    <string name="unignore_chapter">অধ্যায় অন্তর্ভুক্ত করুন</string>
+    <string name="ignore_reason">কারণ (ঐচ্ছিক)</string>
+    <string name="effective_pages">কার্যকরী পৃষ্ঠা: %1$d</string>
+
+    <!-- Study Plan -->
+    <string name="study_plan">পড়ার পরিকল্পনা</string>
+    <string name="create_study_plan">পড়ার পরিকল্পনা তৈরি করুন</string>
+    <string name="no_study_plan">কোন পরিকল্পনা নেই</string>
+    <string name="create_plan_message">সেশন তৈরি করতে একটি পড়ার পরিকল্পনা তৈরি করুন</string>
+    <string name="start_date">শুরুর তারিখ</string>
+    <string name="end_date">শেষ তারিখ</string>
+    <string name="recurrence">পুনরাবৃত্তি</string>
+    <string name="daily">প্রতিদিন</string>
+    <string name="weekly">সাপ্তাহিক</string>
+    <string name="custom">কাস্টম</string>
+    <string name="select_days">দিন নির্বাচন করুন</string>
+    <string name="plan_active">সক্রিয়</string>
+    <string name="plan_paused">বিরতি</string>
+    <string name="plan_completed">সম্পন্ন</string>
+
+    <!-- Sessions -->
+    <string name="sessions">সেশন</string>
+    <string name="study_sessions">পড়ার সেশন</string>
+    <string name="no_sessions">কোন সেশন নেই</string>
+    <string name="session_details">সেশনের বিবরণ</string>
+    <string name="start_session">সেশন শুরু করুন</string>
+    <string name="complete_session">সেশন সম্পন্ন করুন</string>
+    <string name="mark_as_missed">মিস হিসেবে চিহ্নিত করুন</string>
+    <string name="cancel_session">সেশন বাতিল করুন</string>
+    <string name="planned_pages">পরিকল্পিত: %1$d পৃষ্ঠা</string>
+    <string name="completed_pages">সম্পন্ন: %1$d পৃষ্ঠা</string>
+    <string name="enter_completed_pages">সম্পন্ন পৃষ্ঠা লিখুন</string>
+    <string name="notes">নোট (ঐচ্ছিক)</string>
+    <string name="session_time">%1$s - %2$s</string>
+
+    <!-- Session Status -->
+    <string name="status_planned">পরিকল্পিত</string>
+    <string name="status_in_progress">চলমান</string>
+    <string name="status_completed">সম্পন্ন</string>
+    <string name="status_missed">মিস হয়েছে</string>
+    <string name="status_cancelled">বাতিল</string>
+
+    <!-- Schedule -->
+    <string name="schedule">সময়সূচী</string>
+    <string name="availability">সময়ের উপলব্ধতা</string>
+    <string name="add_availability">সময় যোগ করুন</string>
+    <string name="no_availability">কোন সময় সেট করা নেই</string>
+    <string name="set_availability_message">আপনার সাপ্তাহিক পড়ার সময় সেট করুন</string>
+    <string name="schedule_override">সময়সূচী পরিবর্তন</string>
+    <string name="day_off">ছুটির দিন</string>
+    <string name="custom_hours">কাস্টম সময়</string>
+
+    <!-- Days of Week -->
+    <string name="sunday">রবিবার</string>
+    <string name="monday">সোমবার</string>
+    <string name="tuesday">মঙ্গলবার</string>
+    <string name="wednesday">বুধবার</string>
+    <string name="thursday">বৃহস্পতিবার</string>
+    <string name="friday">শুক্রবার</string>
+    <string name="saturday">শনিবার</string>
+
+    <!-- Settings -->
+    <string name="settings">সেটিংস</string>
+    <string name="profile">প্রোফাইল</string>
+    <string name="appearance">থিম</string>
+    <string name="language">ভাষা</string>
+    <string name="notifications">নোটিফিকেশন</string>
+    <string name="about">সম্পর্কে</string>
+    <string name="theme">থিম</string>
+    <string name="theme_system">সিস্টেম ডিফল্ট</string>
+    <string name="theme_light">লাইট</string>
+    <string name="theme_dark">ডার্ক</string>
+    <string name="enable_notifications">নোটিফিকেশন চালু করুন</string>
+    <string name="reminder_before">আগে মনে করিয়ে দিন</string>
+    <string name="minutes_before">%1$d মিনিট আগে</string>
+    <string name="version">সংস্করণ %1$s</string>
+    <string name="delete_account">অ্যাকাউন্ট মুছুন</string>
+    <string name="delete_account_warning">এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না। আপনার সমস্ত ডেটা স্থায়ীভাবে মুছে যাবে।</string>
+
+    <!-- Languages -->
+    <string name="english">English</string>
+    <string name="bengali">বাংলা</string>
+
+    <!-- Priority Levels -->
+    <string name="priority_low">নিম্ন</string>
+    <string name="priority_medium">মাঝারি</string>
+    <string name="priority_high">উচ্চ</string>
+
+    <!-- Difficulty Levels -->
+    <string name="difficulty_easy">সহজ</string>
+    <string name="difficulty_medium">মাঝারি</string>
+    <string name="difficulty_hard">কঠিন</string>
+
+    <!-- Common -->
+    <string name="save">সংরক্ষণ করুন</string>
+    <string name="cancel">বাতিল</string>
+    <string name="delete">মুছুন</string>
+    <string name="edit">সম্পাদনা</string>
+    <string name="confirm">নিশ্চিত করুন</string>
+    <string name="ok">ঠিক আছে</string>
+    <string name="loading">লোড হচ্ছে…</string>
+    <string name="error">ত্রুটি</string>
+    <string name="retry">পুনরায় চেষ্টা করুন</string>
+    <string name="success">সফল</string>
+    <string name="warning">সতর্কতা</string>
+    <string name="no_internet">ইন্টারনেট সংযোগ নেই</string>
+    <string name="something_went_wrong">কিছু ভুল হয়েছে</string>
+    <string name="try_again">আবার চেষ্টা করুন</string>
+    <string name="select_date">তারিখ নির্বাচন করুন</string>
+    <string name="select_time">সময় নির্বাচন করুন</string>
+    <string name="from">থেকে</string>
+    <string name="to">পর্যন্ত</string>
+    <string name="search">অনুসন্ধান</string>
+    <string name="filter">ফিল্টার</string>
+    <string name="sort">সাজান</string>
+    <string name="refresh">রিফ্রেশ</string>
+    <string name="back">পিছনে</string>
+    <string name="close">বন্ধ</string>
+    <string name="more">আরও</string>
+</resources>
+

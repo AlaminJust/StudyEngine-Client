@@ -1,0 +1,168 @@
+<resources>
+    <string name="app_name">StudyEngine</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_books">Books</string>
+    <string name="nav_sessions">Sessions</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Auth -->
+    <string name="sign_in">Sign In</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="welcome_back">Welcome back!</string>
+    <string name="welcome_message">Organize your study sessions and achieve your goals</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard">Dashboard</string>
+    <string name="today_sessions">Today\'s Sessions</string>
+    <string name="upcoming_sessions">Upcoming Sessions</string>
+    <string name="no_sessions_today">No sessions scheduled for today</string>
+    <string name="sessions_completed">%1$d of %2$d completed</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="add_book">Add Book</string>
+    <string name="view_all">View All</string>
+    <string name="your_progress">Your Progress</string>
+    <string name="pages_read_today">Pages read today</string>
+    <string name="study_streak">Study Streak</string>
+    <string name="days">days</string>
+
+    <!-- Books -->
+    <string name="books">Books</string>
+    <string name="my_books">My Books</string>
+    <string name="no_books">No books yet</string>
+    <string name="add_your_first_book">Add your first book to start planning</string>
+    <string name="book_title">Title</string>
+    <string name="book_subject">Subject</string>
+    <string name="total_pages">Total Pages</string>
+    <string name="difficulty">Difficulty</string>
+    <string name="priority">Priority</string>
+    <string name="target_end_date">Target End Date</string>
+    <string name="chapters">Chapters</string>
+    <string name="add_chapter">Add Chapter</string>
+    <string name="chapter_title">Chapter Title</string>
+    <string name="start_page">Start Page</string>
+    <string name="end_page">End Page</string>
+    <string name="ignored">Ignored</string>
+    <string name="ignore_chapter">Ignore Chapter</string>
+    <string name="unignore_chapter">Include Chapter</string>
+    <string name="ignore_reason">Reason (optional)</string>
+    <string name="effective_pages">Effective pages: %1$d</string>
+
+    <!-- Study Plan -->
+    <string name="study_plan">Study Plan</string>
+    <string name="create_study_plan">Create Study Plan</string>
+    <string name="no_study_plan">No study plan</string>
+    <string name="create_plan_message">Create a study plan to generate sessions</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+    <string name="recurrence">Recurrence</string>
+    <string name="daily">Daily</string>
+    <string name="weekly">Weekly</string>
+    <string name="custom">Custom</string>
+    <string name="select_days">Select Days</string>
+    <string name="plan_active">Active</string>
+    <string name="plan_paused">Paused</string>
+    <string name="plan_completed">Completed</string>
+
+    <!-- Sessions -->
+    <string name="sessions">Sessions</string>
+    <string name="study_sessions">Study Sessions</string>
+    <string name="no_sessions">No sessions</string>
+    <string name="session_details">Session Details</string>
+    <string name="start_session">Start Session</string>
+    <string name="complete_session">Complete Session</string>
+    <string name="mark_as_missed">Mark as Missed</string>
+    <string name="cancel_session">Cancel Session</string>
+    <string name="planned_pages">Planned: %1$d pages</string>
+    <string name="completed_pages">Completed: %1$d pages</string>
+    <string name="enter_completed_pages">Enter completed pages</string>
+    <string name="notes">Notes (optional)</string>
+    <string name="session_time">%1$s - %2$s</string>
+
+    <!-- Session Status -->
+    <string name="status_planned">Planned</string>
+    <string name="status_in_progress">In Progress</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_missed">Missed</string>
+    <string name="status_cancelled">Cancelled</string>
+
+    <!-- Schedule -->
+    <string name="schedule">Schedule</string>
+    <string name="availability">Availability</string>
+    <string name="add_availability">Add Availability</string>
+    <string name="no_availability">No availability set</string>
+    <string name="set_availability_message">Set your weekly study availability</string>
+    <string name="schedule_override">Schedule Override</string>
+    <string name="day_off">Day Off</string>
+    <string name="custom_hours">Custom Hours</string>
+
+    <!-- Days of Week -->
+    <string name="sunday">Sunday</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="profile">Profile</string>
+    <string name="appearance">Appearance</string>
+    <string name="language">Language</string>
+    <string name="notifications">Notifications</string>
+    <string name="about">About</string>
+    <string name="theme">Theme</string>
+    <string name="theme_system">System Default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="reminder_before">Remind me before</string>
+    <string name="minutes_before">%1$d minutes before</string>
+    <string name="version">Version %1$s</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_account_warning">This action cannot be undone. All your data will be permanently deleted.</string>
+
+    <!-- Languages -->
+    <string name="english">English</string>
+    <string name="bengali">বাংলা</string>
+
+    <!-- Priority Levels -->
+    <string name="priority_low">Low</string>
+    <string name="priority_medium">Medium</string>
+    <string name="priority_high">High</string>
+
+    <!-- Difficulty Levels -->
+    <string name="difficulty_easy">Easy</string>
+    <string name="difficulty_medium">Medium</string>
+    <string name="difficulty_hard">Hard</string>
+
+    <!-- Common -->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="confirm">Confirm</string>
+    <string name="ok">OK</string>
+    <string name="loading">Loading…</string>
+    <string name="error">Error</string>
+    <string name="retry">Retry</string>
+    <string name="success">Success</string>
+    <string name="warning">Warning</string>
+    <string name="no_internet">No internet connection</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="try_again">Try Again</string>
+    <string name="select_date">Select Date</string>
+    <string name="select_time">Select Time</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="search">Search</string>
+    <string name="filter">Filter</string>
+    <string name="sort">Sort</string>
+    <string name="refresh">Refresh</string>
+    <string name="back">Back</string>
+    <string name="close">Close</string>
+    <string name="more">More</string>
+</resources>
