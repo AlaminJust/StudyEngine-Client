@@ -21,7 +21,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // API Configuration
-        buildConfigField("String", "API_BASE_URL", "\"https://your-api-url.com/api/v1/\"")
+        buildConfigField("String", "API_BASE_URL", "\"http://192.168.0.103:8082/api/v1/\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"YOUR_GOOGLE_WEB_CLIENT_ID\"")
 
         // Enable resource configuration for localization

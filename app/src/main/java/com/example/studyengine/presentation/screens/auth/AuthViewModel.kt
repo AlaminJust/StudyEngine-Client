@@ -12,6 +12,7 @@ import com.example.studyengine.domain.repository.AuthRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDateTime
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -106,6 +107,39 @@ class AuthViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             authRepository.logout()
             _uiState.update { it.copy(isLoading = false, user = null) }
+        }
+    }
+
+    /**
+     * Test Sign-In that bypasses both Google Sign-In form and the backend.
+     * Creates a hardcoded mock user directly for testing purposes.
+     * No network calls or UI prompts are made.
+     */
+    fun testSignInWithGoogle() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+
+            // Simulate a small delay to mimic network call (optional)
+            kotlinx.coroutines.delay(500)
+
+            // Create a hardcoded test user without any Google or backend calls
+            val testUser = User(
+                id = "test_user_123",
+                name = "Test User",
+                email = "testuser@example.com",
+                timeZone = java.util.TimeZone.getDefault().id,
+                profilePictureUrl = null,
+                createdAt = LocalDateTime.now()
+            )
+
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    user = testUser,
+                    error = null
+                )
+            }
+            _events.emit(AuthEvent.SignInSuccess)
         }
     }
 

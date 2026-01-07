@@ -17,6 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.StudyEngine"
         android:localeConfig="@xml/locales_config"
+        android:usesCleartextTraffic="true"
         tools:targetApi="34">
         <activity
             android:name=".MainActivity"

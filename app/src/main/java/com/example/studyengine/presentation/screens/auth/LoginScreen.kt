@@ -81,7 +81,7 @@ fun LoginScreen(
 
                 // Google Sign-In Button
                 Button(
-                    onClick = { viewModel.signInWithGoogle(context) },
+                    onClick = { viewModel.testSignInWithGoogle() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
