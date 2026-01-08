@@ -31,11 +31,11 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
--keep,includedescriptorclasses class com.example.studyengine.**$$serializer { *; }
--keepclassmembers class com.example.studyengine.** {
+-keep,includedescriptorclasses class com.gatishil.studyengine.**$$serializer { *; }
+-keepclassmembers class com.gatishil.studyengine.** {
     *** Companion;
 }
--keepclasseswithmembers class com.example.studyengine.** {
+-keepclasseswithmembers class com.gatishil.studyengine.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 
@@ -67,9 +67,9 @@
 -dontwarn androidx.room.paging.**
 
 # ============ Data Classes (DTOs) ============
--keep class com.example.studyengine.data.remote.dto.** { *; }
--keep class com.example.studyengine.data.local.entity.** { *; }
--keep class com.example.studyengine.domain.model.** { *; }
+-keep class com.gatishil.studyengine.data.remote.dto.** { *; }
+-keep class com.gatishil.studyengine.data.local.entity.** { *; }
+-keep class com.gatishil.studyengine.domain.model.** { *; }
 
 # ============ Hilt ============
 -keepclasseswithmembers class * {

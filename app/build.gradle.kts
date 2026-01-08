@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.studyengine"
+    namespace = "com.gatishil.studyengine"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.studyengine"
+        applicationId = "com.gatishil.studyengine"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -22,7 +22,7 @@ android {
 
         // API Configuration
         buildConfigField("String", "API_BASE_URL", "\"http://192.168.0.103:8082/api/v1/\"")
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"YOUR_GOOGLE_WEB_CLIENT_ID\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"629081030104-ic39p2p2fa7ov1dar3i0ivjurcn1fcf7.apps.googleusercontent.com\"")
 
         // Enable resource configuration for localization
         resourceConfigurations += listOf("en", "bn")

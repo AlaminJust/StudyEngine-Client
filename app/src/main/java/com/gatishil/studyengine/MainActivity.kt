@@ -1,0 +1,120 @@
+package com.gatishil.studyengine
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.gatishil.studyengine.data.local.datastore.SettingsPreferences
+import com.gatishil.studyengine.presentation.navigation.BottomNavItem
+import com.gatishil.studyengine.presentation.navigation.Screen
+import com.gatishil.studyengine.presentation.navigation.StudyEngineNavGraph
+import com.gatishil.studyengine.ui.theme.StudyEngineTheme
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var settingsPreferences: SettingsPreferences
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        setContent {
+            val themeMode by settingsPreferences.getThemeMode()
+                .collectAsStateWithLifecycle(initialValue = SettingsPreferences.THEME_SYSTEM)
+
+            val darkTheme = when (themeMode) {
+                SettingsPreferences.THEME_DARK -> true
+                SettingsPreferences.THEME_LIGHT -> false
+                else -> isSystemInDarkTheme()
+            }
+
+            StudyEngineTheme(darkTheme = darkTheme) {
+                StudyEngineApp()
+            }
+        }
+    }
+}
+
+@Composable
+fun StudyEngineApp() {
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    // Determine if we should show bottom navigation
+    val showBottomBar = currentDestination?.route in listOf(
+        Screen.Dashboard.route,
+        Screen.Books.route,
+        Screen.TodaySessions.route,
+        Screen.Settings.route
+    )
+
+    // TODO: Check if user is logged in to determine start destination
+    val startDestination = Screen.Login.route // Change to Dashboard if logged in
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            if (showBottomBar) {
+                NavigationBar {
+                    BottomNavItem.entries.forEach { navItem ->
+                        val selected = currentDestination?.hierarchy?.any {
+                            it.route == navItem.route
+                        } == true
+
+                        NavigationBarItem(
+                            icon = {
+                                Icon(
+                                    imageVector = when (navItem) {
+                                        BottomNavItem.HOME -> Icons.Default.Home
+                                        BottomNavItem.BOOKS -> Icons.Default.MenuBook
+                                        BottomNavItem.SESSIONS -> Icons.Default.CalendarToday
+                                        BottomNavItem.SETTINGS -> Icons.Default.Settings
+                                    },
+                                    contentDescription = stringResource(navItem.titleResId)
+                                )
+                            },
+                            label = { Text(stringResource(navItem.titleResId)) },
+                            selected = selected,
+                            onClick = {
+                                navController.navigate(navItem.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    ) { innerPadding ->
+        StudyEngineNavGraph(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
