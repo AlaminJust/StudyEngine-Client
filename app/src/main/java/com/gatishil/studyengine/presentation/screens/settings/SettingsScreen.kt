@@ -107,14 +107,14 @@ fun SettingsScreen(
 
             // Schedule section
             item {
-                SettingsSectionHeader(title = "Schedule Management")
+                SettingsSectionHeader(title = stringResource(R.string.schedule_management))
             }
 
             item {
                 SettingsItem(
                     icon = Icons.Default.Schedule,
-                    title = "Study Availability",
-                    subtitle = "Set your weekly study time slots",
+                    title = stringResource(R.string.study_availability),
+                    subtitle = stringResource(R.string.study_availability_desc),
                     onClick = onNavigateToAvailability
                 )
             }
@@ -122,8 +122,8 @@ fun SettingsScreen(
             item {
                 SettingsItem(
                     icon = Icons.Default.EventBusy,
-                    title = "Schedule Overrides",
-                    subtitle = "Add days off or custom study hours",
+                    title = stringResource(R.string.schedule_overrides),
+                    subtitle = stringResource(R.string.schedule_overrides_desc),
                     onClick = onNavigateToScheduleOverrides
                 )
             }
@@ -131,8 +131,8 @@ fun SettingsScreen(
             item {
                 SettingsItem(
                     icon = Icons.Default.CalendarMonth,
-                    title = "Schedule Contexts",
-                    subtitle = "Manage exam periods, vacations, etc.",
+                    title = stringResource(R.string.schedule_contexts),
+                    subtitle = stringResource(R.string.schedule_contexts_desc),
                     onClick = onNavigateToScheduleContexts
                 )
             }

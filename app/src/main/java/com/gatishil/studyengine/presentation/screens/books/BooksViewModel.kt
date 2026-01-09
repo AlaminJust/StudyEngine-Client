@@ -2,6 +2,7 @@ package com.gatishil.studyengine.presentation.screens.books
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gatishil.studyengine.R
 import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.domain.model.Book
 import com.gatishil.studyengine.domain.model.CreateBookRequest
@@ -34,7 +35,8 @@ data class AddBookUiState(
 data class BookDetailUiState(
     val isLoading: Boolean = true,
     val book: Book? = null,
-    val error: String? = null
+    val error: String? = null,
+    val successMessageResId: Int? = null
 )
 
 @HiltViewModel
@@ -227,6 +229,7 @@ class BookDetailViewModel @Inject constructor(
             try {
                 val response = api.activateStudyPlan(studyPlanId)
                 if (response.isSuccessful) {
+                    _uiState.update { it.copy(successMessageResId = R.string.study_plan_resumed_success) }
                     // Reload book to get updated study plan
                     _uiState.value.book?.let { loadBook(it.id) }
                 } else {
@@ -244,6 +247,7 @@ class BookDetailViewModel @Inject constructor(
             try {
                 val response = api.pauseStudyPlan(studyPlanId)
                 if (response.isSuccessful) {
+                    _uiState.update { it.copy(successMessageResId = R.string.study_plan_paused_success) }
                     _uiState.value.book?.let { loadBook(it.id) }
                 } else {
                     _uiState.update { it.copy(isLoading = false, error = "Failed to pause plan") }
@@ -260,6 +264,7 @@ class BookDetailViewModel @Inject constructor(
             try {
                 val response = api.completeStudyPlan(studyPlanId)
                 if (response.isSuccessful) {
+                    _uiState.update { it.copy(successMessageResId = R.string.study_plan_completed_success) }
                     _uiState.value.book?.let { loadBook(it.id) }
                 } else {
                     _uiState.update { it.copy(isLoading = false, error = "Failed to complete plan") }
@@ -276,6 +281,7 @@ class BookDetailViewModel @Inject constructor(
             try {
                 val response = api.deleteStudyPlan(studyPlanId)
                 if (response.isSuccessful) {
+                    _uiState.update { it.copy(successMessageResId = R.string.study_plan_deleted_success) }
                     _uiState.value.book?.let { loadBook(it.id) }
                 } else {
                     _uiState.update { it.copy(isLoading = false, error = "Failed to delete plan") }
@@ -288,6 +294,10 @@ class BookDetailViewModel @Inject constructor(
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
+    }
+
+    fun clearSuccessMessage() {
+        _uiState.update { it.copy(successMessageResId = null) }
     }
 }
 

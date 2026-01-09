@@ -84,6 +84,7 @@ fun StudyEngineNavGraph(
                 onNavigateToSession = { sessionId ->
                     navController.navigate(Screen.SessionDetail.createRoute(sessionId))
                 },
+                onNavigateToSessions = { navController.navigate(Screen.TodaySessions.route) },
                 onNavigateToAddBook = { navController.navigate(Screen.AddBook.route) }
             )
         }

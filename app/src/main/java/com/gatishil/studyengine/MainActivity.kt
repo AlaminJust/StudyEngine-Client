@@ -4,17 +4,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -47,6 +50,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeMode by settingsPreferences.getThemeMode()
                 .collectAsStateWithLifecycle(initialValue = SettingsPreferences.THEME_SYSTEM)
+
+            val language by settingsPreferences.getLanguage()
+                .collectAsStateWithLifecycle(initialValue = SettingsPreferences.LANGUAGE_ENGLISH)
+
+            // Apply language change using AppCompatDelegate
+            LaunchedEffect(language) {
+                val localeCode = when (language) {
+                    SettingsPreferences.LANGUAGE_BENGALI -> "bn"
+                    else -> "en"
+                }
+                AppCompatDelegate.setApplicationLocales(
+                    LocaleListCompat.forLanguageTags(localeCode)
+                )
+            }
 
             val darkTheme = when (themeMode) {
                 SettingsPreferences.THEME_DARK -> true
@@ -107,7 +124,7 @@ fun StudyEngineApp(isLoggedIn: Boolean) {
                                 Icon(
                                     imageVector = when (navItem) {
                                         BottomNavItem.HOME -> Icons.Default.Home
-                                        BottomNavItem.BOOKS -> Icons.Default.MenuBook
+                                        BottomNavItem.BOOKS -> Icons.AutoMirrored.Filled.MenuBook
                                         BottomNavItem.SESSIONS -> Icons.Default.CalendarToday
                                         BottomNavItem.SETTINGS -> Icons.Default.Settings
                                     },

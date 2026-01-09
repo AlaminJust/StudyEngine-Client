@@ -97,6 +97,55 @@
     <string name="schedule_override">Schedule Override</string>
     <string name="day_off">Day Off</string>
     <string name="custom_hours">Custom Hours</string>
+    <string name="schedule_management">Schedule Management</string>
+    <string name="study_availability">Study Availability</string>
+    <string name="study_availability_desc">Set your weekly study time slots</string>
+    <string name="schedule_overrides">Schedule Overrides</string>
+    <string name="schedule_overrides_desc">Add days off or custom study hours</string>
+    <string name="schedule_contexts">Schedule Contexts</string>
+    <string name="schedule_contexts_desc">Manage exam periods, vacations, etc.</string>
+
+    <!-- Study Plan Actions -->
+    <string name="pause_study_plan">Pause Study Plan</string>
+    <string name="pause_study_plan_message">Are you sure you want to pause this study plan?</string>
+    <string name="pause_study_plan_consequence_1">📅 No new study sessions will be scheduled</string>
+    <string name="pause_study_plan_consequence_2">📊 Your progress will be saved</string>
+    <string name="pause_study_plan_consequence_3">⏰ You can resume anytime to continue where you left off</string>
+    <string name="pause_study_plan_consequence_4">📚 Existing scheduled sessions will remain but won\'t generate new ones</string>
+    <string name="pause_plan">Pause Plan</string>
+
+    <string name="complete_study_plan">Complete Study Plan</string>
+    <string name="complete_study_plan_message">Are you sure you want to mark this study plan as complete?</string>
+    <string name="complete_study_plan_consequence_1">🎉 The plan will be marked as successfully completed</string>
+    <string name="complete_study_plan_consequence_2">📊 All your progress and statistics will be preserved</string>
+    <string name="complete_study_plan_consequence_3">📅 No more sessions will be scheduled for this plan</string>
+    <string name="complete_study_plan_consequence_4">📖 You can create a new study plan for this book anytime</string>
+    <string name="complete_plan">Complete Plan</string>
+
+    <string name="resume_study_plan">Resume Study Plan</string>
+    <string name="resume_study_plan_message">Are you sure you want to resume this study plan?</string>
+    <string name="resume_study_plan_consequence_1">▶️ The plan will become active again</string>
+    <string name="resume_study_plan_consequence_2">📅 New study sessions will be scheduled based on your availability</string>
+    <string name="resume_study_plan_consequence_3">📊 You\'ll continue from where you left off</string>
+    <string name="resume_study_plan_consequence_4">🔔 You\'ll receive reminders for upcoming sessions</string>
+    <string name="resume_plan">Resume Plan</string>
+
+    <string name="delete_study_plan">Delete Study Plan</string>
+    <string name="delete_study_plan_message">Are you sure you want to delete this study plan?</string>
+    <string name="delete_study_plan_consequence_1">⚠️ This action cannot be undone</string>
+    <string name="delete_study_plan_consequence_2">🗑️ All scheduled sessions will be removed</string>
+    <string name="delete_study_plan_consequence_3">📊 Your study history for this plan will be lost</string>
+    <string name="delete_study_plan_consequence_4">📖 You\'ll need to create a new plan to continue studying this book</string>
+    <string name="delete_plan">Delete Plan</string>
+
+    <string name="what_will_happen">What will happen:</string>
+    <string name="create_new_plan">Create New Plan</string>
+
+    <!-- Study Plan Success Messages -->
+    <string name="study_plan_resumed_success">Study plan resumed successfully! New sessions will be scheduled.</string>
+    <string name="study_plan_paused_success">Study plan paused. You can resume anytime.</string>
+    <string name="study_plan_completed_success">🎉 Congratulations! Study plan completed successfully!</string>
+    <string name="study_plan_deleted_success">Study plan deleted.</string>
 
     <!-- Days of Week -->
     <string name="sunday">Sunday</string>

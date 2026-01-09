@@ -29,9 +29,33 @@ fun BookDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(bookId) {
         viewModel.loadBook(bookId)
+    }
+
+    // Show error or success messages
+    LaunchedEffect(uiState.error, uiState.successMessageResId) {
+        uiState.error?.let { error ->
+            snackbarHostState.showSnackbar(
+                message = error,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearError()
+        }
+    }
+
+    // Handle success message separately since we need context
+    uiState.successMessageResId?.let { resId ->
+        val message = stringResource(resId)
+        LaunchedEffect(resId) {
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearSuccessMessage()
+        }
     }
 
     Scaffold(
@@ -57,7 +81,8 @@ fun BookDetailScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         when {
             uiState.isLoading -> {
@@ -298,6 +323,9 @@ private fun StudyPlanCard(
     onDelete: () -> Unit = {}
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showPauseDialog by remember { mutableStateOf(false) }
+    var showCompleteDialog by remember { mutableStateOf(false) }
+    var showActivateDialog by remember { mutableStateOf(false) }
 
     StudyCard {
         Row(
@@ -387,7 +415,7 @@ private fun StudyPlanCard(
                 when (plan.status) {
                     com.gatishil.studyengine.domain.model.StudyPlanStatus.ACTIVE -> {
                         OutlinedButton(
-                            onClick = onPause,
+                            onClick = { showPauseDialog = true },
                             modifier = Modifier.weight(1f)
                         ) {
                             Icon(Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -395,7 +423,7 @@ private fun StudyPlanCard(
                             Text("Pause")
                         }
                         Button(
-                            onClick = onComplete,
+                            onClick = { showCompleteDialog = true },
                             modifier = Modifier.weight(1f)
                         ) {
                             Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -405,7 +433,7 @@ private fun StudyPlanCard(
                     }
                     com.gatishil.studyengine.domain.model.StudyPlanStatus.PAUSED -> {
                         Button(
-                            onClick = onActivate,
+                            onClick = { showActivateDialog = true },
                             modifier = Modifier.weight(1f)
                         ) {
                             Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -472,29 +500,175 @@ private fun StudyPlanCard(
         }
     }
 
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Study Plan") },
-            text = { Text("Are you sure you want to delete this study plan? This action cannot be undone.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDelete()
-                        showDeleteDialog = false
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("Delete")
-                }
+    // Pause Confirmation Dialog
+    if (showPauseDialog) {
+        StudyPlanActionDialog(
+            title = stringResource(R.string.pause_study_plan),
+            icon = Icons.Default.Pause,
+            iconTint = MaterialTheme.colorScheme.tertiary,
+            message = stringResource(R.string.pause_study_plan_message),
+            consequences = listOf(
+                stringResource(R.string.pause_study_plan_consequence_1),
+                stringResource(R.string.pause_study_plan_consequence_2),
+                stringResource(R.string.pause_study_plan_consequence_3),
+                stringResource(R.string.pause_study_plan_consequence_4)
+            ),
+            confirmText = stringResource(R.string.pause_plan),
+            confirmColor = MaterialTheme.colorScheme.tertiary,
+            onConfirm = {
+                onPause()
+                showPauseDialog = false
             },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = { showPauseDialog = false }
         )
     }
+
+    // Complete Confirmation Dialog
+    if (showCompleteDialog) {
+        StudyPlanActionDialog(
+            title = stringResource(R.string.complete_study_plan),
+            icon = Icons.Default.CheckCircle,
+            iconTint = StudyEngineTheme.extendedColors.success,
+            message = stringResource(R.string.complete_study_plan_message),
+            consequences = listOf(
+                stringResource(R.string.complete_study_plan_consequence_1),
+                stringResource(R.string.complete_study_plan_consequence_2),
+                stringResource(R.string.complete_study_plan_consequence_3),
+                stringResource(R.string.complete_study_plan_consequence_4)
+            ),
+            confirmText = stringResource(R.string.complete_plan),
+            confirmColor = StudyEngineTheme.extendedColors.success,
+            onConfirm = {
+                onComplete()
+                showCompleteDialog = false
+            },
+            onDismiss = { showCompleteDialog = false }
+        )
+    }
+
+    // Activate/Resume Confirmation Dialog
+    if (showActivateDialog) {
+        StudyPlanActionDialog(
+            title = stringResource(R.string.resume_study_plan),
+            icon = Icons.Default.PlayArrow,
+            iconTint = StudyEngineTheme.extendedColors.success,
+            message = stringResource(R.string.resume_study_plan_message),
+            consequences = listOf(
+                stringResource(R.string.resume_study_plan_consequence_1),
+                stringResource(R.string.resume_study_plan_consequence_2),
+                stringResource(R.string.resume_study_plan_consequence_3),
+                stringResource(R.string.resume_study_plan_consequence_4)
+            ),
+            confirmText = stringResource(R.string.resume_plan),
+            confirmColor = StudyEngineTheme.extendedColors.success,
+            onConfirm = {
+                onActivate()
+                showActivateDialog = false
+            },
+            onDismiss = { showActivateDialog = false }
+        )
+    }
+
+    // Delete Confirmation Dialog
+    if (showDeleteDialog) {
+        StudyPlanActionDialog(
+            title = stringResource(R.string.delete_study_plan),
+            icon = Icons.Default.Delete,
+            iconTint = MaterialTheme.colorScheme.error,
+            message = stringResource(R.string.delete_study_plan_message),
+            consequences = listOf(
+                stringResource(R.string.delete_study_plan_consequence_1),
+                stringResource(R.string.delete_study_plan_consequence_2),
+                stringResource(R.string.delete_study_plan_consequence_3),
+                stringResource(R.string.delete_study_plan_consequence_4)
+            ),
+            confirmText = stringResource(R.string.delete_plan),
+            confirmColor = MaterialTheme.colorScheme.error,
+            onConfirm = {
+                onDelete()
+                showDeleteDialog = false
+            },
+            onDismiss = { showDeleteDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun StudyPlanActionDialog(
+    title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconTint: androidx.compose.ui.graphics.Color,
+    message: String,
+    consequences: List<String>,
+    confirmText: String,
+    confirmColor: androidx.compose.ui.graphics.Color,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(32.dp)
+            )
+        },
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.what_will_happen),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        )
+                        consequences.forEach { consequence ->
+                            Text(
+                                text = consequence,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = confirmColor)
+            ) {
+                Text(confirmText)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable
