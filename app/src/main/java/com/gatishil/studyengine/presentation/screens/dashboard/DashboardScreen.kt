@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
@@ -35,6 +36,7 @@ fun DashboardScreen(
     onNavigateToSession: (String) -> Unit,
     onNavigateToSessions: () -> Unit,
     onNavigateToUpcomingSessions: () -> Unit,
+    onNavigateToStats: () -> Unit,
     onNavigateToAddBook: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
@@ -70,16 +72,22 @@ fun DashboardScreen(
                 ) {
                     // Hero Header Section
                     item {
-                        DashboardHeader()
+                        DashboardHeader(
+                            onStreakClick = onNavigateToStats,
+                            onQuickActionsClick = onNavigateToAddBook
+                        )
                     }
 
                     // Stats Section
                     item {
                         StatsSection(
-                            pagesReadToday = uiState.totalPagesReadToday,
+                            pagesReadToday = uiState.quickStats?.todayPages ?: uiState.totalPagesReadToday,
                             upcomingSessionsCount = uiState.upcomingSessionsCount,
                             completedTodayCount = uiState.todayCompletedCount,
-                            onUpcomingClick = onNavigateToUpcomingSessions
+                            currentStreak = uiState.quickStats?.currentStreak ?: 0,
+                            isStreakActive = uiState.quickStats?.isStreakActive ?: false,
+                            onUpcomingClick = onNavigateToUpcomingSessions,
+                            onStatsClick = onNavigateToStats
                         )
                     }
 
@@ -145,7 +153,10 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun DashboardHeader() {
+private fun DashboardHeader(
+    onStreakClick: () -> Unit = {},
+    onQuickActionsClick: () -> Unit = {}
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -228,6 +239,7 @@ private fun DashboardHeader() {
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Surface(
+                    onClick = onStreakClick,
                     shape = MaterialTheme.shapes.small,
                     color = Color.White.copy(alpha = 0.15f)
                 ) {
@@ -251,6 +263,7 @@ private fun DashboardHeader() {
                 }
 
                 Surface(
+                    onClick = onQuickActionsClick,
                     shape = MaterialTheme.shapes.small,
                     color = Color.White.copy(alpha = 0.15f)
                 ) {
@@ -282,45 +295,143 @@ private fun StatsSection(
     pagesReadToday: Int,
     upcomingSessionsCount: Int,
     completedTodayCount: Int,
-    onUpcomingClick: () -> Unit = {}
+    currentStreak: Int = 0,
+    isStreakActive: Boolean = false,
+    onUpcomingClick: () -> Unit = {},
+    onStatsClick: () -> Unit = {}
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .height(IntrinsicSize.Max),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        StatCard(
-            title = stringResource(R.string.pages_read_today),
-            value = pagesReadToday.toString(),
+        // First row: Pages and Sessions
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-            icon = {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        )
+                .fillMaxWidth()
+                .height(IntrinsicSize.Max),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StatCard(
+                title = stringResource(R.string.pages_read_today),
+                value = pagesReadToday.toString(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                icon = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            )
 
-        StatCard(
-            title = stringResource(R.string.upcoming_sessions),
-            value = upcomingSessionsCount.toString(),
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-            onClick = onUpcomingClick,
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Schedule,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+            StatCard(
+                title = stringResource(R.string.upcoming_sessions),
+                value = upcomingSessionsCount.toString(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                onClick = onUpcomingClick,
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Schedule,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            )
+        }
+
+        // Streak Card - Full width
+        StreakCard(
+            currentStreak = currentStreak,
+            isStreakActive = isStreakActive,
+            onClick = onStatsClick
+        )
+    }
+}
+
+@Composable
+private fun StreakCard(
+    currentStreak: Int,
+    isStreakActive: Boolean,
+    onClick: () -> Unit
+) {
+    val streakColor = if (isStreakActive) {
+        StudyEngineTheme.extendedColors.success
+    } else {
+        MaterialTheme.colorScheme.error
+    }
+
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isStreakActive) {
+                StudyEngineTheme.extendedColors.success.copy(alpha = 0.15f)
+            } else {
+                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
             }
         )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "🔥",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Column {
+                    Text(
+                        text = stringResource(R.string.study_streak),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = streakColor
+                    )
+                    Text(
+                        text = if (currentStreak > 0) {
+                            "$currentStreak ${stringResource(R.string.days)}"
+                        } else {
+                            stringResource(R.string.no_streak)
+                        },
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isStreakActive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                if (isStreakActive) {
+                    StatusChip(
+                        text = stringResource(R.string.active),
+                        color = StudyEngineTheme.extendedColors.success
+                    )
+                } else {
+                    StatusChip(
+                        text = stringResource(R.string.inactive),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.view_stats),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
     }
 }
 

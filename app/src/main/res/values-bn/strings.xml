@@ -28,6 +28,32 @@
     <string name="pages_read_today">আজ পড়া পৃষ্ঠা</string>
     <string name="study_streak">পড়ার ধারা</string>
     <string name="days">দিন</string>
+    <string name="no_streak">পড়া শুরু করুন!</string>
+    <string name="active">সক্রিয়</string>
+    <string name="inactive">নিষ্ক্রিয়</string>
+    <string name="view_stats">পরিসংখ্যান দেখুন →</string>
+
+    <!-- Statistics -->
+    <string name="statistics">পরিসংখ্যান</string>
+    <string name="day_streak">দিনের ধারা</string>
+    <string name="longest_streak">দীর্ঘতম ধারা</string>
+    <string name="perfect_weeks">পারফেক্ট সপ্তাহ</string>
+    <string name="days_to_milestone">মাইলস্টোন পর্যন্ত দিন</string>
+    <string name="total_pages">মোট পৃষ্ঠা</string>
+    <string name="hours_studied">পড়ার ঘন্টা</string>
+    <string name="sessions_completed_stat">সেশন</string>
+    <string name="books_completed">বই সম্পন্ন</string>
+    <string name="this_week">এই সপ্তাহ</string>
+    <string name="perfect_week">পারফেক্ট সপ্তাহ</string>
+    <string name="study_days">পড়ার দিন</string>
+    <string name="pages">পৃষ্ঠা</string>
+    <string name="time">সময়</string>
+    <string name="lifetime_stats">সর্বকালীন পরিসংখ্যান</string>
+    <string name="total_study_days">মোট পড়ার দিন</string>
+    <string name="avg_pages_per_session">গড় পৃষ্ঠা/সেশন</string>
+    <string name="avg_minutes_per_session">গড় সময়/সেশন</string>
+    <string name="avg_pages_per_day">গড় পৃষ্ঠা/দিন</string>
+    <string name="achievements">অর্জন</string>
 
     <!-- Books -->
     <string name="books">বই</string>
@@ -36,7 +62,6 @@
     <string name="add_your_first_book">পরিকল্পনা শুরু করতে আপনার প্রথম বই যোগ করুন</string>
     <string name="book_title">শিরোনাম</string>
     <string name="book_subject">বিষয়</string>
-    <string name="total_pages">মোট পৃষ্ঠা</string>
     <string name="difficulty">কঠিনতা</string>
     <string name="priority">অগ্রাধিকার</string>
     <string name="target_end_date">লক্ষ্য শেষ তারিখ</string>

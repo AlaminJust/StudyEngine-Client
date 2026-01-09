@@ -397,6 +397,113 @@ object StudySessionMapper {
 }
 
 /**
+ * Mapper functions for Stats
+ */
+object StatsMapper {
+    private val dateFormatter = DateTimeFormatter.ISO_DATE
+
+    private fun parseDate(dateString: String?): LocalDate? {
+        if (dateString.isNullOrBlank()) return null
+        return try {
+            LocalDate.parse(dateString.substringBefore("T"), dateFormatter)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun StatsDto.toDomain(): StudyStats = StudyStats(
+        currentStreak = currentStreak,
+        currentStreakStartDate = parseDate(currentStreakStartDate),
+        lastStudyDate = parseDate(lastStudyDate),
+        isStreakActive = isStreakActive,
+        daysUntilStreakExpires = daysUntilStreakExpires,
+        longestStreak = longestStreak,
+        longestStreakStartDate = parseDate(longestStreakStartDate),
+        longestStreakEndDate = parseDate(longestStreakEndDate),
+        totalStudyDays = totalStudyDays,
+        totalPagesRead = totalPagesRead,
+        totalMinutesStudied = totalMinutesStudied,
+        totalHoursStudied = totalHoursStudied,
+        totalSessionsCompleted = totalSessionsCompleted,
+        totalBooksCompleted = totalBooksCompleted,
+        weeklyStats = weeklyStats?.toDomain(),
+        perfectWeeksCount = perfectWeeksCount,
+        streakMilestoneReached = streakMilestoneReached,
+        nextStreakMilestone = nextStreakMilestone,
+        daysToNextMilestone = daysToNextMilestone,
+        averagePagesPerSession = averagePagesPerSession,
+        averageMinutesPerSession = averageMinutesPerSession,
+        averagePagesPerDay = averagePagesPerDay,
+        streakMessage = streakMessage,
+        recentAchievements = recentAchievements?.map { it.toDomain() } ?: emptyList()
+    )
+
+    fun WeeklyStatsDto.toDomain(): WeeklyStats = WeeklyStats(
+        weekStartDate = parseDate(weekStartDate) ?: LocalDate.now(),
+        weekEndDate = parseDate(weekEndDate) ?: LocalDate.now(),
+        studyDays = studyDays,
+        pagesRead = pagesRead,
+        minutesStudied = minutesStudied,
+        isPerfectWeek = isPerfectWeek,
+        dailyBreakdown = dailyBreakdown?.map { it.toDomain() } ?: emptyList()
+    )
+
+    fun DailyBreakdownDto.toDomain(): DailyBreakdown = DailyBreakdown(
+        date = parseDate(date) ?: LocalDate.now(),
+        pagesRead = pagesRead,
+        minutesStudied = minutesStudied,
+        sessionsCompleted = sessionsCompleted
+    )
+
+    fun QuickStatsDto.toDomain(): QuickStats = QuickStats(
+        currentStreak = currentStreak,
+        isStreakActive = isStreakActive,
+        todayPages = todayPages,
+        todayMinutes = todayMinutes,
+        weeklyPages = weeklyPages,
+        weeklyStudyDays = weeklyStudyDays,
+        motivationalMessage = motivationalMessage
+    )
+
+    fun StudyHistoryDto.toDomain(): StudyHistory = StudyHistory(
+        startDate = parseDate(startDate) ?: LocalDate.now(),
+        endDate = parseDate(endDate) ?: LocalDate.now(),
+        days = days.map { it.toDomain() },
+        totalStudyDays = totalStudyDays,
+        totalPagesRead = totalPagesRead,
+        totalMinutesStudied = totalMinutesStudied,
+        longestStreakInRange = longestStreakInRange
+    )
+
+    fun StudyDayDto.toDomain(): StudyDay = StudyDay(
+        date = parseDate(date) ?: LocalDate.now(),
+        sessionsCompleted = sessionsCompleted,
+        pagesRead = pagesRead,
+        minutesStudied = minutesStudied,
+        booksStudied = booksStudied,
+        isStreakDay = isStreakDay,
+        dayOfWeek = dayOfWeek
+    )
+
+    fun AchievementDto.toDomain(): Achievement = Achievement(
+        id = id,
+        title = title,
+        description = description,
+        icon = icon,
+        achievedDate = parseDate(achievedDate),
+        isAchieved = isAchieved
+    )
+
+    fun CalendarMonthDto.toDomain(): CalendarMonth = CalendarMonth(
+        year = year,
+        month = month,
+        days = days.map { it.toDomain() },
+        totalStudyDays = totalStudyDays,
+        totalPagesRead = totalPagesRead
+    )
+}
+
+/**
  * Mapper functions for Schedule models
  */
 object ScheduleMapper {

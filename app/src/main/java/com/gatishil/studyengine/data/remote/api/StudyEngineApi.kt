@@ -318,6 +318,32 @@ interface StudyEngineApi {
         @Path("id") sessionId: String
     ): Response<StudySessionDto>
 
+    // ==================== Stats Endpoints ====================
+
+    @GET("stats")
+    suspend fun getStats(): Response<StatsDto>
+
+    @GET("stats/quick")
+    suspend fun getQuickStats(): Response<QuickStatsDto>
+
+    @GET("stats/history")
+    suspend fun getStudyHistory(
+        @Query("startDate") startDate: String,
+        @Query("endDate") endDate: String
+    ): Response<StudyHistoryDto>
+
+    @GET("stats/calendar/{year}/{month}")
+    suspend fun getCalendarMonth(
+        @Path("year") year: Int,
+        @Path("month") month: Int
+    ): Response<CalendarMonthDto>
+
+    @GET("stats/achievements")
+    suspend fun getAchievements(): Response<List<AchievementDto>>
+
+    @POST("stats/recalculate")
+    suspend fun recalculateStats(): Response<StatsDto>
+
     // ==================== Sync Endpoints ====================
 
     @POST("sync")

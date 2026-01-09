@@ -27,6 +27,32 @@
     <string name="pages_read_today">Pages read today</string>
     <string name="study_streak">Study Streak</string>
     <string name="days">days</string>
+    <string name="no_streak">Start studying!</string>
+    <string name="active">Active</string>
+    <string name="inactive">Inactive</string>
+    <string name="view_stats">View Stats →</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Statistics</string>
+    <string name="day_streak">Day Streak</string>
+    <string name="longest_streak">Longest Streak</string>
+    <string name="perfect_weeks">Perfect Weeks</string>
+    <string name="days_to_milestone">days to milestone</string>
+    <string name="total_pages">Total Pages</string>
+    <string name="hours_studied">Hours Studied</string>
+    <string name="sessions_completed_stat">Sessions</string>
+    <string name="books_completed">Books Done</string>
+    <string name="this_week">This Week</string>
+    <string name="perfect_week">Perfect Week</string>
+    <string name="study_days">Study Days</string>
+    <string name="pages">Pages</string>
+    <string name="time">Time</string>
+    <string name="lifetime_stats">Lifetime Stats</string>
+    <string name="total_study_days">Total Study Days</string>
+    <string name="avg_pages_per_session">Avg Pages/Session</string>
+    <string name="avg_minutes_per_session">Avg Time/Session</string>
+    <string name="avg_pages_per_day">Avg Pages/Day</string>
+    <string name="achievements">Achievements</string>
 
     <!-- Books -->
     <string name="books">Books</string>
@@ -35,7 +61,6 @@
     <string name="add_your_first_book">Add your first book to start planning</string>
     <string name="book_title">Title</string>
     <string name="book_subject">Subject</string>
-    <string name="total_pages">Total Pages</string>
     <string name="difficulty">Difficulty</string>
     <string name="priority">Priority</string>
     <string name="target_end_date">Target End Date</string>

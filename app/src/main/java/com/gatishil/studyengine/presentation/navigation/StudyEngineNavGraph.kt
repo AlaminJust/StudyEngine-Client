@@ -86,7 +86,15 @@ fun StudyEngineNavGraph(
                 },
                 onNavigateToSessions = { navController.navigate(Screen.TodaySessions.route) },
                 onNavigateToUpcomingSessions = { navController.navigate(Screen.UpcomingSessions.route) },
+                onNavigateToStats = { navController.navigate(Screen.Stats.route) },
                 onNavigateToAddBook = { navController.navigate(Screen.AddBook.route) }
+            )
+        }
+
+        // Stats
+        composable(route = Screen.Stats.route) {
+            com.gatishil.studyengine.presentation.screens.stats.StatsScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
