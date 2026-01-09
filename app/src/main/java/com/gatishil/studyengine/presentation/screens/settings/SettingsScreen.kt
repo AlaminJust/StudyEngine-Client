@@ -47,7 +47,8 @@ fun SettingsScreen(
                 title = { Text(stringResource(R.string.settings)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
-                )
+                ),
+                windowInsets = TopAppBarDefaults.windowInsets
             )
         }
     ) { paddingValues ->

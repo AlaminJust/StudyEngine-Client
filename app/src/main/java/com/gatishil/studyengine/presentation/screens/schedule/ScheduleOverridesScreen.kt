@@ -49,7 +49,8 @@ fun ScheduleOverridesScreen(
                             contentDescription = stringResource(R.string.back)
                         )
                     }
-                }
+                },
+                windowInsets = TopAppBarDefaults.windowInsets
             )
         },
         floatingActionButton = {

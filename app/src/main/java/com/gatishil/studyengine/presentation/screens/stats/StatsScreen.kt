@@ -56,7 +56,8 @@ fun StatsScreen(
                             contentDescription = stringResource(R.string.back)
                         )
                     }
-                }
+                },
+                windowInsets = TopAppBarDefaults.windowInsets
             )
         }
     ) { paddingValues ->
@@ -685,6 +686,16 @@ private fun AchievementsSection(achievements: List<Achievement>) {
 
 @Composable
 private fun AchievementCard(achievement: Achievement) {
+    val achievementIcon = when {
+        achievement.id.contains("streak") -> Icons.Default.LocalFireDepartment
+        achievement.id.contains("book") -> Icons.Default.MenuBook
+        achievement.id.contains("page") -> Icons.Default.Description
+        achievement.id.contains("session") -> Icons.Default.EventAvailable
+        achievement.id.contains("week") -> Icons.Default.DateRange
+        achievement.id.contains("hour") -> Icons.Default.Timer
+        else -> Icons.Default.EmojiEvents
+    }
+
     Card(
         modifier = Modifier.width(140.dp),
         colors = CardDefaults.cardColors(
@@ -702,11 +713,17 @@ private fun AchievementCard(achievement: Achievement) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = achievement.icon,
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(4.dp),
-                textAlign = TextAlign.Center
+            Icon(
+                imageVector = achievementIcon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(4.dp),
+                tint = if (achievement.isAchieved) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                }
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(

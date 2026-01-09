@@ -38,7 +38,8 @@ fun HowSessionsWorkScreen(
                             contentDescription = stringResource(R.string.back)
                         )
                     }
-                }
+                },
+                windowInsets = TopAppBarDefaults.windowInsets
             )
         }
     ) { paddingValues ->

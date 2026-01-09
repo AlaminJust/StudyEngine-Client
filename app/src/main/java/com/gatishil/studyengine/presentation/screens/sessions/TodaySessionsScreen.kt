@@ -37,6 +37,7 @@ fun TodaySessionsScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
+                windowInsets = TopAppBarDefaults.windowInsets,
                 actions = {
                     IconButton(onClick = onNavigateToUpcoming) {
                         Icon(

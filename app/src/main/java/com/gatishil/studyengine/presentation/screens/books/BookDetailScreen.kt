@@ -1,8 +1,11 @@
 package com.gatishil.studyengine.presentation.screens.books
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -10,7 +13,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gatishil.studyengine.domain.model.Book
@@ -72,6 +77,7 @@ fun BookDetailScreen(
                         )
                     }
                 },
+                windowInsets = TopAppBarDefaults.windowInsets,
                 actions = {
                     IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
@@ -242,9 +248,10 @@ private fun BookDetailContent(
                 }
             }
         } else {
-            items(book.chapters) { chapter ->
+            itemsIndexed(book.chapters) { index, chapter ->
                 ChapterItem(
                     chapter = chapter,
+                    index = index,
                     onEdit = { title, startPage, endPage, orderIndex ->
                         onEditChapter(chapter, title, startPage, endPage, orderIndex)
                     },
@@ -937,6 +944,7 @@ private fun EditStudyPlanDialog(
 @Composable
 private fun ChapterItem(
     chapter: Chapter,
+    index: Int = 0,
     onEdit: (title: String, startPage: Int, endPage: Int, orderIndex: Int) -> Unit = { _, _, _, _ -> },
     onDelete: () -> Unit = {},
     onIgnore: () -> Unit = {},
@@ -947,23 +955,65 @@ private fun ChapterItem(
     var showIgnoreDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
 
+    // Colorful chapter colors based on index
+    val chapterColors = listOf(
+        Color(0xFF6366F1), // Indigo
+        Color(0xFF8B5CF6), // Violet
+        Color(0xFFEC4899), // Pink
+        Color(0xFFF97316), // Orange
+        Color(0xFF14B8A6), // Teal
+        Color(0xFF22C55E), // Green
+        Color(0xFF3B82F6), // Blue
+        Color(0xFFA855F7), // Purple
+        Color(0xFFEF4444), // Red
+        Color(0xFF06B6D4)  // Cyan
+    )
+    val chapterColor = chapterColors[index % chapterColors.size]
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = if (chapter.isIgnored) {
                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             } else {
-                MaterialTheme.colorScheme.surface
+                chapterColor.copy(alpha = 0.08f)
             }
-        )
+        ),
+        border = if (!chapter.isIgnored) {
+            BorderStroke(1.dp, chapterColor.copy(alpha = 0.3f))
+        } else null
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Chapter number badge
+            Surface(
+                shape = CircleShape,
+                color = if (chapter.isIgnored) {
+                    MaterialTheme.colorScheme.surfaceVariant
+                } else {
+                    chapterColor
+                },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "${index + 1}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = if (chapter.isIgnored) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            Color.White
+                        }
+                    )
+                }
+            }
+
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -972,6 +1022,7 @@ private fun ChapterItem(
                     Text(
                         text = chapter.title,
                         style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
                         color = if (chapter.isIgnored) {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         } else {
@@ -985,18 +1036,53 @@ private fun ChapterItem(
                         )
                     }
                 }
-                Text(
-                    text = "Pages ${chapter.startPage} - ${chapter.endPage} (${chapter.pageCount} pages)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Description,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = if (chapter.isIgnored) {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            } else {
+                                chapterColor
+                            }
+                        )
+                        Text(
+                            text = "${chapter.pageCount} pages",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text(
+                        text = "•",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                    Text(
+                        text = "p.${chapter.startPage} - ${chapter.endPage}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             Box {
                 IconButton(onClick = { showMenu = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.more)
+                        contentDescription = stringResource(R.string.more),
+                        tint = if (chapter.isIgnored) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            chapterColor
+                        }
                     )
                 }
 

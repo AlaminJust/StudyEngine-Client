@@ -46,7 +46,8 @@ fun ScheduleContextsScreen(
                             contentDescription = stringResource(R.string.back)
                         )
                     }
-                }
+                },
+                windowInsets = TopAppBarDefaults.windowInsets
             )
         },
         floatingActionButton = {

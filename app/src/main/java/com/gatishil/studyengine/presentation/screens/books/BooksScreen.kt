@@ -33,7 +33,8 @@ fun BooksScreen(
                 title = { Text(stringResource(R.string.my_books)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
-                )
+                ),
+                windowInsets = TopAppBarDefaults.windowInsets
             )
         },
         floatingActionButton = {

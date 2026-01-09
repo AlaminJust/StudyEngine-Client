@@ -53,7 +53,8 @@ fun AddBookScreen(
                             contentDescription = stringResource(R.string.back)
                         )
                     }
-                }
+                },
+                windowInsets = TopAppBarDefaults.windowInsets
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

@@ -49,7 +49,8 @@ fun UpcomingSessionsScreen(
                             contentDescription = stringResource(R.string.back)
                         )
                     }
-                }
+                },
+                windowInsets = TopAppBarDefaults.windowInsets
             )
         }
     ) { paddingValues ->

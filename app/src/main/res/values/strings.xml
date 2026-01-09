@@ -213,7 +213,7 @@
     <string name="pause_study_plan_consequence_2">📊 Your progress will be saved</string>
     <string name="pause_study_plan_consequence_3">⏰ You can resume anytime to continue where you left off</string>
     <string name="pause_study_plan_consequence_4">📚 Existing scheduled sessions will remain but won\'t generate new ones</string>
-    <string name="pause_plan">Pause Plan</string>
+    <string name="pause_plan">Pause</string>
 
     <string name="complete_study_plan">Complete Study Plan</string>
     <string name="complete_study_plan_message">Are you sure you want to mark this study plan as complete?</string>
@@ -221,9 +221,9 @@
     <string name="complete_study_plan_consequence_2">📊 All your progress and statistics will be preserved</string>
     <string name="complete_study_plan_consequence_3">📅 No more sessions will be scheduled for this plan</string>
     <string name="complete_study_plan_consequence_4">📖 You can create a new study plan for this book anytime</string>
-    <string name="complete_plan">Complete Plan</string>
+    <string name="complete_plan">Complete</string>
 
-    <string name="resume_study_plan">Resume Study Plan</string>
+    <string name="resume_study_plan">Resume Study</string>
     <string name="resume_study_plan_message">Are you sure you want to resume this study plan?</string>
     <string name="resume_study_plan_consequence_1">▶️ The plan will become active again</string>
     <string name="resume_study_plan_consequence_2">📅 New study sessions will be scheduled based on your availability</string>
