@@ -1,5 +1,6 @@
 package com.gatishil.studyengine.data.repository
 
+import android.util.Log
 import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.data.local.dao.BookDao
 import com.gatishil.studyengine.data.local.dao.ChapterDao
@@ -17,8 +18,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val TAG = "BookRepository"
 
 @Singleton
 class BookRepositoryImpl @Inject constructor(
@@ -170,20 +175,30 @@ class BookRepositoryImpl @Inject constructor(
 
     override suspend fun addChapter(bookId: String, request: CreateChapterRequest): Resource<Chapter> {
         return try {
-            val response = api.addChapter(bookId, with(ChapterMapper) { request.toDto() })
+            val dto = with(ChapterMapper) { request.toDto() }
+            val jsonPayload = Json.encodeToString(dto)
+            Log.d(TAG, "addChapter - bookId: $bookId")
+            Log.d(TAG, "addChapter - JSON payload: $jsonPayload")
+            Log.d(TAG, "addChapter - request: title=${dto.title}, startPage=${dto.startPage}, endPage=${dto.endPage}, orderIndex=${dto.orderIndex}")
+
+            val response = api.addChapter(bookId, dto)
 
             if (response.isSuccessful) {
                 response.body()?.let { chapterDto ->
+                    Log.d(TAG, "addChapter - SUCCESS: ${chapterDto.id}")
                     chapterDao.insertChapter(with(ChapterMapper) { chapterDto.toEntity() })
                     Resource.success(with(ChapterMapper) { chapterDto.toDomain() })
                 } ?: Resource.error(Exception("Empty response body"))
             } else {
+                val errorBody = response.errorBody()?.string() ?: response.message()
+                Log.e(TAG, "addChapter - FAILED: ${response.code()} - $errorBody")
                 Resource.error(
-                    Exception("Add chapter failed: ${response.code()}"),
-                    response.message()
+                    Exception("Add chapter failed: ${response.code()} - $errorBody"),
+                    "Error ${response.code()}: $errorBody"
                 )
             }
         } catch (e: Exception) {
+            Log.e(TAG, "addChapter - EXCEPTION: ${e.message}", e)
             Resource.error(e, e.message)
         }
     }
@@ -194,7 +209,7 @@ class BookRepositoryImpl @Inject constructor(
         request: UpdateChapterRequest
     ): Resource<Chapter> {
         return try {
-            val response = api.updateChapter(bookId, chapterId, with(ChapterMapper) { request.toDto() })
+            val response = api.updateChapterByBookId(bookId, chapterId, with(ChapterMapper) { request.toDto() })
 
             if (response.isSuccessful) {
                 response.body()?.let { chapterDto ->
@@ -214,7 +229,7 @@ class BookRepositoryImpl @Inject constructor(
 
     override suspend fun deleteChapter(bookId: String, chapterId: String): Resource<Boolean> {
         return try {
-            val response = api.deleteChapter(bookId, chapterId)
+            val response = api.deleteChapterByBookId(bookId, chapterId)
 
             if (response.isSuccessful) {
                 chapterDao.getChapterById(chapterId)?.let { chapterDao.deleteChapter(it) }
@@ -236,7 +251,7 @@ class BookRepositoryImpl @Inject constructor(
         reason: String?
     ): Resource<Chapter> {
         return try {
-            val response = api.ignoreChapter(bookId, chapterId, IgnoreChapterRequestDto(reason))
+            val response = api.ignoreChapterByBookId(bookId, chapterId, IgnoreChapterRequestDto(reason))
 
             if (response.isSuccessful) {
                 response.body()?.let { chapterDto ->
@@ -256,7 +271,7 @@ class BookRepositoryImpl @Inject constructor(
 
     override suspend fun unignoreChapter(bookId: String, chapterId: String): Resource<Chapter> {
         return try {
-            val response = api.unignoreChapter(bookId, chapterId)
+            val response = api.unignoreChapterByBookId(bookId, chapterId)
 
             if (response.isSuccessful) {
                 response.body()?.let { chapterDto ->
@@ -276,7 +291,7 @@ class BookRepositoryImpl @Inject constructor(
 
     override suspend fun getStudyPlan(bookId: String): Resource<StudyPlan?> {
         return try {
-            val response = api.getStudyPlan(bookId)
+            val response = api.getStudyPlanByBookId(bookId)
 
             if (response.isSuccessful) {
                 response.body()?.let { studyPlanDto ->
@@ -314,10 +329,18 @@ class BookRepositoryImpl @Inject constructor(
         request: CreateStudyPlanRequest
     ): Resource<StudyPlan> {
         return try {
-            val response = api.createStudyPlan(bookId, with(StudyPlanMapper) { request.toDto() })
+            val dto = with(StudyPlanMapper) { request.toDto() }
+            Log.d(TAG, "createStudyPlan - bookId: $bookId")
+            Log.d(TAG, "createStudyPlan - request: startDate=${dto.startDate}, endDate=${dto.endDate}")
+            dto.recurrenceRule?.let { rule ->
+                Log.d(TAG, "createStudyPlan - recurrenceRule: type=${rule.type}, interval=${rule.interval}, daysOfWeek=${rule.daysOfWeek}")
+            }
+
+            val response = api.createStudyPlan(bookId, dto)
 
             if (response.isSuccessful) {
                 response.body()?.let { studyPlanDto ->
+                    Log.d(TAG, "createStudyPlan - SUCCESS: ${studyPlanDto.id}")
                     studyPlanDao.insertStudyPlan(with(StudyPlanMapper) { studyPlanDto.toEntity() })
                     studyPlanDto.recurrenceRule?.let { ruleDto ->
                         recurrenceRuleDao.insertRecurrenceRule(
@@ -327,12 +350,15 @@ class BookRepositoryImpl @Inject constructor(
                     Resource.success(with(StudyPlanMapper) { studyPlanDto.toDomain() })
                 } ?: Resource.error(Exception("Empty response body"))
             } else {
+                val errorBody = response.errorBody()?.string() ?: response.message()
+                Log.e(TAG, "createStudyPlan - FAILED: ${response.code()} - $errorBody")
                 Resource.error(
-                    Exception("Create study plan failed: ${response.code()}"),
-                    response.message()
+                    Exception("Create study plan failed: ${response.code()} - $errorBody"),
+                    "Error ${response.code()}: $errorBody"
                 )
             }
         } catch (e: Exception) {
+            Log.e(TAG, "createStudyPlan - EXCEPTION: ${e.message}", e)
             Resource.error(e, e.message)
         }
     }

@@ -13,8 +13,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.gatishil.studyengine.presentation.screens.auth.LoginScreen
 import com.gatishil.studyengine.presentation.screens.books.AddBookScreen
+import com.gatishil.studyengine.presentation.screens.books.AddChapterScreen
 import com.gatishil.studyengine.presentation.screens.books.BookDetailScreen
 import com.gatishil.studyengine.presentation.screens.books.BooksScreen
+import com.gatishil.studyengine.presentation.screens.books.CreateStudyPlanScreen
 import com.gatishil.studyengine.presentation.screens.dashboard.DashboardScreen
 import com.gatishil.studyengine.presentation.screens.sessions.SessionDetailScreen
 import com.gatishil.studyengine.presentation.screens.sessions.TodaySessionsScreen
@@ -108,6 +110,9 @@ fun StudyEngineNavGraph(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToCreatePlan = {
                     navController.navigate(Screen.CreateStudyPlan.createRoute(bookId))
+                },
+                onNavigateToAddChapter = {
+                    navController.navigate(Screen.AddChapter.createRoute(bookId))
                 }
             )
         }
@@ -120,6 +125,36 @@ fun StudyEngineNavGraph(
                         popUpTo(Screen.AddBook.route) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        // Create Study Plan
+        composable(
+            route = Screen.CreateStudyPlan.route,
+            arguments = listOf(
+                navArgument("bookId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId") ?: return@composable
+            CreateStudyPlanScreen(
+                bookId = bookId,
+                onNavigateBack = { navController.popBackStack() },
+                onPlanCreated = { navController.popBackStack() }
+            )
+        }
+
+        // Add Chapter
+        composable(
+            route = Screen.AddChapter.route,
+            arguments = listOf(
+                navArgument("bookId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val bookId = backStackEntry.arguments?.getString("bookId") ?: return@composable
+            AddChapterScreen(
+                bookId = bookId,
+                onNavigateBack = { navController.popBackStack() },
+                onChapterAdded = { navController.popBackStack() }
             )
         }
 
@@ -145,12 +180,34 @@ fun StudyEngineNavGraph(
             )
         }
 
+        // Schedule
+        composable(route = Screen.Availability.route) {
+            com.gatishil.studyengine.presentation.screens.schedule.AvailabilityScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Screen.ScheduleOverrides.route) {
+            com.gatishil.studyengine.presentation.screens.schedule.ScheduleOverridesScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Screen.ScheduleContexts.route) {
+            com.gatishil.studyengine.presentation.screens.schedule.ScheduleContextsScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
         // Settings
         composable(route = Screen.Settings.route) {
             SettingsScreen(
                 onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
                 onNavigateToAppearance = { navController.navigate(Screen.Appearance.route) },
                 onNavigateToLanguage = { navController.navigate(Screen.Language.route) },
+                onNavigateToAvailability = { navController.navigate(Screen.Availability.route) },
+                onNavigateToScheduleOverrides = { navController.navigate(Screen.ScheduleOverrides.route) },
+                onNavigateToScheduleContexts = { navController.navigate(Screen.ScheduleContexts.route) },
                 onSignOut = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }

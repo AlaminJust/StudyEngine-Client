@@ -92,7 +92,7 @@ class UserRepositoryImpl @Inject constructor(
         request: CreateUserAvailabilityRequest
     ): Resource<UserAvailability> {
         return try {
-            val response = api.addAvailability(with(ScheduleMapper) { request.toDto() })
+            val response = api.createAvailability(with(ScheduleMapper) { request.toDto() })
 
             if (response.isSuccessful) {
                 response.body()?.let { availabilityDto ->
@@ -114,7 +114,7 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun removeAvailability(availabilityId: String): Resource<Boolean> {
         return try {
-            val response = api.removeAvailability(availabilityId)
+            val response = api.deleteAvailability(availabilityId)
 
             if (response.isSuccessful) {
                 availabilityDao.deleteAvailabilityById(availabilityId)
@@ -144,7 +144,7 @@ class UserRepositoryImpl @Inject constructor(
         request: CreateScheduleOverrideRequest
     ): Resource<ScheduleOverride> {
         return try {
-            val response = api.addScheduleOverride(with(ScheduleMapper) { request.toDto() })
+            val response = api.createScheduleOverride(with(ScheduleMapper) { request.toDto() })
 
             if (response.isSuccessful) {
                 response.body()?.let { overrideDto ->
@@ -178,7 +178,7 @@ class UserRepositoryImpl @Inject constructor(
         request: CreateScheduleContextRequest
     ): Resource<ScheduleContext> {
         return try {
-            val response = api.addScheduleContext(with(ScheduleMapper) { request.toDto() })
+            val response = api.createScheduleContext(with(ScheduleMapper) { request.toDto() })
 
             if (response.isSuccessful) {
                 response.body()?.let { contextDto ->

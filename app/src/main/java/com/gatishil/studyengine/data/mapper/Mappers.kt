@@ -258,6 +258,12 @@ object StudyPlanMapper {
         recurrenceRule = recurrenceRule?.let { with(RecurrenceRuleMapper) { it.toDto() } }
     )
 
+    fun UpdateStudyPlanRequest.toDto(): UpdateStudyPlanRequestDto = UpdateStudyPlanRequestDto(
+        startDate = startDate.format(dateFormatter),
+        endDate = endDate.format(dateFormatter),
+        recurrenceRule = recurrenceRule?.let { with(RecurrenceRuleMapper) { it.toDto() } }
+    )
+
     private fun parseDate(dateString: String): LocalDate {
         return try {
             LocalDate.parse(dateString, dateFormatter)
@@ -299,9 +305,16 @@ object RecurrenceRuleMapper {
     )
 
     fun CreateRecurrenceRuleRequest.toDto(): CreateRecurrenceRuleRequestDto = CreateRecurrenceRuleRequestDto(
-        type = type.name,
+        // Convert to proper case: DAILY -> Daily, WEEKLY -> Weekly, CUSTOM -> Custom
+        type = type.name.lowercase().replaceFirstChar { it.uppercase() },
         interval = interval,
-        daysOfWeek = daysOfWeek?.map { it.value }
+        // Convert Java DayOfWeek (1=Monday, 7=Sunday) to C# DayOfWeek format (0=Sunday, 1=Monday, ..., 6=Saturday)
+        daysOfWeek = daysOfWeek?.map { dayOfWeek ->
+            when (dayOfWeek.value) {
+                7 -> 0  // Sunday: Java=7, C#=0
+                else -> dayOfWeek.value  // Monday=1, Tuesday=2, etc. (same in both)
+            }
+        }
     )
 }
 

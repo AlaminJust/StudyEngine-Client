@@ -6,6 +6,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gatishil.studyengine.BuildConfig
+import com.gatishil.studyengine.core.session.UserSessionManager
 import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.domain.model.User
 import com.gatishil.studyengine.domain.repository.AuthRepository
@@ -37,7 +38,8 @@ sealed class AuthEvent {
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userSessionManager: UserSessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -75,6 +77,9 @@ class AuthViewModel @Inject constructor(
                 // Sign in with the backend
                 when (val authResult = authRepository.signInWithGoogle(idToken)) {
                     is Resource.Success -> {
+                        // Save user to centralized session manager
+                        userSessionManager.setCurrentUser(authResult.data.user)
+
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
@@ -95,7 +100,23 @@ class AuthViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                val errorMessage = e.message ?: "Sign in failed"
+                val errorMessage = when {
+                    e.message?.contains("DEVELOPER_ERROR") == true ||
+                    e.message?.contains("28444") == true -> {
+                        "Developer console setup error. Check:\n" +
+                        "1. SHA-1 fingerprint registered in Google Cloud Console\n" +
+                        "2. Package name is 'com.gatishil.studyengine'\n" +
+                        "3. Using Web Client ID (not Android Client ID)\n" +
+                        "Error: ${e.message}"
+                    }
+                    e.message?.contains("USER_CANCELLED") == true -> {
+                        "Sign-in cancelled"
+                    }
+                    e.message?.contains("NETWORK_ERROR") == true -> {
+                        "Network error. Check your internet connection and backend server."
+                    }
+                    else -> e.message ?: "Sign in failed"
+                }
                 _uiState.update { it.copy(isLoading = false, error = errorMessage) }
                 _events.emit(AuthEvent.ShowError(errorMessage))
             }
@@ -106,6 +127,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             authRepository.logout()
+            userSessionManager.clearSession()
             _uiState.update { it.copy(isLoading = false, user = null) }
         }
     }
@@ -114,6 +136,9 @@ class AuthViewModel @Inject constructor(
      * Test Sign-In that bypasses both Google Sign-In form and the backend.
      * Creates a hardcoded mock user directly for testing purposes.
      * No network calls or UI prompts are made.
+     *
+     * NOTE: This saves a mock token for API calls. For real testing with backend,
+     * you should use signInWithGoogle() instead.
      */
     fun testSignInWithGoogle() {
         viewModelScope.launch {
@@ -130,6 +155,15 @@ class AuthViewModel @Inject constructor(
                 timeZone = java.util.TimeZone.getDefault().id,
                 profilePictureUrl = null,
                 createdAt = LocalDateTime.now()
+            )
+
+            // Save user AND a mock token to session manager
+            // This mock token allows API calls to include Authorization header
+            // Note: The backend still needs to accept this token or use a test mode
+            userSessionManager.setCurrentUserWithToken(
+                user = testUser,
+                accessToken = "test_access_token_for_development",
+                refreshToken = "test_refresh_token"
             )
 
             _uiState.update {

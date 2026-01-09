@@ -41,17 +41,17 @@ data class BookDto(
  */
 @Serializable
 data class CreateBookRequestDto(
-    @SerialName("title")
+    @SerialName("Title")
     val title: String,
-    @SerialName("subject")
+    @SerialName("Subject")
     val subject: String,
-    @SerialName("totalPages")
+    @SerialName("TotalPages")
     val totalPages: Int,
-    @SerialName("difficulty")
+    @SerialName("Difficulty")
     val difficulty: Int = 1,
-    @SerialName("priority")
+    @SerialName("Priority")
     val priority: Int = 1,
-    @SerialName("targetEndDate")
+    @SerialName("TargetEndDate")
     val targetEndDate: String? = null
 )
 
@@ -60,17 +60,17 @@ data class CreateBookRequestDto(
  */
 @Serializable
 data class UpdateBookRequestDto(
-    @SerialName("title")
+    @SerialName("Title")
     val title: String,
-    @SerialName("subject")
+    @SerialName("Subject")
     val subject: String,
-    @SerialName("totalPages")
+    @SerialName("TotalPages")
     val totalPages: Int,
-    @SerialName("difficulty")
+    @SerialName("Difficulty")
     val difficulty: Int,
-    @SerialName("priority")
+    @SerialName("Priority")
     val priority: Int,
-    @SerialName("targetEndDate")
+    @SerialName("TargetEndDate")
     val targetEndDate: String?
 )
 
@@ -104,13 +104,13 @@ data class ChapterDto(
  */
 @Serializable
 data class CreateChapterRequestDto(
-    @SerialName("title")
+    @SerialName("Title")
     val title: String,
-    @SerialName("startPage")
+    @SerialName("StartPage")
     val startPage: Int,
-    @SerialName("endPage")
+    @SerialName("EndPage")
     val endPage: Int,
-    @SerialName("orderIndex")
+    @SerialName("OrderIndex")
     val orderIndex: Int
 )
 
@@ -119,13 +119,13 @@ data class CreateChapterRequestDto(
  */
 @Serializable
 data class UpdateChapterRequestDto(
-    @SerialName("title")
+    @SerialName("Title")
     val title: String,
-    @SerialName("startPage")
+    @SerialName("StartPage")
     val startPage: Int,
-    @SerialName("endPage")
+    @SerialName("EndPage")
     val endPage: Int,
-    @SerialName("orderIndex")
+    @SerialName("OrderIndex")
     val orderIndex: Int
 )
 
@@ -134,7 +134,7 @@ data class UpdateChapterRequestDto(
  */
 @Serializable
 data class IgnoreChapterRequestDto(
-    @SerialName("reason")
+    @SerialName("Reason")
     val reason: String? = null
 )
 

@@ -27,11 +27,24 @@ data class StudyPlanDto(
  */
 @Serializable
 data class CreateStudyPlanRequestDto(
-    @SerialName("startDate")
+    @SerialName("StartDate")
     val startDate: String,
-    @SerialName("endDate")
+    @SerialName("EndDate")
     val endDate: String,
-    @SerialName("recurrenceRule")
+    @SerialName("RecurrenceRule")
+    val recurrenceRule: CreateRecurrenceRuleRequestDto? = null
+)
+
+/**
+ * Request DTO for updating a study plan
+ */
+@Serializable
+data class UpdateStudyPlanRequestDto(
+    @SerialName("StartDate")
+    val startDate: String,
+    @SerialName("EndDate")
+    val endDate: String,
+    @SerialName("RecurrenceRule")
     val recurrenceRule: CreateRecurrenceRuleRequestDto? = null
 )
 
@@ -57,11 +70,11 @@ data class RecurrenceRuleDto(
  */
 @Serializable
 data class CreateRecurrenceRuleRequestDto(
-    @SerialName("type")
+    @SerialName("Type")
     val type: String,
-    @SerialName("interval")
+    @SerialName("Interval")
     val interval: Int = 1,
-    @SerialName("daysOfWeek")
+    @SerialName("DaysOfWeek")
     val daysOfWeek: List<Int>? = null
 )
 

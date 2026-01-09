@@ -24,6 +24,7 @@ fun BookDetailScreen(
     bookId: String,
     onNavigateBack: () -> Unit,
     onNavigateToCreatePlan: () -> Unit,
+    onNavigateToAddChapter: () -> Unit,
     viewModel: BookDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -73,6 +74,27 @@ fun BookDetailScreen(
                 BookDetailContent(
                     book = uiState.book!!,
                     onNavigateToCreatePlan = onNavigateToCreatePlan,
+                    onAddChapter = onNavigateToAddChapter,
+                    onActivateStudyPlan = {
+                        uiState.book?.studyPlan?.let { plan ->
+                            viewModel.activateStudyPlan(plan.id)
+                        }
+                    },
+                    onPauseStudyPlan = {
+                        uiState.book?.studyPlan?.let { plan ->
+                            viewModel.pauseStudyPlan(plan.id)
+                        }
+                    },
+                    onCompleteStudyPlan = {
+                        uiState.book?.studyPlan?.let { plan ->
+                            viewModel.completeStudyPlan(plan.id)
+                        }
+                    },
+                    onDeleteStudyPlan = {
+                        uiState.book?.studyPlan?.let { plan ->
+                            viewModel.deleteStudyPlan(plan.id)
+                        }
+                    },
                     modifier = Modifier.padding(paddingValues)
                 )
             }
@@ -111,6 +133,11 @@ fun BookDetailScreen(
 private fun BookDetailContent(
     book: Book,
     onNavigateToCreatePlan: () -> Unit,
+    onAddChapter: () -> Unit,
+    onActivateStudyPlan: () -> Unit = {},
+    onPauseStudyPlan: () -> Unit = {},
+    onCompleteStudyPlan: () -> Unit = {},
+    onDeleteStudyPlan: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -127,7 +154,11 @@ private fun BookDetailContent(
         item {
             StudyPlanCard(
                 book = book,
-                onCreatePlan = onNavigateToCreatePlan
+                onCreatePlan = onNavigateToCreatePlan,
+                onActivate = onActivateStudyPlan,
+                onPause = onPauseStudyPlan,
+                onComplete = onCompleteStudyPlan,
+                onDelete = onDeleteStudyPlan
             )
         }
 
@@ -136,7 +167,7 @@ private fun BookDetailContent(
             SectionHeader(
                 title = stringResource(R.string.chapters),
                 actionLabel = stringResource(R.string.add_chapter),
-                onAction = { /* TODO: Add chapter */ }
+                onAction = onAddChapter
             )
         }
 
@@ -260,8 +291,14 @@ private fun BookInfoCard(book: Book) {
 @Composable
 private fun StudyPlanCard(
     book: Book,
-    onCreatePlan: () -> Unit
+    onCreatePlan: () -> Unit,
+    onActivate: () -> Unit = {},
+    onPause: () -> Unit = {},
+    onComplete: () -> Unit = {},
+    onDelete: () -> Unit = {}
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
     StudyCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -276,7 +313,12 @@ private fun StudyPlanCard(
             book.studyPlan?.let { plan ->
                 StatusChip(
                     text = plan.status.name,
-                    color = StudyEngineTheme.extendedColors.success
+                    color = when (plan.status) {
+                        com.gatishil.studyengine.domain.model.StudyPlanStatus.ACTIVE -> StudyEngineTheme.extendedColors.success
+                        com.gatishil.studyengine.domain.model.StudyPlanStatus.PAUSED -> MaterialTheme.colorScheme.tertiary
+                        com.gatishil.studyengine.domain.model.StudyPlanStatus.COMPLETED -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.outline
+                    }
                 )
             }
         }
@@ -314,6 +356,99 @@ private fun StudyPlanCard(
                     )
                 }
             }
+
+            // Recurrence info
+            plan.recurrenceRule?.let { rule ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Repeat,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${rule.type.name.lowercase().replaceFirstChar { it.uppercase() }} • Every ${rule.interval} ${if (rule.interval == 1) "day" else "days"}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Action buttons based on status
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                when (plan.status) {
+                    com.gatishil.studyengine.domain.model.StudyPlanStatus.ACTIVE -> {
+                        OutlinedButton(
+                            onClick = onPause,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Pause")
+                        }
+                        Button(
+                            onClick = onComplete,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Complete")
+                        }
+                    }
+                    com.gatishil.studyengine.domain.model.StudyPlanStatus.PAUSED -> {
+                        Button(
+                            onClick = onActivate,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Resume")
+                        }
+                        OutlinedButton(
+                            onClick = { showDeleteDialog = true },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Delete")
+                        }
+                    }
+                    com.gatishil.studyengine.domain.model.StudyPlanStatus.COMPLETED -> {
+                        OutlinedButton(
+                            onClick = onCreatePlan,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Create New Plan")
+                        }
+                    }
+                    else -> {
+                        OutlinedButton(
+                            onClick = { showDeleteDialog = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Delete Plan")
+                        }
+                    }
+                }
+            }
         } else {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -335,6 +470,30 @@ private fun StudyPlanCard(
                 }
             }
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Study Plan") },
+            text = { Text("Are you sure you want to delete this study plan? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDelete()
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

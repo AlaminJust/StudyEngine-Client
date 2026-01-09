@@ -48,34 +48,86 @@ interface StudyEngineApi {
     @DELETE("users/me")
     suspend fun deleteCurrentUser(): Response<Unit>
 
+    // ==================== User Availabilities ====================
+
     @GET("users/me/availabilities")
     suspend fun getAvailabilities(): Response<List<UserAvailabilityDto>>
 
+    @GET("users/me/availabilities/{id}")
+    suspend fun getAvailabilityById(
+        @Path("id") id: String
+    ): Response<UserAvailabilityDto>
+
     @POST("users/me/availabilities")
-    suspend fun addAvailability(
+    suspend fun createAvailability(
         @Body request: CreateUserAvailabilityRequestDto
     ): Response<UserAvailabilityDto>
 
-    @DELETE("users/me/availabilities/{availabilityId}")
-    suspend fun removeAvailability(
-        @Path("availabilityId") availabilityId: String
+    @PUT("users/me/availabilities/{id}")
+    suspend fun updateAvailability(
+        @Path("id") id: String,
+        @Body request: CreateUserAvailabilityRequestDto
+    ): Response<UserAvailabilityDto>
+
+    @DELETE("users/me/availabilities/{id}")
+    suspend fun deleteAvailability(
+        @Path("id") id: String
     ): Response<Unit>
+
+    // ==================== Schedule Overrides ====================
 
     @GET("users/me/schedule-overrides")
     suspend fun getScheduleOverrides(): Response<List<ScheduleOverrideDto>>
 
+    @GET("users/me/schedule-overrides/range")
+    suspend fun getScheduleOverridesByDateRange(
+        @Query("startDate") startDate: String,
+        @Query("endDate") endDate: String
+    ): Response<List<ScheduleOverrideDto>>
+
+    @GET("users/me/schedule-overrides/{id}")
+    suspend fun getScheduleOverrideById(
+        @Path("id") id: String
+    ): Response<ScheduleOverrideDto>
+
     @POST("users/me/schedule-overrides")
-    suspend fun addScheduleOverride(
+    suspend fun createScheduleOverride(
         @Body request: CreateScheduleOverrideRequestDto
     ): Response<ScheduleOverrideDto>
+
+    @DELETE("users/me/schedule-overrides/{id}")
+    suspend fun deleteScheduleOverride(
+        @Path("id") id: String
+    ): Response<Unit>
+
+    // ==================== Schedule Contexts ====================
 
     @GET("users/me/schedule-contexts")
     suspend fun getScheduleContexts(): Response<List<ScheduleContextDto>>
 
+    @GET("users/me/schedule-contexts/active")
+    suspend fun getActiveScheduleContext(): Response<ScheduleContextDto>
+
+    @GET("users/me/schedule-contexts/{id}")
+    suspend fun getScheduleContextById(
+        @Path("id") id: String
+    ): Response<ScheduleContextDto>
+
     @POST("users/me/schedule-contexts")
-    suspend fun addScheduleContext(
+    suspend fun createScheduleContext(
         @Body request: CreateScheduleContextRequestDto
     ): Response<ScheduleContextDto>
+
+    @PATCH("users/me/schedule-contexts/{id}/load-multiplier")
+    suspend fun updateScheduleContextLoadMultiplier(
+        @Path("id") id: String,
+        @Body request: UpdateLoadMultiplierRequestDto
+    ): Response<ScheduleContextDto>
+
+    @DELETE("users/me/schedule-contexts/{id}")
+    suspend fun deleteScheduleContext(
+        @Path("id") id: String
+    ): Response<Unit>
 
     // ==================== Book Endpoints ====================
 
@@ -103,13 +155,15 @@ interface StudyEngineApi {
         @Path("id") bookId: String
     ): Response<Unit>
 
+    // ==================== Chapter Endpoints (via Books) ====================
+
     @GET("books/{bookId}/chapters")
-    suspend fun getChapters(
+    suspend fun getChaptersByBookId(
         @Path("bookId") bookId: String
     ): Response<List<ChapterDto>>
 
     @GET("books/{bookId}/chapters/{chapterId}")
-    suspend fun getChapter(
+    suspend fun getChapterByBookId(
         @Path("bookId") bookId: String,
         @Path("chapterId") chapterId: String
     ): Response<ChapterDto>
@@ -121,40 +175,113 @@ interface StudyEngineApi {
     ): Response<ChapterDto>
 
     @PUT("books/{bookId}/chapters/{chapterId}")
-    suspend fun updateChapter(
+    suspend fun updateChapterByBookId(
         @Path("bookId") bookId: String,
         @Path("chapterId") chapterId: String,
         @Body request: UpdateChapterRequestDto
     ): Response<ChapterDto>
 
     @DELETE("books/{bookId}/chapters/{chapterId}")
-    suspend fun deleteChapter(
+    suspend fun deleteChapterByBookId(
         @Path("bookId") bookId: String,
         @Path("chapterId") chapterId: String
     ): Response<Unit>
 
     @POST("books/{bookId}/chapters/{chapterId}/ignore")
-    suspend fun ignoreChapter(
+    suspend fun ignoreChapterByBookId(
         @Path("bookId") bookId: String,
         @Path("chapterId") chapterId: String,
         @Body request: IgnoreChapterRequestDto
     ): Response<ChapterDto>
 
     @POST("books/{bookId}/chapters/{chapterId}/unignore")
-    suspend fun unignoreChapter(
+    suspend fun unignoreChapterByBookId(
         @Path("bookId") bookId: String,
         @Path("chapterId") chapterId: String
     ): Response<ChapterDto>
 
-    @GET("books/{bookId}/study-plan")
-    suspend fun getStudyPlan(
+    // ==================== Chapter Endpoints (Standalone) ====================
+
+    @GET("chapters/{id}")
+    suspend fun getChapterById(
+        @Path("id") chapterId: String
+    ): Response<ChapterDto>
+
+    @GET("chapters/book/{bookId}")
+    suspend fun getChapters(
+        @Path("bookId") bookId: String
+    ): Response<List<ChapterDto>>
+
+    @POST("chapters/book/{bookId}")
+    suspend fun createChapter(
+        @Path("bookId") bookId: String,
+        @Body request: CreateChapterRequestDto
+    ): Response<ChapterDto>
+
+    @PUT("chapters/{id}")
+    suspend fun updateChapter(
+        @Path("id") chapterId: String,
+        @Body request: UpdateChapterRequestDto
+    ): Response<ChapterDto>
+
+    @DELETE("chapters/{id}")
+    suspend fun deleteChapter(
+        @Path("id") chapterId: String
+    ): Response<Unit>
+
+    @POST("chapters/{id}/ignore")
+    suspend fun ignoreChapter(
+        @Path("id") chapterId: String,
+        @Body request: IgnoreChapterRequestDto
+    ): Response<ChapterDto>
+
+    @POST("chapters/{id}/unignore")
+    suspend fun unignoreChapter(
+        @Path("id") chapterId: String
+    ): Response<ChapterDto>
+
+    // ==================== Study Plan Endpoints ====================
+
+    @GET("study-plans/{id}")
+    suspend fun getStudyPlanById(
+        @Path("id") studyPlanId: String
+    ): Response<StudyPlanDto>
+
+    @GET("study-plans/book/{bookId}")
+    suspend fun getStudyPlanByBookId(
         @Path("bookId") bookId: String
     ): Response<StudyPlanDto>
 
-    @POST("books/{bookId}/study-plan")
+    @POST("study-plans/book/{bookId}")
     suspend fun createStudyPlan(
         @Path("bookId") bookId: String,
         @Body request: CreateStudyPlanRequestDto
+    ): Response<StudyPlanDto>
+
+    @PUT("study-plans/{id}")
+    suspend fun updateStudyPlan(
+        @Path("id") studyPlanId: String,
+        @Body request: UpdateStudyPlanRequestDto
+    ): Response<StudyPlanDto>
+
+    @DELETE("study-plans/{id}")
+    suspend fun deleteStudyPlan(
+        @Path("id") studyPlanId: String
+    ): Response<Unit>
+
+    @POST("study-plans/{id}/activate")
+    suspend fun activateStudyPlan(
+        @Path("id") studyPlanId: String
+    ): Response<StudyPlanDto>
+
+    @POST("study-plans/{id}/pause")
+    suspend fun pauseStudyPlan(
+        @Path("id") studyPlanId: String
+    ): Response<StudyPlanDto>
+
+    @POST("study-plans/{id}/complete")
+    suspend fun completeStudyPlan(
+        @Path("id") studyPlanId: String
     ): Response<StudyPlanDto>
 
     // ==================== Session Endpoints ====================

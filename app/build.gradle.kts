@@ -21,8 +21,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // API Configuration
-        buildConfigField("String", "API_BASE_URL", "\"http://192.168.0.103:8082/api/v1/\"")
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"629081030104-ic39p2p2fa7ov1dar3i0ivjurcn1fcf7.apps.googleusercontent.com\"")
+        buildConfigField("String", "API_BASE_URL", "\"http://192.168.0.101:8082/api/v1/\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"629081030104-8rq6e63104m8i3dhcr69arpunhgkg59r.apps.googleusercontent.com\"")
 
         // Enable resource configuration for localization
         resourceConfigurations += listOf("en", "bn")

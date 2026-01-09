@@ -5,12 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -19,6 +21,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.gatishil.studyengine.data.local.datastore.AuthPreferences
 import com.gatishil.studyengine.data.local.datastore.SettingsPreferences
 import com.gatishil.studyengine.presentation.navigation.BottomNavItem
 import com.gatishil.studyengine.presentation.navigation.Screen
@@ -32,6 +35,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var settingsPreferences: SettingsPreferences
+
+    @Inject
+    lateinit var authPreferences: AuthPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -48,15 +54,29 @@ class MainActivity : ComponentActivity() {
                 else -> isSystemInDarkTheme()
             }
 
+            // Check if user is logged in
+            val isLoggedIn by authPreferences.isLoggedIn()
+                .collectAsStateWithLifecycle(initialValue = null)
+
             StudyEngineTheme(darkTheme = darkTheme) {
-                StudyEngineApp()
+                // Show loading until we know login state
+                if (isLoggedIn == null) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    StudyEngineApp(isLoggedIn = isLoggedIn!!)
+                }
             }
         }
     }
 }
 
 @Composable
-fun StudyEngineApp() {
+fun StudyEngineApp(isLoggedIn: Boolean) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -69,8 +89,8 @@ fun StudyEngineApp() {
         Screen.Settings.route
     )
 
-    // TODO: Check if user is logged in to determine start destination
-    val startDestination = Screen.Login.route // Change to Dashboard if logged in
+    // Start destination based on login state
+    val startDestination = if (isLoggedIn) Screen.Dashboard.route else Screen.Login.route
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

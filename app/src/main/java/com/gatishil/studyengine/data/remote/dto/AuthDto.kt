@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class GoogleSignInRequestDto(
-    @SerialName("idToken")
+    @SerialName("IdToken")
     val idToken: String
 )
 
@@ -34,7 +34,7 @@ data class AuthResponseDto(
  */
 @Serializable
 data class RefreshTokenRequestDto(
-    @SerialName("refreshToken")
+    @SerialName("RefreshToken")
     val refreshToken: String
 )
 
@@ -75,11 +75,11 @@ data class UserDto(
  */
 @Serializable
 data class UpdateUserRequestDto(
-    @SerialName("name")
+    @SerialName("Name")
     val name: String,
-    @SerialName("email")
+    @SerialName("Email")
     val email: String,
-    @SerialName("timeZone")
+    @SerialName("TimeZone")
     val timeZone: String
 )
 

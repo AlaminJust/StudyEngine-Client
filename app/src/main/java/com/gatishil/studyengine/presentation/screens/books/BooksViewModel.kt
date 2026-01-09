@@ -172,7 +172,8 @@ class AddBookViewModel @Inject constructor(
 
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
-    private val bookRepository: BookRepository
+    private val bookRepository: BookRepository,
+    private val api: com.gatishil.studyengine.data.remote.api.StudyEngineApi
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BookDetailUiState())
@@ -216,6 +217,71 @@ class BookDetailViewModel @Inject constructor(
                 is Resource.Loading -> {
                     // Already handling loading
                 }
+            }
+        }
+    }
+
+    fun activateStudyPlan(studyPlanId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val response = api.activateStudyPlan(studyPlanId)
+                if (response.isSuccessful) {
+                    // Reload book to get updated study plan
+                    _uiState.value.book?.let { loadBook(it.id) }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to activate plan") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun pauseStudyPlan(studyPlanId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val response = api.pauseStudyPlan(studyPlanId)
+                if (response.isSuccessful) {
+                    _uiState.value.book?.let { loadBook(it.id) }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to pause plan") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun completeStudyPlan(studyPlanId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val response = api.completeStudyPlan(studyPlanId)
+                if (response.isSuccessful) {
+                    _uiState.value.book?.let { loadBook(it.id) }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to complete plan") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun deleteStudyPlan(studyPlanId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val response = api.deleteStudyPlan(studyPlanId)
+                if (response.isSuccessful) {
+                    _uiState.value.book?.let { loadBook(it.id) }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to delete plan") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }

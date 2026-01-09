@@ -67,6 +67,15 @@ data class CreateStudyPlanRequest(
 )
 
 /**
+ * Domain model for updating a study plan
+ */
+data class UpdateStudyPlanRequest(
+    val startDate: LocalDate,
+    val endDate: LocalDate,
+    val recurrenceRule: CreateRecurrenceRuleRequest? = null
+)
+
+/**
  * Domain model for creating a recurrence rule
  */
 data class CreateRecurrenceRuleRequest(

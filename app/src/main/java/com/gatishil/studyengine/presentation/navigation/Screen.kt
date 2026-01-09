@@ -24,6 +24,9 @@ sealed class Screen(val route: String) {
     data object CreateStudyPlan : Screen("books/{bookId}/create-plan") {
         fun createRoute(bookId: String) = "books/$bookId/create-plan"
     }
+    data object AddChapter : Screen("books/{bookId}/add-chapter") {
+        fun createRoute(bookId: String) = "books/$bookId/add-chapter"
+    }
 
     // Sessions
     data object Sessions : Screen("sessions")
@@ -35,6 +38,13 @@ sealed class Screen(val route: String) {
     // Schedule
     data object Schedule : Screen("schedule")
     data object Availability : Screen("schedule/availability")
+    data object ScheduleOverrides : Screen("schedule/overrides")
+    data object ScheduleContexts : Screen("schedule/contexts")
+
+    // Study Plan
+    data object StudyPlanDetail : Screen("study-plans/{studyPlanId}") {
+        fun createRoute(studyPlanId: String) = "study-plans/$studyPlanId"
+    }
 
     // Settings
     data object Settings : Screen("settings")

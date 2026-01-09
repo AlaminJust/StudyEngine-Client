@@ -24,6 +24,9 @@ fun SettingsScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToAppearance: () -> Unit,
     onNavigateToLanguage: () -> Unit,
+    onNavigateToAvailability: () -> Unit = {},
+    onNavigateToScheduleOverrides: () -> Unit = {},
+    onNavigateToScheduleContexts: () -> Unit = {},
     onSignOut: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -99,6 +102,38 @@ fun SettingsScreen(
                     title = stringResource(R.string.language),
                     subtitle = languageLabel,
                     onClick = { showLanguageDialog = true }
+                )
+            }
+
+            // Schedule section
+            item {
+                SettingsSectionHeader(title = "Schedule Management")
+            }
+
+            item {
+                SettingsItem(
+                    icon = Icons.Default.Schedule,
+                    title = "Study Availability",
+                    subtitle = "Set your weekly study time slots",
+                    onClick = onNavigateToAvailability
+                )
+            }
+
+            item {
+                SettingsItem(
+                    icon = Icons.Default.EventBusy,
+                    title = "Schedule Overrides",
+                    subtitle = "Add days off or custom study hours",
+                    onClick = onNavigateToScheduleOverrides
+                )
+            }
+
+            item {
+                SettingsItem(
+                    icon = Icons.Default.CalendarMonth,
+                    title = "Schedule Contexts",
+                    subtitle = "Manage exam periods, vacations, etc.",
+                    onClick = onNavigateToScheduleContexts
                 )
             }
 

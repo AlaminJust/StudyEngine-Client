@@ -39,9 +39,9 @@ data class StudySessionDto(
  */
 @Serializable
 data class CompleteSessionRequestDto(
-    @SerialName("completedPages")
+    @SerialName("CompletedPages")
     val completedPages: Int,
-    @SerialName("notes")
+    @SerialName("Notes")
     val notes: String? = null
 )
 

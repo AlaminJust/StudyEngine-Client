@@ -27,11 +27,11 @@ data class UserAvailabilityDto(
  */
 @Serializable
 data class CreateUserAvailabilityRequestDto(
-    @SerialName("dayOfWeek")
+    @SerialName("DayOfWeek")
     val dayOfWeek: Int,
-    @SerialName("startTime")
+    @SerialName("StartTime")
     val startTime: String,
-    @SerialName("endTime")
+    @SerialName("EndTime")
     val endTime: String
 )
 
@@ -59,13 +59,13 @@ data class ScheduleOverrideDto(
  */
 @Serializable
 data class CreateScheduleOverrideRequestDto(
-    @SerialName("overrideDate")
+    @SerialName("OverrideDate")
     val overrideDate: String,
-    @SerialName("startTime")
+    @SerialName("StartTime")
     val startTime: String?,
-    @SerialName("endTime")
+    @SerialName("EndTime")
     val endTime: String?,
-    @SerialName("isOff")
+    @SerialName("IsOff")
     val isOff: Boolean
 )
 
@@ -93,13 +93,22 @@ data class ScheduleContextDto(
  */
 @Serializable
 data class CreateScheduleContextRequestDto(
-    @SerialName("contextType")
+    @SerialName("ContextType")
     val contextType: String,
-    @SerialName("startDate")
+    @SerialName("StartDate")
     val startDate: String,
-    @SerialName("endDate")
+    @SerialName("EndDate")
     val endDate: String,
-    @SerialName("loadMultiplier")
+    @SerialName("LoadMultiplier")
     val loadMultiplier: Float = 1.0f
+)
+
+/**
+ * Request DTO for updating load multiplier
+ */
+@Serializable
+data class UpdateLoadMultiplierRequestDto(
+    @SerialName("LoadMultiplier")
+    val loadMultiplier: Float
 )
 
