@@ -163,10 +163,13 @@ fun StatCard(
     value: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
-    icon: @Composable (() -> Unit)? = null
+    icon: @Composable (() -> Unit)? = null,
+    onClick: (() -> Unit)? = null
 ) {
     Card(
         modifier = modifier,
+        onClick = onClick ?: {},
+        enabled = onClick != null,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer

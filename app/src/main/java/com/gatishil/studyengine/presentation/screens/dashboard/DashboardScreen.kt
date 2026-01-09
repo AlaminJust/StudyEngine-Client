@@ -34,6 +34,7 @@ fun DashboardScreen(
     onNavigateToBook: (String) -> Unit,
     onNavigateToSession: (String) -> Unit,
     onNavigateToSessions: () -> Unit,
+    onNavigateToUpcomingSessions: () -> Unit,
     onNavigateToAddBook: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
@@ -77,7 +78,8 @@ fun DashboardScreen(
                         StatsSection(
                             pagesReadToday = uiState.totalPagesReadToday,
                             upcomingSessionsCount = uiState.upcomingSessionsCount,
-                            completedTodayCount = uiState.todayCompletedCount
+                            completedTodayCount = uiState.todayCompletedCount,
+                            onUpcomingClick = onNavigateToUpcomingSessions
                         )
                     }
 
@@ -279,7 +281,8 @@ private fun DashboardHeader() {
 private fun StatsSection(
     pagesReadToday: Int,
     upcomingSessionsCount: Int,
-    completedTodayCount: Int
+    completedTodayCount: Int,
+    onUpcomingClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -309,6 +312,7 @@ private fun StatsSection(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight(),
+            onClick = onUpcomingClick,
             icon = {
                 Icon(
                     imageVector = Icons.Default.Schedule,

@@ -146,6 +146,17 @@
     <string name="no_sessions_today_desc">Create a study plan and set your availability to start generating sessions</string>
     <string name="learn_how_sessions_work">Learn How Sessions Work</string>
 
+    <!-- Upcoming Sessions -->
+    <string name="no_upcoming_sessions">No Upcoming Sessions</string>
+    <string name="no_upcoming_sessions_desc">No sessions scheduled for this time period. Create a study plan to get started.</string>
+    <string name="filter_next_30_days">Next 30 Days</string>
+    <string name="filter_this_week">This Week</string>
+    <string name="filter_next_week">Next Week</string>
+    <string name="filter_this_month">This Month</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="view_upcoming">View Upcoming</string>
+
     <!-- Session Status -->
     <string name="status_planned">Planned</string>
     <string name="status_in_progress">In Progress</string>

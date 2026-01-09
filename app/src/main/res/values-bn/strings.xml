@@ -147,6 +147,17 @@
     <string name="no_sessions_today_desc">সেশন তৈরি শুরু করতে একটি পড়ার পরিকল্পনা তৈরি করুন এবং আপনার উপলব্ধতা সেট করুন</string>
     <string name="learn_how_sessions_work">সেশন কীভাবে কাজ করে জানুন</string>
 
+    <!-- Upcoming Sessions -->
+    <string name="no_upcoming_sessions">কোন আসন্ন সেশন নেই</string>
+    <string name="no_upcoming_sessions_desc">এই সময়ের জন্য কোন সেশন নির্ধারিত নেই। শুরু করতে একটি পড়ার পরিকল্পনা তৈরি করুন।</string>
+    <string name="filter_next_30_days">পরবর্তী ৩০ দিন</string>
+    <string name="filter_this_week">এই সপ্তাহ</string>
+    <string name="filter_next_week">পরের সপ্তাহ</string>
+    <string name="filter_this_month">এই মাস</string>
+    <string name="today">আজ</string>
+    <string name="tomorrow">আগামীকাল</string>
+    <string name="view_upcoming">আসন্ন দেখুন</string>
+
     <!-- Session Status -->
     <string name="status_planned">পরিকল্পিত</string>
     <string name="status_in_progress">চলমান</string>

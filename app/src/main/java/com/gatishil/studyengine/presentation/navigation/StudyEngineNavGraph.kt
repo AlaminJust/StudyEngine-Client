@@ -85,6 +85,7 @@ fun StudyEngineNavGraph(
                     navController.navigate(Screen.SessionDetail.createRoute(sessionId))
                 },
                 onNavigateToSessions = { navController.navigate(Screen.TodaySessions.route) },
+                onNavigateToUpcomingSessions = { navController.navigate(Screen.UpcomingSessions.route) },
                 onNavigateToAddBook = { navController.navigate(Screen.AddBook.route) }
             )
         }
@@ -167,6 +168,18 @@ fun StudyEngineNavGraph(
                 },
                 onNavigateToHowItWorks = {
                     navController.navigate(Screen.HowSessionsWork.route)
+                },
+                onNavigateToUpcoming = {
+                    navController.navigate(Screen.UpcomingSessions.route)
+                }
+            )
+        }
+
+        composable(route = Screen.UpcomingSessions.route) {
+            com.gatishil.studyengine.presentation.screens.sessions.UpcomingSessionsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToSession = { sessionId ->
+                    navController.navigate(Screen.SessionDetail.createRoute(sessionId))
                 }
             )
         }

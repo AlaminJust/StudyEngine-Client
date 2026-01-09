@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -24,6 +25,7 @@ import com.gatishil.studyengine.R
 fun TodaySessionsScreen(
     onNavigateToSession: (String) -> Unit,
     onNavigateToHowItWorks: () -> Unit = {},
+    onNavigateToUpcoming: () -> Unit = {},
     viewModel: TodaySessionsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -36,6 +38,12 @@ fun TodaySessionsScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
                 actions = {
+                    IconButton(onClick = onNavigateToUpcoming) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = stringResource(R.string.upcoming_sessions)
+                        )
+                    }
                     IconButton(onClick = onNavigateToHowItWorks) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.HelpOutline,
