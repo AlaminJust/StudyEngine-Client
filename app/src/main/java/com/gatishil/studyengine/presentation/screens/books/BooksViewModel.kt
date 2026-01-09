@@ -292,6 +292,113 @@ class BookDetailViewModel @Inject constructor(
         }
     }
 
+    fun deleteChapter(bookId: String, chapterId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val response = api.deleteChapterByBookId(bookId, chapterId)
+                if (response.isSuccessful) {
+                    loadBook(bookId)
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to delete chapter") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun ignoreChapter(bookId: String, chapterId: String, reason: String? = null) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val request = com.gatishil.studyengine.data.remote.dto.IgnoreChapterRequestDto(reason)
+                val response = api.ignoreChapterByBookId(bookId, chapterId, request)
+                if (response.isSuccessful) {
+                    loadBook(bookId)
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to ignore chapter") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun unignoreChapter(bookId: String, chapterId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val response = api.unignoreChapterByBookId(bookId, chapterId)
+                if (response.isSuccessful) {
+                    loadBook(bookId)
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to include chapter") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun updateStudyPlan(
+        studyPlanId: String,
+        startDate: String,
+        endDate: String,
+        recurrenceRule: com.gatishil.studyengine.data.remote.dto.CreateRecurrenceRuleRequestDto? = null
+    ) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val request = com.gatishil.studyengine.data.remote.dto.UpdateStudyPlanRequestDto(
+                    startDate = startDate,
+                    endDate = endDate,
+                    recurrenceRule = recurrenceRule
+                )
+                val response = api.updateStudyPlan(studyPlanId, request)
+                if (response.isSuccessful) {
+                    _uiState.update { it.copy(successMessageResId = R.string.study_plan_updated_success) }
+                    _uiState.value.book?.let { loadBook(it.id) }
+                } else {
+                    val errorBody = response.errorBody()?.string() ?: response.message()
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to update plan: $errorBody") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun updateChapter(
+        bookId: String,
+        chapterId: String,
+        title: String,
+        startPage: Int,
+        endPage: Int,
+        orderIndex: Int
+    ) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val request = com.gatishil.studyengine.data.remote.dto.UpdateChapterRequestDto(
+                    title = title,
+                    startPage = startPage,
+                    endPage = endPage,
+                    orderIndex = orderIndex
+                )
+                val response = api.updateChapterByBookId(bookId, chapterId, request)
+                if (response.isSuccessful) {
+                    loadBook(bookId)
+                } else {
+                    val errorBody = response.errorBody()?.string() ?: response.message()
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to update chapter: $errorBody") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }

@@ -115,9 +115,8 @@ fun StudyEngineApp(isLoggedIn: Boolean) {
             if (showBottomBar) {
                 NavigationBar {
                     BottomNavItem.entries.forEach { navItem ->
-                        val selected = currentDestination?.hierarchy?.any {
-                            it.route == navItem.route
-                        } == true
+                        // Simple route matching - check if current route matches nav item route
+                        val selected = currentDestination?.route == navItem.route
 
                         NavigationBarItem(
                             icon = {
@@ -134,12 +133,14 @@ fun StudyEngineApp(isLoggedIn: Boolean) {
                             label = { Text(stringResource(navItem.titleResId)) },
                             selected = selected,
                             onClick = {
-                                navController.navigate(navItem.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                                if (!selected) {
+                                    navController.navigate(navItem.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
                             }
                         )

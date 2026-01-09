@@ -158,6 +158,48 @@ class AvailabilityViewModel @Inject constructor(
         }
     }
 
+    fun updateAvailability(
+        id: String,
+        dayOfWeek: java.time.DayOfWeek,
+        startTime: java.time.LocalTime,
+        endTime: java.time.LocalTime
+    ) {
+        if (endTime <= startTime) {
+            _uiState.update { it.copy(error = "End time must be after start time") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            try {
+                val dayOfWeekValue = when (dayOfWeek.value) {
+                    7 -> 0  // Sunday
+                    else -> dayOfWeek.value
+                }
+
+                val request = CreateUserAvailabilityRequestDto(
+                    dayOfWeek = dayOfWeekValue,
+                    startTime = startTime.format(timeFormatter),
+                    endTime = endTime.format(timeFormatter)
+                )
+
+                val response = api.updateAvailability(id, request)
+                if (response.isSuccessful) {
+                    loadAvailabilities()
+                } else {
+                    val errorBody = response.errorBody()?.string() ?: response.message()
+                    _uiState.update {
+                        it.copy(isLoading = false, error = "Failed to update: $errorBody")
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(isLoading = false, error = e.message ?: "Unknown error")
+                }
+            }
+        }
+    }
+
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }

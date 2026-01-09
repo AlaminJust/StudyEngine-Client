@@ -49,6 +49,12 @@
     <string name="unignore_chapter">Include Chapter</string>
     <string name="ignore_reason">Reason (optional)</string>
     <string name="effective_pages">Effective pages: %1$d</string>
+    <string name="ignore">Ignore</string>
+    <string name="unignore">Include</string>
+    <string name="delete_chapter">Delete Chapter</string>
+    <string name="delete_chapter_message">Are you sure you want to delete the chapter \"%1$s\"? This action cannot be undone.</string>
+    <string name="ignore_chapter_message">Ignoring \"%1$s\" will exclude it from your study plan. The chapter pages won\'t be counted towards your total.</string>
+    <string name="edit_chapter">Edit Chapter</string>
 
     <!-- Study Plan -->
     <string name="study_plan">Study Plan</string>
@@ -80,6 +86,65 @@
     <string name="enter_completed_pages">Enter completed pages</string>
     <string name="notes">Notes (optional)</string>
     <string name="session_time">%1$s - %2$s</string>
+
+    <!-- How Sessions Work -->
+    <string name="how_sessions_work">How Sessions Work</string>
+    <string name="smart_session_scheduling">Smart Session Scheduling</string>
+    <string name="smart_session_scheduling_desc">Learn how StudyEngine creates personalized study sessions based on your availability and goals</string>
+    <string name="session_generation_overview">Session Generation Overview</string>
+    <string name="session_generation_overview_desc">StudyEngine automatically generates study sessions by analyzing your availability, book details, study plan settings, and schedule contexts. The algorithm ensures you get balanced, achievable study goals.</string>
+    <string name="key_factors">Key Factors</string>
+    <string name="tips">Tips</string>
+
+    <!-- Factor 1: Availability -->
+    <string name="factor_availability">Your Study Availability</string>
+    <string name="factor_availability_desc">Sessions are scheduled only during your available time slots. Set realistic times when you can actually focus on studying.</string>
+    <string name="factor_availability_tip1">Add multiple time slots per day for flexibility</string>
+    <string name="factor_availability_tip2">Morning sessions are best for difficult content</string>
+    <string name="factor_availability_tip3">Keep gaps between slots for breaks</string>
+
+    <!-- Factor 2: Book & Chapters -->
+    <string name="factor_book_chapters">Book &amp; Chapters</string>
+    <string name="factor_book_chapters_desc">The total pages, chapter divisions, and book difficulty all influence how pages are distributed across sessions.</string>
+    <string name="factor_book_chapters_tip1">Divide your book into logical chapters</string>
+    <string name="factor_book_chapters_tip2">Ignore chapters you don\'t need to study</string>
+    <string name="factor_book_chapters_tip3">Higher difficulty = fewer pages per session</string>
+
+    <!-- Factor 3: Study Plan -->
+    <string name="factor_study_plan">Study Plan Settings</string>
+    <string name="factor_study_plan_desc">Your study plan\'s start date, end date, and recurrence pattern determine when and how often sessions are created.</string>
+    <string name="factor_study_plan_tip1">Set realistic end dates based on page count</string>
+    <string name="factor_study_plan_tip2">Daily recurrence creates consistent habits</string>
+    <string name="factor_study_plan_tip3">Weekly patterns work well for multiple subjects</string>
+
+    <!-- Factor 4: Schedule Context -->
+    <string name="factor_schedule_context">Schedule Contexts</string>
+    <string name="factor_schedule_context_desc">Exam periods, vacations, or intensive study times adjust the load multiplier, affecting how much you study each day.</string>
+    <string name="factor_schedule_context_tip1">Set exam periods to increase study intensity</string>
+    <string name="factor_schedule_context_tip2">Mark vacation times to reduce/pause sessions</string>
+    <string name="factor_schedule_context_tip3">Load multiplier 150% = 50% more pages</string>
+
+    <!-- Algorithm Steps -->
+    <string name="how_algorithm_works">How The Algorithm Works</string>
+    <string name="algorithm_step1_title">Collect Available Slots</string>
+    <string name="algorithm_step1_desc">Gathers your weekly availability and filters by study plan recurrence days.</string>
+    <string name="algorithm_step2_title">Calculate Daily Capacity</string>
+    <string name="algorithm_step2_desc">Determines total study time and adjusts based on book difficulty and priority.</string>
+    <string name="algorithm_step3_title">Apply Modifiers</string>
+    <string name="algorithm_step3_desc">Applies schedule context multipliers and checks for schedule overrides.</string>
+    <string name="algorithm_step4_title">Generate Sessions</string>
+    <string name="algorithm_step4_desc">Creates balanced sessions with appropriate page ranges for each time slot.</string>
+
+    <!-- Best Practices -->
+    <string name="best_practices">Best Practices</string>
+    <string name="best_practice_1">Set up your availability before creating study plans</string>
+    <string name="best_practice_2">Add chapters to your books for better page distribution</string>
+    <string name="best_practice_3">Mark exam periods to automatically increase study load</string>
+    <string name="best_practice_4">Use schedule overrides for one-off changes instead of editing availability</string>
+    <string name="best_practice_5">Complete sessions on time to maintain accurate progress tracking</string>
+    <string name="session_warning">Sessions are generated when you activate a study plan. Changes to availability or schedule contexts may not affect already-generated sessions.</string>
+    <string name="no_sessions_today_desc">Create a study plan and set your availability to start generating sessions</string>
+    <string name="learn_how_sessions_work">Learn How Sessions Work</string>
 
     <!-- Session Status -->
     <string name="status_planned">Planned</string>
@@ -140,12 +205,15 @@
 
     <string name="what_will_happen">What will happen:</string>
     <string name="create_new_plan">Create New Plan</string>
+    <string name="edit_study_plan">Edit Study Plan</string>
+    <string name="update_plan">Update Plan</string>
 
     <!-- Study Plan Success Messages -->
     <string name="study_plan_resumed_success">Study plan resumed successfully! New sessions will be scheduled.</string>
     <string name="study_plan_paused_success">Study plan paused. You can resume anytime.</string>
     <string name="study_plan_completed_success">🎉 Congratulations! Study plan completed successfully!</string>
     <string name="study_plan_deleted_success">Study plan deleted.</string>
+    <string name="study_plan_updated_success">Study plan updated successfully!</string>
 
     <!-- Days of Week -->
     <string name="sunday">Sunday</string>

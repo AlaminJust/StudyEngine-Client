@@ -411,8 +411,10 @@ private fun BookCard(
                 .padding(12.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
-                // Subject badge
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Subject badge at top
                 Surface(
                     shape = MaterialTheme.shapes.small,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
@@ -425,12 +427,37 @@ private fun BookCard(
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
+
+                // Book title
                 Text(
                     text = book.title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 2
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Book icon centered below title
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Surface(
+                        shape = MaterialTheme.shapes.medium,
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                                contentDescription = null,
+                                modifier = Modifier.size(28.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
             }
 
             Column {
@@ -442,13 +469,13 @@ private fun BookCard(
                     PriorityIndicator(priority = book.priority)
                     DifficultyIndicator(difficulty = book.difficulty)
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                        imageVector = Icons.Default.Description,
                         contentDescription = null,
                         modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant

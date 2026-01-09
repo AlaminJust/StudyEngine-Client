@@ -120,6 +120,23 @@ fun BookDetailScreen(
                             viewModel.deleteStudyPlan(plan.id)
                         }
                     },
+                    onEditStudyPlan = { startDate, endDate ->
+                        uiState.book?.studyPlan?.let { plan ->
+                            viewModel.updateStudyPlan(plan.id, startDate, endDate)
+                        }
+                    },
+                    onEditChapter = { chapter, title, startPage, endPage, orderIndex ->
+                        viewModel.updateChapter(bookId, chapter.id, title, startPage, endPage, orderIndex)
+                    },
+                    onDeleteChapter = { chapter ->
+                        viewModel.deleteChapter(bookId, chapter.id)
+                    },
+                    onIgnoreChapter = { chapter ->
+                        viewModel.ignoreChapter(bookId, chapter.id)
+                    },
+                    onUnignoreChapter = { chapter ->
+                        viewModel.unignoreChapter(bookId, chapter.id)
+                    },
                     modifier = Modifier.padding(paddingValues)
                 )
             }
@@ -163,6 +180,11 @@ private fun BookDetailContent(
     onPauseStudyPlan: () -> Unit = {},
     onCompleteStudyPlan: () -> Unit = {},
     onDeleteStudyPlan: () -> Unit = {},
+    onEditStudyPlan: (startDate: String, endDate: String) -> Unit = { _, _ -> },
+    onEditChapter: (Chapter, title: String, startPage: Int, endPage: Int, orderIndex: Int) -> Unit = { _, _, _, _, _ -> },
+    onDeleteChapter: (Chapter) -> Unit = {},
+    onIgnoreChapter: (Chapter) -> Unit = {},
+    onUnignoreChapter: (Chapter) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -183,7 +205,8 @@ private fun BookDetailContent(
                 onActivate = onActivateStudyPlan,
                 onPause = onPauseStudyPlan,
                 onComplete = onCompleteStudyPlan,
-                onDelete = onDeleteStudyPlan
+                onDelete = onDeleteStudyPlan,
+                onEdit = onEditStudyPlan
             )
         }
 
@@ -220,7 +243,15 @@ private fun BookDetailContent(
             }
         } else {
             items(book.chapters) { chapter ->
-                ChapterItem(chapter)
+                ChapterItem(
+                    chapter = chapter,
+                    onEdit = { title, startPage, endPage, orderIndex ->
+                        onEditChapter(chapter, title, startPage, endPage, orderIndex)
+                    },
+                    onDelete = { onDeleteChapter(chapter) },
+                    onIgnore = { onIgnoreChapter(chapter) },
+                    onUnignore = { onUnignoreChapter(chapter) }
+                )
             }
         }
 
@@ -320,12 +351,14 @@ private fun StudyPlanCard(
     onActivate: () -> Unit = {},
     onPause: () -> Unit = {},
     onComplete: () -> Unit = {},
-    onDelete: () -> Unit = {}
+    onDelete: () -> Unit = {},
+    onEdit: (startDate: String, endDate: String) -> Unit = { _, _ -> }
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showPauseDialog by remember { mutableStateOf(false) }
     var showCompleteDialog by remember { mutableStateOf(false) }
     var showActivateDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
 
     StudyCard {
         Row(
@@ -408,6 +441,25 @@ private fun StudyPlanCard(
 
             // Action buttons based on status
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Edit button row (for ACTIVE and PAUSED states)
+            if (plan.status == com.gatishil.studyengine.domain.model.StudyPlanStatus.ACTIVE ||
+                plan.status == com.gatishil.studyengine.domain.model.StudyPlanStatus.PAUSED) {
+                OutlinedButton(
+                    onClick = { showEditDialog = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(R.string.edit_study_plan),
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -418,17 +470,25 @@ private fun StudyPlanCard(
                             onClick = { showPauseDialog = true },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Pause, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Pause")
+                            Text(
+                                text = stringResource(R.string.pause_plan),
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
                         Button(
                             onClick = { showCompleteDialog = true },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Complete")
+                            Text(
+                                text = stringResource(R.string.complete_plan),
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
                     }
                     com.gatishil.studyengine.domain.model.StudyPlanStatus.PAUSED -> {
@@ -436,9 +496,13 @@ private fun StudyPlanCard(
                             onClick = { showActivateDialog = true },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Resume")
+                            Text(
+                                text = stringResource(R.string.resume_plan),
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
                         OutlinedButton(
                             onClick = { showDeleteDialog = true },
@@ -447,9 +511,13 @@ private fun StudyPlanCard(
                                 contentColor = MaterialTheme.colorScheme.error
                             )
                         ) {
-                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Delete")
+                            Text(
+                                text = stringResource(R.string.delete_plan),
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
                     }
                     com.gatishil.studyengine.domain.model.StudyPlanStatus.COMPLETED -> {
@@ -457,9 +525,13 @@ private fun StudyPlanCard(
                             onClick = onCreatePlan,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Create New Plan")
+                            Text(
+                                text = stringResource(R.string.create_new_plan),
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
                     }
                     else -> {
@@ -470,9 +542,13 @@ private fun StudyPlanCard(
                                 contentColor = MaterialTheme.colorScheme.error
                             )
                         ) {
-                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Delete Plan")
+                            Text(
+                                text = stringResource(R.string.delete_plan),
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
                     }
                 }
@@ -591,6 +667,19 @@ private fun StudyPlanCard(
             onDismiss = { showDeleteDialog = false }
         )
     }
+
+    // Edit Study Plan Dialog
+    if (showEditDialog && book.studyPlan != null) {
+        EditStudyPlanDialog(
+            currentStartDate = book.studyPlan.startDate,
+            currentEndDate = book.studyPlan.endDate,
+            onConfirm = { startDate, endDate ->
+                onEdit(startDate, endDate)
+                showEditDialog = false
+            },
+            onDismiss = { showEditDialog = false }
+        )
+    }
 }
 
 @Composable
@@ -671,8 +760,193 @@ private fun StudyPlanActionDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ChapterItem(chapter: Chapter) {
+private fun EditStudyPlanDialog(
+    currentStartDate: java.time.LocalDate,
+    currentEndDate: java.time.LocalDate,
+    onConfirm: (startDate: String, endDate: String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var startDate by remember { mutableStateOf(currentStartDate) }
+    var endDate by remember { mutableStateOf(currentEndDate) }
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
+
+    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("MMM d, yyyy")
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
+        },
+        title = {
+            Text(
+                text = stringResource(R.string.edit_study_plan),
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Start Date
+                OutlinedCard(
+                    onClick = { showStartDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = stringResource(R.string.start_date),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = startDate.format(dateFormatter),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                // End Date
+                OutlinedCard(
+                    onClick = { showEndDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = stringResource(R.string.end_date),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = endDate.format(dateFormatter),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                // Validation message
+                if (endDate <= startDate) {
+                    Text(
+                        text = "End date must be after start date",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm(
+                        startDate.format(java.time.format.DateTimeFormatter.ISO_DATE),
+                        endDate.format(java.time.format.DateTimeFormatter.ISO_DATE)
+                    )
+                },
+                enabled = endDate > startDate
+            ) {
+                Text(stringResource(R.string.update_plan))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+
+    // Start Date Picker
+    if (showStartDatePicker) {
+        val state = rememberDatePickerState(
+            initialSelectedDateMillis = startDate.toEpochDay() * 24 * 60 * 60 * 1000
+        )
+        DatePickerDialog(
+            onDismissRequest = { showStartDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    state.selectedDateMillis?.let {
+                        startDate = java.time.LocalDate.ofEpochDay(it / (24 * 60 * 60 * 1000))
+                    }
+                    showStartDatePicker = false
+                }) { Text(stringResource(R.string.ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStartDatePicker = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) { DatePicker(state = state) }
+    }
+
+    // End Date Picker
+    if (showEndDatePicker) {
+        val state = rememberDatePickerState(
+            initialSelectedDateMillis = endDate.toEpochDay() * 24 * 60 * 60 * 1000
+        )
+        DatePickerDialog(
+            onDismissRequest = { showEndDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    state.selectedDateMillis?.let {
+                        endDate = java.time.LocalDate.ofEpochDay(it / (24 * 60 * 60 * 1000))
+                    }
+                    showEndDatePicker = false
+                }) { Text(stringResource(R.string.ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndDatePicker = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) { DatePicker(state = state) }
+    }
+}
+
+@Composable
+private fun ChapterItem(
+    chapter: Chapter,
+    onEdit: (title: String, startPage: Int, endPage: Int, orderIndex: Int) -> Unit = { _, _, _, _ -> },
+    onDelete: () -> Unit = {},
+    onIgnore: () -> Unit = {},
+    onUnignore: () -> Unit = {}
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showIgnoreDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -718,13 +992,254 @@ private fun ChapterItem(chapter: Chapter) {
                 )
             }
 
-            IconButton(onClick = { /* TODO: Chapter menu */ }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = stringResource(R.string.more)
-                )
+            Box {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.more)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.edit)) },
+                        onClick = {
+                            showMenu = false
+                            showEditDialog = true
+                        },
+                        leadingIcon = {
+                            Icon(Icons.Default.Edit, contentDescription = null)
+                        }
+                    )
+
+                    if (chapter.isIgnored) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.unignore)) },
+                            onClick = {
+                                showMenu = false
+                                onUnignore()
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.Visibility, contentDescription = null)
+                            }
+                        )
+                    } else {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.ignore)) },
+                            onClick = {
+                                showMenu = false
+                                showIgnoreDialog = true
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.VisibilityOff, contentDescription = null)
+                            }
+                        )
+                    }
+
+                    HorizontalDivider()
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                stringResource(R.string.delete),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        },
+                        onClick = {
+                            showMenu = false
+                            showDeleteDialog = true
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    )
+                }
             }
         }
     }
+
+    // Delete Confirmation Dialog
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            icon = {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
+            title = { Text(stringResource(R.string.delete_chapter)) },
+            text = {
+                Text(stringResource(R.string.delete_chapter_message, chapter.title))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDelete()
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    // Ignore Confirmation Dialog
+    if (showIgnoreDialog) {
+        AlertDialog(
+            onDismissRequest = { showIgnoreDialog = false },
+            icon = {
+                Icon(
+                    Icons.Default.VisibilityOff,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.tertiary
+                )
+            },
+            title = { Text(stringResource(R.string.ignore_chapter)) },
+            text = {
+                Text(stringResource(R.string.ignore_chapter_message, chapter.title))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onIgnore()
+                        showIgnoreDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.ignore))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showIgnoreDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    // Edit Chapter Dialog
+    if (showEditDialog) {
+        EditChapterDialog(
+            chapter = chapter,
+            onConfirm = { title, startPage, endPage, orderIndex ->
+                onEdit(title, startPage, endPage, orderIndex)
+                showEditDialog = false
+            },
+            onDismiss = { showEditDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun EditChapterDialog(
+    chapter: Chapter,
+    onConfirm: (title: String, startPage: Int, endPage: Int, orderIndex: Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var title by remember { mutableStateOf(chapter.title) }
+    var startPage by remember { mutableStateOf(chapter.startPage.toString()) }
+    var endPage by remember { mutableStateOf(chapter.endPage.toString()) }
+
+    val isValid = title.isNotBlank() &&
+                  startPage.toIntOrNull() != null &&
+                  endPage.toIntOrNull() != null &&
+                  (startPage.toIntOrNull() ?: 0) <= (endPage.toIntOrNull() ?: 0)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                Icons.Default.Edit,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
+        },
+        title = { Text(stringResource(R.string.edit_chapter)) },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text(stringResource(R.string.chapter_title)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = startPage,
+                        onValueChange = { startPage = it.filter { c -> c.isDigit() } },
+                        label = { Text(stringResource(R.string.start_page)) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                        )
+                    )
+
+                    OutlinedTextField(
+                        value = endPage,
+                        onValueChange = { endPage = it.filter { c -> c.isDigit() } },
+                        label = { Text(stringResource(R.string.end_page)) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                        )
+                    )
+                }
+
+                if (!isValid && title.isNotBlank()) {
+                    Text(
+                        text = "Please enter valid page numbers (start <= end)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm(
+                        title,
+                        startPage.toIntOrNull() ?: chapter.startPage,
+                        endPage.toIntOrNull() ?: chapter.endPage,
+                        chapter.orderIndex
+                    )
+                },
+                enabled = isValid
+            ) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 

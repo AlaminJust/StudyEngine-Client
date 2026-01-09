@@ -164,7 +164,16 @@ fun StudyEngineNavGraph(
             TodaySessionsScreen(
                 onNavigateToSession = { sessionId ->
                     navController.navigate(Screen.SessionDetail.createRoute(sessionId))
+                },
+                onNavigateToHowItWorks = {
+                    navController.navigate(Screen.HowSessionsWork.route)
                 }
+            )
+        }
+
+        composable(route = Screen.HowSessionsWork.route) {
+            com.gatishil.studyengine.presentation.screens.sessions.HowSessionsWorkScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

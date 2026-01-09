@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -22,6 +23,7 @@ import com.gatishil.studyengine.R
 @Composable
 fun TodaySessionsScreen(
     onNavigateToSession: (String) -> Unit,
+    onNavigateToHowItWorks: () -> Unit = {},
     viewModel: TodaySessionsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -32,7 +34,15 @@ fun TodaySessionsScreen(
                 title = { Text(stringResource(R.string.today_sessions)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
-                )
+                ),
+                actions = {
+                    IconButton(onClick = onNavigateToHowItWorks) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                            contentDescription = stringResource(R.string.how_sessions_work)
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -54,7 +64,7 @@ fun TodaySessionsScreen(
                     )
                 }
                 uiState.sessions.isEmpty() -> {
-                    EmptySessionsState()
+                    EmptySessionsState(onLearnMore = onNavigateToHowItWorks)
                 }
                 else -> {
                     LazyColumn(
@@ -76,7 +86,7 @@ fun TodaySessionsScreen(
 }
 
 @Composable
-private fun EmptySessionsState() {
+private fun EmptySessionsState(onLearnMore: () -> Unit = {}) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -97,6 +107,21 @@ private fun EmptySessionsState() {
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Text(
+                text = stringResource(R.string.no_sessions_today_desc),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            OutlinedButton(onClick = onLearnMore) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.learn_how_sessions_work))
+            }
         }
     }
 }
