@@ -280,7 +280,7 @@ private fun QuickStatsGrid(stats: StudyStats) {
                     .weight(1f)
                     .fillMaxHeight(),
                 icon = Icons.Default.Timer,
-                value = String.format("%.1f", stats.totalHoursStudied),
+                value = String.format(Locale.US, "%.1f", stats.totalHoursStudied),
                 label = stringResource(R.string.hours_studied)
             )
         }
@@ -638,15 +638,15 @@ private fun LifetimeStatsCard(stats: StudyStats) {
             )
             LifetimeStat(
                 label = stringResource(R.string.avg_pages_per_session),
-                value = String.format("%.1f", stats.averagePagesPerSession)
+                value = String.format(Locale.US, "%.1f", stats.averagePagesPerSession)
             )
             LifetimeStat(
                 label = stringResource(R.string.avg_minutes_per_session),
-                value = String.format("%.0f min", stats.averageMinutesPerSession)
+                value = String.format(Locale.US, "%.0f min", stats.averageMinutesPerSession)
             )
             LifetimeStat(
                 label = stringResource(R.string.avg_pages_per_day),
-                value = String.format("%.1f", stats.averagePagesPerDay)
+                value = String.format(Locale.US, "%.1f", stats.averagePagesPerDay)
             )
         }
     }
@@ -697,7 +697,9 @@ private fun AchievementCard(achievement: Achievement) {
     }
 
     Card(
-        modifier = Modifier.width(140.dp),
+        modifier = Modifier
+            .width(140.dp)
+            .height(130.dp), // Fixed height for all cards
         colors = CardDefaults.cardColors(
             containerColor = if (achievement.isAchieved) {
                 MaterialTheme.colorScheme.primaryContainer
@@ -708,23 +710,37 @@ private fun AchievementCard(achievement: Achievement) {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = achievementIcon,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(4.dp),
-                tint = if (achievement.isAchieved) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            // Icon with lock overlay for unachieved
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(44.dp)
+            ) {
+                Icon(
+                    imageVector = achievementIcon,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = if (achievement.isAchieved) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                    }
+                )
+                if (!achievement.isAchieved) {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(18.dp)
+                            .align(Alignment.BottomEnd),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
                 }
-            )
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = achievement.title,
@@ -732,21 +748,13 @@ private fun AchievementCard(achievement: Achievement) {
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
+                maxLines = 2,
                 color = if (achievement.isAchieved) {
                     MaterialTheme.colorScheme.onPrimaryContainer
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 }
             )
-            if (!achievement.isAchieved) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
-            }
         }
     }
 }
