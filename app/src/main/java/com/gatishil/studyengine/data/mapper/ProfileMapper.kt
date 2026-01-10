@@ -94,6 +94,50 @@ object ProfileMapper {
         )
     }
 
+    fun toAcademicProfileDomain(dto: UserAcademicProfileDto): UserAcademicProfile {
+        return UserAcademicProfile(
+            role = dto.role,
+            roleDescription = dto.roleDescription,
+            academicLevel = dto.academicLevel,
+            currentClass = dto.currentClass,
+            major = dto.major,
+            department = dto.department,
+            studentType = dto.studentType,
+            studentId = dto.studentId,
+            academicYear = dto.academicYear,
+            currentSemester = dto.currentSemester,
+            enrollmentDate = dto.enrollmentDate,
+            expectedGraduationDate = dto.expectedGraduationDate,
+            institution = dto.institution?.let { toInstitutionInfoDomain(it) },
+            teachingSubjects = dto.teachingSubjects,
+            qualifications = dto.qualifications,
+            yearsOfExperience = dto.yearsOfExperience,
+            bio = dto.bio,
+            researchInterests = dto.researchInterests,
+            socialLinks = dto.socialLinks?.let { toSocialLinksDomain(it) },
+            isVerified = dto.isVerified,
+            verifiedAt = dto.verifiedAt
+        )
+    }
+
+    fun toInstitutionInfoDomain(dto: InstitutionInfoDto): InstitutionInfo {
+        return InstitutionInfo(
+            name = dto.name,
+            type = dto.type,
+            country = dto.country,
+            city = dto.city,
+            state = dto.state
+        )
+    }
+
+    fun toSocialLinksDomain(dto: SocialLinksDto): SocialLinks {
+        return SocialLinks(
+            website = dto.website,
+            linkedIn = dto.linkedIn,
+            gitHub = dto.gitHub
+        )
+    }
+
     private fun parseDateTime(dateString: String): LocalDateTime {
         return try {
             LocalDateTime.parse(dateString, dateTimeFormatter)

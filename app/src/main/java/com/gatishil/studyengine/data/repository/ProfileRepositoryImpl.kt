@@ -264,5 +264,160 @@ class ProfileRepositoryImpl @Inject constructor(
             Resource.error(e, e.message)
         }
     }
+
+    // ==================== Academic Profile ====================
+
+    override fun getAcademicProfile(): Flow<Resource<UserAcademicProfile>> = flow {
+        emit(Resource.loading())
+        try {
+            val response = api.getAcademicProfile()
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    emit(Resource.success(ProfileMapper.toAcademicProfileDomain(dto)))
+                } ?: emit(Resource.error(Exception("Empty response body")))
+            } else {
+                emit(Resource.error(
+                    Exception("Failed to get academic profile: ${response.code()}"),
+                    response.message()
+                ))
+            }
+        } catch (e: Exception) {
+            emit(Resource.error(e, e.message))
+        }
+    }
+
+    override suspend fun updateAcademicBasicInfo(
+        role: String,
+        roleDescription: String?,
+        bio: String?
+    ): Resource<UserAcademicProfile> {
+        return try {
+            val response = api.updateAcademicBasicInfo(
+                UpdateAcademicBasicInfoRequestDto(role, roleDescription, bio)
+            )
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(ProfileMapper.toAcademicProfileDomain(dto))
+                } ?: Resource.error(Exception("Empty response body"))
+            } else {
+                Resource.error(
+                    Exception("Failed to update academic info: ${response.code()}"),
+                    response.message()
+                )
+            }
+        } catch (e: Exception) {
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun updateStudentInfo(
+        academicLevel: String?,
+        currentClass: String?,
+        major: String?,
+        department: String?,
+        studentType: String?,
+        studentId: String?,
+        academicYear: Int?,
+        currentSemester: String?,
+        enrollmentDate: String?,
+        expectedGraduationDate: String?
+    ): Resource<UserAcademicProfile> {
+        return try {
+            val response = api.updateStudentInfo(
+                UpdateStudentInfoRequestDto(
+                    academicLevel, currentClass, major, department,
+                    studentType, studentId, academicYear, currentSemester,
+                    enrollmentDate, expectedGraduationDate
+                )
+            )
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(ProfileMapper.toAcademicProfileDomain(dto))
+                } ?: Resource.error(Exception("Empty response body"))
+            } else {
+                Resource.error(
+                    Exception("Failed to update student info: ${response.code()}"),
+                    response.message()
+                )
+            }
+        } catch (e: Exception) {
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun updateInstitutionInfo(
+        name: String,
+        type: String,
+        country: String,
+        city: String?,
+        state: String?
+    ): Resource<UserAcademicProfile> {
+        return try {
+            val response = api.updateInstitutionInfo(
+                UpdateInstitutionInfoRequestDto(name, type, country, city, state)
+            )
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(ProfileMapper.toAcademicProfileDomain(dto))
+                } ?: Resource.error(Exception("Empty response body"))
+            } else {
+                Resource.error(
+                    Exception("Failed to update institution info: ${response.code()}"),
+                    response.message()
+                )
+            }
+        } catch (e: Exception) {
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun updateTeachingInfo(
+        teachingSubjects: String?,
+        qualifications: String?,
+        yearsOfExperience: Int?
+    ): Resource<UserAcademicProfile> {
+        return try {
+            val response = api.updateTeachingInfo(
+                UpdateTeachingInfoRequestDto(teachingSubjects, qualifications, yearsOfExperience)
+            )
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(ProfileMapper.toAcademicProfileDomain(dto))
+                } ?: Resource.error(Exception("Empty response body"))
+            } else {
+                Resource.error(
+                    Exception("Failed to update teaching info: ${response.code()}"),
+                    response.message()
+                )
+            }
+        } catch (e: Exception) {
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun updateSocialLinks(
+        researchInterests: String?,
+        website: String?,
+        linkedIn: String?,
+        gitHub: String?
+    ): Resource<UserAcademicProfile> {
+        return try {
+            val response = api.updateSocialLinks(
+                UpdateSocialLinksRequestDto(researchInterests, website, linkedIn, gitHub)
+            )
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(ProfileMapper.toAcademicProfileDomain(dto))
+                } ?: Resource.error(Exception("Empty response body"))
+            } else {
+                Resource.error(
+                    Exception("Failed to update social links: ${response.code()}"),
+                    response.message()
+                )
+            }
+        } catch (e: Exception) {
+            Resource.error(e, e.message)
+        }
+    }
 }
 

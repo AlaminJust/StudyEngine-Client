@@ -58,6 +58,9 @@ sealed class Screen(val route: String) {
 
     // Stats
     data object Stats : Screen("stats")
+
+    // Academic
+    data object Academic : Screen("academic")
 }
 
 /**

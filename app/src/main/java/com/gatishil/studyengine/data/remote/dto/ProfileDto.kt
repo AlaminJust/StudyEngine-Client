@@ -201,3 +201,117 @@ data class PublicStudySummaryDto(
     @SerialName("achievementsUnlocked") val achievementsUnlocked: Int
 )
 
+// ==================== Academic Profile DTOs ====================
+
+/**
+ * Academic profile information
+ */
+@Serializable
+data class UserAcademicProfileDto(
+    @SerialName("role") val role: String,
+    @SerialName("roleDescription") val roleDescription: String?,
+    @SerialName("academicLevel") val academicLevel: String?,
+    @SerialName("currentClass") val currentClass: String?,
+    @SerialName("major") val major: String?,
+    @SerialName("department") val department: String?,
+    @SerialName("studentType") val studentType: String?,
+    @SerialName("studentId") val studentId: String?,
+    @SerialName("academicYear") val academicYear: Int?,
+    @SerialName("currentSemester") val currentSemester: String?,
+    @SerialName("enrollmentDate") val enrollmentDate: String?,
+    @SerialName("expectedGraduationDate") val expectedGraduationDate: String?,
+    @SerialName("institution") val institution: InstitutionInfoDto?,
+    @SerialName("teachingSubjects") val teachingSubjects: String?,
+    @SerialName("qualifications") val qualifications: String?,
+    @SerialName("yearsOfExperience") val yearsOfExperience: Int?,
+    @SerialName("bio") val bio: String?,
+    @SerialName("researchInterests") val researchInterests: String?,
+    @SerialName("socialLinks") val socialLinks: SocialLinksDto?,
+    @SerialName("isVerified") val isVerified: Boolean,
+    @SerialName("verifiedAt") val verifiedAt: String?
+)
+
+/**
+ * Institution information
+ */
+@Serializable
+data class InstitutionInfoDto(
+    @SerialName("name") val name: String,
+    @SerialName("type") val type: String,
+    @SerialName("country") val country: String,
+    @SerialName("city") val city: String?,
+    @SerialName("state") val state: String?
+)
+
+/**
+ * Social and professional links
+ */
+@Serializable
+data class SocialLinksDto(
+    @SerialName("website") val website: String?,
+    @SerialName("linkedIn") val linkedIn: String?,
+    @SerialName("gitHub") val gitHub: String?
+)
+
+// ==================== Academic Request DTOs ====================
+
+/**
+ * Update academic basic info
+ */
+@Serializable
+data class UpdateAcademicBasicInfoRequestDto(
+    @SerialName("role") val role: String,
+    @SerialName("roleDescription") val roleDescription: String?,
+    @SerialName("bio") val bio: String?
+)
+
+/**
+ * Update student information
+ */
+@Serializable
+data class UpdateStudentInfoRequestDto(
+    @SerialName("academicLevel") val academicLevel: String?,
+    @SerialName("currentClass") val currentClass: String?,
+    @SerialName("major") val major: String?,
+    @SerialName("department") val department: String?,
+    @SerialName("studentType") val studentType: String?,
+    @SerialName("studentId") val studentId: String?,
+    @SerialName("academicYear") val academicYear: Int?,
+    @SerialName("currentSemester") val currentSemester: String?,
+    @SerialName("enrollmentDate") val enrollmentDate: String?,
+    @SerialName("expectedGraduationDate") val expectedGraduationDate: String?
+)
+
+/**
+ * Update institution information
+ */
+@Serializable
+data class UpdateInstitutionInfoRequestDto(
+    @SerialName("InstitutionName") val institutionName: String,
+    @SerialName("InstitutionType") val institutionType: String,
+    @SerialName("InstitutionCountry") val institutionCountry: String,
+    @SerialName("InstitutionCity") val institutionCity: String?,
+    @SerialName("InstitutionState") val institutionState: String?
+)
+
+/**
+ * Update teaching information
+ */
+@Serializable
+data class UpdateTeachingInfoRequestDto(
+    @SerialName("teachingSubjects") val teachingSubjects: String?,
+    @SerialName("qualifications") val qualifications: String?,
+    @SerialName("yearsOfExperience") val yearsOfExperience: Int?
+)
+
+/**
+ * Update social links
+ */
+@Serializable
+data class UpdateSocialLinksRequestDto(
+    @SerialName("researchInterests") val researchInterests: String?,
+    @SerialName("website") val website: String?,
+    @SerialName("linkedIn") val linkedIn: String?,
+    @SerialName("gitHub") val gitHub: String?
+)
+

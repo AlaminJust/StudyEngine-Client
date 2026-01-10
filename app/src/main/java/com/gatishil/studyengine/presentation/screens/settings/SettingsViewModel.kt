@@ -14,6 +14,8 @@ data class SettingsUiState(
     val language: String = SettingsPreferences.LANGUAGE_ENGLISH,
     val notificationsEnabled: Boolean = true,
     val reminderMinutes: Int = 15,
+    val streakRemindersEnabled: Boolean = true,
+    val achievementNotificationsEnabled: Boolean = true,
     val isLoading: Boolean = false
 )
 
@@ -39,13 +41,17 @@ class SettingsViewModel @Inject constructor(
                 settingsPreferences.getThemeMode(),
                 settingsPreferences.getLanguage(),
                 settingsPreferences.isNotificationEnabled(),
-                settingsPreferences.getReminderMinutesBefore()
-            ) { theme, language, notifications, reminder ->
+                settingsPreferences.getReminderMinutesBefore(),
+                settingsPreferences.isStreakRemindersEnabled(),
+                settingsPreferences.isAchievementNotificationsEnabled()
+            ) { values: Array<Any> ->
                 SettingsUiState(
-                    themeMode = theme,
-                    language = language,
-                    notificationsEnabled = notifications,
-                    reminderMinutes = reminder
+                    themeMode = values[0] as String,
+                    language = values[1] as String,
+                    notificationsEnabled = values[2] as Boolean,
+                    reminderMinutes = values[3] as Int,
+                    streakRemindersEnabled = values[4] as Boolean,
+                    achievementNotificationsEnabled = values[5] as Boolean
                 )
             }.collect { state ->
                 _uiState.update { state }
@@ -74,6 +80,18 @@ class SettingsViewModel @Inject constructor(
     fun setReminderMinutes(minutes: Int) {
         viewModelScope.launch {
             settingsPreferences.setReminderMinutesBefore(minutes)
+        }
+    }
+
+    fun setStreakRemindersEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsPreferences.setStreakRemindersEnabled(enabled)
+        }
+    }
+
+    fun setAchievementNotificationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsPreferences.setAchievementNotificationsEnabled(enabled)
         }
     }
 

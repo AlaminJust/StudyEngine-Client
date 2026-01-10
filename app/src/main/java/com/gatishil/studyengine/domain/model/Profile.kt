@@ -91,3 +91,50 @@ data class PrivacySettings(
     val showStatsPublicly: Boolean
 )
 
+/**
+ * Academic profile domain model
+ */
+data class UserAcademicProfile(
+    val role: String,
+    val roleDescription: String?,
+    val academicLevel: String?,
+    val currentClass: String?,
+    val major: String?,
+    val department: String?,
+    val studentType: String?,
+    val studentId: String?,
+    val academicYear: Int?,
+    val currentSemester: String?,
+    val enrollmentDate: String?,
+    val expectedGraduationDate: String?,
+    val institution: InstitutionInfo?,
+    val teachingSubjects: String?,
+    val qualifications: String?,
+    val yearsOfExperience: Int?,
+    val bio: String?,
+    val researchInterests: String?,
+    val socialLinks: SocialLinks?,
+    val isVerified: Boolean,
+    val verifiedAt: String?
+)
+
+/**
+ * Institution information
+ */
+data class InstitutionInfo(
+    val name: String,
+    val type: String,
+    val country: String,
+    val city: String?,
+    val state: String?
+)
+
+/**
+ * Social and professional links
+ */
+data class SocialLinks(
+    val website: String?,
+    val linkedIn: String?,
+    val gitHub: String?
+)
+

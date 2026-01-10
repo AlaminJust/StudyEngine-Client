@@ -89,5 +89,67 @@ interface ProfileRepository {
      * Delete account permanently
      */
     suspend fun deleteAccount(confirmationPhrase: String): Resource<Boolean>
+
+    // ==================== Academic Profile ====================
+
+    /**
+     * Get academic profile
+     */
+    fun getAcademicProfile(): Flow<Resource<UserAcademicProfile>>
+
+    /**
+     * Update academic basic info
+     */
+    suspend fun updateAcademicBasicInfo(
+        role: String,
+        roleDescription: String?,
+        bio: String?
+    ): Resource<UserAcademicProfile>
+
+    /**
+     * Update student info
+     */
+    suspend fun updateStudentInfo(
+        academicLevel: String?,
+        currentClass: String?,
+        major: String?,
+        department: String?,
+        studentType: String?,
+        studentId: String?,
+        academicYear: Int?,
+        currentSemester: String?,
+        enrollmentDate: String?,
+        expectedGraduationDate: String?
+    ): Resource<UserAcademicProfile>
+
+    /**
+     * Update institution info
+     */
+    suspend fun updateInstitutionInfo(
+        name: String,
+        type: String,
+        country: String,
+        city: String?,
+        state: String?
+    ): Resource<UserAcademicProfile>
+
+    /**
+     * Update teaching info
+     */
+    suspend fun updateTeachingInfo(
+        teachingSubjects: String?,
+        qualifications: String?,
+        yearsOfExperience: Int?
+    ): Resource<UserAcademicProfile>
+
+    /**
+     * Update social links
+     */
+    suspend fun updateSocialLinks(
+        researchInterests: String?,
+        website: String?,
+        linkedIn: String?,
+        gitHub: String?
+    ): Resource<UserAcademicProfile>
 }
 

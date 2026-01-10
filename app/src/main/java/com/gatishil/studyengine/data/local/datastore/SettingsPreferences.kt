@@ -26,6 +26,8 @@ class SettingsPreferences @Inject constructor(
         private val LANGUAGE_CODE = stringPreferencesKey("language_code")
         private val NOTIFICATION_ENABLED = booleanPreferencesKey("notification_enabled")
         private val REMINDER_MINUTES_BEFORE = intPreferencesKey("reminder_minutes_before")
+        private val STREAK_REMINDERS_ENABLED = booleanPreferencesKey("streak_reminders_enabled")
+        private val ACHIEVEMENT_NOTIFICATIONS_ENABLED = booleanPreferencesKey("achievement_notifications_enabled")
 
         // Theme modes
         const val THEME_SYSTEM = "system"
@@ -81,6 +83,26 @@ class SettingsPreferences @Inject constructor(
 
     fun getReminderMinutesBefore(): Flow<Int> = dataStore.data.map { preferences ->
         preferences[REMINDER_MINUTES_BEFORE] ?: 15
+    }
+
+    suspend fun setStreakRemindersEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[STREAK_REMINDERS_ENABLED] = enabled
+        }
+    }
+
+    fun isStreakRemindersEnabled(): Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[STREAK_REMINDERS_ENABLED] ?: true
+    }
+
+    suspend fun setAchievementNotificationsEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[ACHIEVEMENT_NOTIFICATIONS_ENABLED] = enabled
+        }
+    }
+
+    fun isAchievementNotificationsEnabled(): Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[ACHIEVEMENT_NOTIFICATIONS_ENABLED] ?: true
     }
 }
 

@@ -1,8 +1,11 @@
 package com.gatishil.studyengine.presentation.screens.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -11,13 +14,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.gatishil.studyengine.data.local.datastore.SettingsPreferences
-import kotlinx.coroutines.flow.collectLatest
 import com.gatishil.studyengine.R
+import com.gatishil.studyengine.data.local.datastore.SettingsPreferences
+import com.gatishil.studyengine.ui.theme.StudyEngineTheme
+import kotlinx.coroutines.flow.collectLatest
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -34,6 +43,8 @@ fun SettingsScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showSignOutDialog by remember { mutableStateOf(false) }
+    var showNotificationDialog by remember { mutableStateOf(false) }
+    var showReminderDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.signOutEvent.collectLatest {
@@ -45,9 +56,6 @@ fun SettingsScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.settings)) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
                 windowInsets = WindowInsets(0.dp)
             )
         }
@@ -56,362 +64,488 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(vertical = 8.dp)
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Profile section
+            // Profile Card
             item {
-                SettingsSectionHeader(title = stringResource(R.string.profile))
+                ProfileSettingsCard(onNavigateToProfile = onNavigateToProfile)
             }
 
+            // Appearance Section
             item {
-                SettingsItem(
-                    icon = Icons.Default.Person,
-                    title = stringResource(R.string.profile),
-                    subtitle = "Manage your account",
-                    onClick = onNavigateToProfile
-                )
-            }
-
-            // Appearance section
-            item {
-                SettingsSectionHeader(title = stringResource(R.string.appearance))
-            }
-
-            item {
-                val themeLabel = when (uiState.themeMode) {
-                    SettingsPreferences.THEME_LIGHT -> stringResource(R.string.theme_light)
-                    SettingsPreferences.THEME_DARK -> stringResource(R.string.theme_dark)
-                    else -> stringResource(R.string.theme_system)
-                }
-
-                SettingsItem(
+                SettingsCard(
+                    title = stringResource(R.string.appearance),
                     icon = Icons.Default.Palette,
-                    title = stringResource(R.string.theme),
-                    subtitle = themeLabel,
-                    onClick = { showThemeDialog = true }
-                )
-            }
+                    iconBackgroundColor = MaterialTheme.colorScheme.primary
+                ) {
+                    val themeLabel = when (uiState.themeMode) {
+                        SettingsPreferences.THEME_LIGHT -> stringResource(R.string.theme_light)
+                        SettingsPreferences.THEME_DARK -> stringResource(R.string.theme_dark)
+                        else -> stringResource(R.string.theme_system)
+                    }
+                    SettingsCardItem(
+                        icon = Icons.Default.DarkMode,
+                        iconColor = MaterialTheme.colorScheme.tertiary,
+                        title = stringResource(R.string.theme),
+                        value = themeLabel,
+                        onClick = { showThemeDialog = true }
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(start = 48.dp))
 
-            item {
-                val languageLabel = when (uiState.language) {
-                    SettingsPreferences.LANGUAGE_BENGALI -> stringResource(R.string.bengali)
-                    else -> stringResource(R.string.english)
-                }
-
-                SettingsItem(
-                    icon = Icons.Default.Language,
-                    title = stringResource(R.string.language),
-                    subtitle = languageLabel,
-                    onClick = { showLanguageDialog = true }
-                )
-            }
-
-            // Schedule section
-            item {
-                SettingsSectionHeader(title = stringResource(R.string.schedule_management))
-            }
-
-            item {
-                SettingsItem(
-                    icon = Icons.Default.Schedule,
-                    title = stringResource(R.string.study_availability),
-                    subtitle = stringResource(R.string.study_availability_desc),
-                    onClick = onNavigateToAvailability
-                )
-            }
-
-            item {
-                SettingsItem(
-                    icon = Icons.Default.EventBusy,
-                    title = stringResource(R.string.schedule_overrides),
-                    subtitle = stringResource(R.string.schedule_overrides_desc),
-                    onClick = onNavigateToScheduleOverrides
-                )
-            }
-
-            item {
-                SettingsItem(
-                    icon = Icons.Default.CalendarMonth,
-                    title = stringResource(R.string.schedule_contexts),
-                    subtitle = stringResource(R.string.schedule_contexts_desc),
-                    onClick = onNavigateToScheduleContexts
-                )
-            }
-
-            // Notifications section
-            item {
-                SettingsSectionHeader(title = stringResource(R.string.notifications))
-            }
-
-            item {
-                SettingsSwitchItem(
-                    icon = Icons.Default.Notifications,
-                    title = stringResource(R.string.enable_notifications),
-                    checked = uiState.notificationsEnabled,
-                    onCheckedChange = viewModel::setNotificationsEnabled
-                )
-            }
-
-            if (uiState.notificationsEnabled) {
-                item {
-                    SettingsItem(
-                        icon = Icons.Default.AccessTime,
-                        title = stringResource(R.string.reminder_before),
-                        subtitle = stringResource(R.string.minutes_before, uiState.reminderMinutes),
-                        onClick = { /* TODO: Show reminder picker */ }
+                    val languageLabel = when (uiState.language) {
+                        SettingsPreferences.LANGUAGE_BENGALI -> stringResource(R.string.bengali)
+                        else -> stringResource(R.string.english)
+                    }
+                    SettingsCardItem(
+                        icon = Icons.Default.Language,
+                        iconColor = StudyEngineTheme.extendedColors.success,
+                        title = stringResource(R.string.language),
+                        value = languageLabel,
+                        onClick = { showLanguageDialog = true }
                     )
                 }
             }
 
-            // About section
+            // Schedule Section
             item {
-                SettingsSectionHeader(title = stringResource(R.string.about))
+                SettingsCard(
+                    title = stringResource(R.string.schedule_management),
+                    icon = Icons.Default.CalendarMonth,
+                    iconBackgroundColor = MaterialTheme.colorScheme.secondary
+                ) {
+                    SettingsCardItem(
+                        icon = Icons.Default.Schedule,
+                        iconColor = MaterialTheme.colorScheme.primary,
+                        title = stringResource(R.string.study_availability),
+                        onClick = onNavigateToAvailability
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(start = 48.dp))
+                    SettingsCardItem(
+                        icon = Icons.Default.EventBusy,
+                        iconColor = MaterialTheme.colorScheme.error,
+                        title = stringResource(R.string.schedule_overrides),
+                        onClick = onNavigateToScheduleOverrides
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(start = 48.dp))
+                    SettingsCardItem(
+                        icon = Icons.Default.Tune,
+                        iconColor = MaterialTheme.colorScheme.tertiary,
+                        title = stringResource(R.string.schedule_contexts),
+                        onClick = onNavigateToScheduleContexts
+                    )
+                }
             }
 
+            // Notifications Section
             item {
-                SettingsItem(
-                    icon = Icons.Default.Info,
+                SettingsCard(
+                    title = stringResource(R.string.notifications),
+                    icon = Icons.Default.Notifications,
+                    iconBackgroundColor = StudyEngineTheme.extendedColors.sessionInProgress
+                ) {
+                    SettingsCardSwitchItem(
+                        icon = Icons.Default.NotificationsActive,
+                        iconColor = StudyEngineTheme.extendedColors.success,
+                        title = stringResource(R.string.session_reminders),
+                        subtitle = stringResource(R.string.get_reminded_before_session),
+                        checked = uiState.notificationsEnabled,
+                        onCheckedChange = viewModel::setNotificationsEnabled
+                    )
+
+                    if (uiState.notificationsEnabled) {
+                        HorizontalDivider(modifier = Modifier.padding(start = 48.dp))
+                        SettingsCardItem(
+                            icon = Icons.Default.Timer,
+                            iconColor = MaterialTheme.colorScheme.primary,
+                            title = stringResource(R.string.reminder_time),
+                            value = "${uiState.reminderMinutes} min before",
+                            onClick = { showReminderDialog = true }
+                        )
+                    }
+
+                    HorizontalDivider(modifier = Modifier.padding(start = 48.dp))
+                    SettingsCardSwitchItem(
+                        icon = Icons.Default.Bolt,
+                        iconColor = MaterialTheme.colorScheme.tertiary,
+                        title = stringResource(R.string.streak_reminders),
+                        subtitle = stringResource(R.string.dont_break_streak),
+                        checked = uiState.streakRemindersEnabled,
+                        onCheckedChange = viewModel::setStreakRemindersEnabled
+                    )
+
+                    HorizontalDivider(modifier = Modifier.padding(start = 48.dp))
+                    SettingsCardSwitchItem(
+                        icon = Icons.Default.EmojiEvents,
+                        iconColor = StudyEngineTheme.extendedColors.sessionCompleted,
+                        title = stringResource(R.string.achievement_notifications),
+                        subtitle = stringResource(R.string.celebrate_achievements),
+                        checked = uiState.achievementNotificationsEnabled,
+                        onCheckedChange = viewModel::setAchievementNotificationsEnabled
+                    )
+                }
+            }
+
+            // About Section
+            item {
+                SettingsCard(
                     title = stringResource(R.string.about),
-                    subtitle = stringResource(R.string.version, "1.0.0"),
-                    onClick = { /* TODO: Show about screen */ }
-                )
+                    icon = Icons.Default.Info,
+                    iconBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    SettingsCardItem(
+                        icon = Icons.Default.Code,
+                        iconColor = MaterialTheme.colorScheme.primary,
+                        title = stringResource(R.string.version),
+                        value = "1.0.0",
+                        onClick = { }
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(start = 48.dp))
+                    SettingsCardItem(
+                        icon = Icons.Default.Policy,
+                        iconColor = MaterialTheme.colorScheme.secondary,
+                        title = stringResource(R.string.privacy_policy),
+                        onClick = { }
+                    )
+                }
             }
 
-            // Sign out
+            // Sign Out
             item {
-                Spacer(modifier = Modifier.height(16.dp))
-                Divider(modifier = Modifier.padding(horizontal = 16.dp))
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            item {
-                SettingsItem(
-                    icon = Icons.AutoMirrored.Filled.ExitToApp,
-                    title = stringResource(R.string.sign_out),
-                    subtitle = null,
-                    onClick = { showSignOutDialog = true },
-                    tint = MaterialTheme.colorScheme.error
-                )
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showSignOutDialog = true }
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = stringResource(R.string.sign_out),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             }
         }
     }
 
-    // Theme selection dialog
+    // Theme Dialog
     if (showThemeDialog) {
         AlertDialog(
             onDismissRequest = { showThemeDialog = false },
             title = { Text(stringResource(R.string.theme)) },
             text = {
                 Column {
-                    ThemeOption(
-                        text = stringResource(R.string.theme_system),
-                        selected = uiState.themeMode == SettingsPreferences.THEME_SYSTEM,
-                        onClick = {
-                            viewModel.setThemeMode(SettingsPreferences.THEME_SYSTEM)
-                            showThemeDialog = false
-                        }
-                    )
-                    ThemeOption(
-                        text = stringResource(R.string.theme_light),
-                        selected = uiState.themeMode == SettingsPreferences.THEME_LIGHT,
-                        onClick = {
-                            viewModel.setThemeMode(SettingsPreferences.THEME_LIGHT)
-                            showThemeDialog = false
-                        }
-                    )
-                    ThemeOption(
-                        text = stringResource(R.string.theme_dark),
-                        selected = uiState.themeMode == SettingsPreferences.THEME_DARK,
-                        onClick = {
-                            viewModel.setThemeMode(SettingsPreferences.THEME_DARK)
-                            showThemeDialog = false
-                        }
-                    )
+                    ThemeOption(stringResource(R.string.theme_system), uiState.themeMode == SettingsPreferences.THEME_SYSTEM) {
+                        viewModel.setThemeMode(SettingsPreferences.THEME_SYSTEM); showThemeDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.theme_light), uiState.themeMode == SettingsPreferences.THEME_LIGHT) {
+                        viewModel.setThemeMode(SettingsPreferences.THEME_LIGHT); showThemeDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.theme_dark), uiState.themeMode == SettingsPreferences.THEME_DARK) {
+                        viewModel.setThemeMode(SettingsPreferences.THEME_DARK); showThemeDialog = false
+                    }
                 }
             },
-            confirmButton = {
-                TextButton(onClick = { showThemeDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            confirmButton = { TextButton(onClick = { showThemeDialog = false }) { Text(stringResource(R.string.cancel)) } }
         )
     }
 
-    // Language selection dialog
+    // Language Dialog
     if (showLanguageDialog) {
         AlertDialog(
             onDismissRequest = { showLanguageDialog = false },
             title = { Text(stringResource(R.string.language)) },
             text = {
                 Column {
-                    ThemeOption(
-                        text = stringResource(R.string.english),
-                        selected = uiState.language == SettingsPreferences.LANGUAGE_ENGLISH,
-                        onClick = {
-                            viewModel.setLanguage(SettingsPreferences.LANGUAGE_ENGLISH)
-                            showLanguageDialog = false
-                        }
-                    )
-                    ThemeOption(
-                        text = stringResource(R.string.bengali),
-                        selected = uiState.language == SettingsPreferences.LANGUAGE_BENGALI,
-                        onClick = {
-                            viewModel.setLanguage(SettingsPreferences.LANGUAGE_BENGALI)
-                            showLanguageDialog = false
-                        }
-                    )
+                    ThemeOption(stringResource(R.string.english), uiState.language == SettingsPreferences.LANGUAGE_ENGLISH) {
+                        viewModel.setLanguage(SettingsPreferences.LANGUAGE_ENGLISH); showLanguageDialog = false
+                    }
+                    ThemeOption(stringResource(R.string.bengali), uiState.language == SettingsPreferences.LANGUAGE_BENGALI) {
+                        viewModel.setLanguage(SettingsPreferences.LANGUAGE_BENGALI); showLanguageDialog = false
+                    }
                 }
             },
-            confirmButton = {
-                TextButton(onClick = { showLanguageDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            confirmButton = { TextButton(onClick = { showLanguageDialog = false }) { Text(stringResource(R.string.cancel)) } }
         )
     }
 
-    // Sign out confirmation dialog
+    // Reminder Dialog
+    if (showReminderDialog) {
+        val options = listOf(5, 10, 15, 30, 60)
+        AlertDialog(
+            onDismissRequest = { showReminderDialog = false },
+            title = { Text(stringResource(R.string.reminder_time)) },
+            text = {
+                Column {
+                    options.forEach { minutes ->
+                        ThemeOption("$minutes minutes before", uiState.reminderMinutes == minutes) {
+                            viewModel.setReminderMinutes(minutes); showReminderDialog = false
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showReminderDialog = false }) { Text(stringResource(R.string.cancel)) } }
+        )
+    }
+
+    // Sign Out Dialog
     if (showSignOutDialog) {
         AlertDialog(
             onDismissRequest = { showSignOutDialog = false },
             title = { Text(stringResource(R.string.sign_out)) },
-            text = { Text("Are you sure you want to sign out?") },
+            text = { Text(stringResource(R.string.sign_out_confirm)) },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        showSignOutDialog = false
-                        viewModel.signOut()
-                    },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text(stringResource(R.string.sign_out))
+                TextButton(onClick = { viewModel.signOut(); showSignOutDialog = false }) {
+                    Text(stringResource(R.string.sign_out), color = MaterialTheme.colorScheme.error)
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showSignOutDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            dismissButton = { TextButton(onClick = { showSignOutDialog = false }) { Text(stringResource(R.string.cancel)) } }
         )
     }
 }
 
 @Composable
-private fun SettingsSectionHeader(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-    )
+private fun ProfileSettingsCard(onNavigateToProfile: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.tertiary
+                        )
+                    )
+                )
+                .clickable { onNavigateToProfile() }
+                .padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color.White.copy(alpha = 0.2f),
+                        modifier = Modifier.size(56.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                    Column {
+                        Text(
+                            text = stringResource(R.string.profile),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Text(
+                            text = stringResource(R.string.manage_account),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
 }
 
 @Composable
-private fun SettingsItem(
-    icon: ImageVector,
+private fun SettingsCard(
     title: String,
-    subtitle: String?,
-    onClick: () -> Unit,
-    tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface
+    icon: ImageVector,
+    iconBackgroundColor: Color,
+    content: @Composable ColumnScope.() -> Unit
 ) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        color = MaterialTheme.colorScheme.surface
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = tint.copy(alpha = 0.7f)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(bottom = 12.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = iconBackgroundColor.copy(alpha = 0.15f),
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = iconBackgroundColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = tint
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
                 )
-                subtitle?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            content()
         }
     }
 }
 
 @Composable
-private fun SettingsSwitchItem(
+private fun SettingsCardItem(
     icon: ImageVector,
+    iconColor: Color,
     title: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f)
-            )
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange
-            )
-        }
-    }
-}
-
-@Composable
-private fun ThemeOption(
-    text: String,
-    selected: Boolean,
+    value: String? = null,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable { onClick() }
             .padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(
-            selected = selected,
-            onClick = onClick
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(22.dp)
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (value != null) {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsCardSwitchItem(
+    icon: ImageVector,
+    iconColor: Color,
+    title: String,
+    subtitle: String? = null,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(22.dp)
+            )
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                if (subtitle != null) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text)
+    }
+}
+
+@Composable
+private fun ThemeOption(text: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = text, style = MaterialTheme.typography.bodyLarge)
+        RadioButton(selected = selected, onClick = onClick)
     }
 }
 

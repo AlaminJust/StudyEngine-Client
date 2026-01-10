@@ -414,5 +414,35 @@ interface StudyEngineApi {
     suspend fun deleteAccount(
         @Body request: DeleteAccountRequestDto
     ): Response<MessageResponseDto>
+
+    // ==================== Academic Profile Endpoints ====================
+
+    @GET("profile/academic")
+    suspend fun getAcademicProfile(): Response<UserAcademicProfileDto>
+
+    @PUT("profile/academic/basic")
+    suspend fun updateAcademicBasicInfo(
+        @Body request: UpdateAcademicBasicInfoRequestDto
+    ): Response<UserAcademicProfileDto>
+
+    @PUT("profile/academic/student")
+    suspend fun updateStudentInfo(
+        @Body request: UpdateStudentInfoRequestDto
+    ): Response<UserAcademicProfileDto>
+
+    @PUT("profile/academic/institution")
+    suspend fun updateInstitutionInfo(
+        @Body request: UpdateInstitutionInfoRequestDto
+    ): Response<UserAcademicProfileDto>
+
+    @PUT("profile/academic/teaching")
+    suspend fun updateTeachingInfo(
+        @Body request: UpdateTeachingInfoRequestDto
+    ): Response<UserAcademicProfileDto>
+
+    @PUT("profile/academic/social")
+    suspend fun updateSocialLinks(
+        @Body request: UpdateSocialLinksRequestDto
+    ): Response<UserAcademicProfileDto>
 }
 

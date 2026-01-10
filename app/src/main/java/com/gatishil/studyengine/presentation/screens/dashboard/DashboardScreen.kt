@@ -39,6 +39,8 @@ fun DashboardScreen(
     onNavigateToUpcomingSessions: () -> Unit,
     onNavigateToStats: () -> Unit,
     onNavigateToAddBook: () -> Unit,
+    onNavigateToProfile: () -> Unit,
+    onNavigateToAcademic: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -76,7 +78,8 @@ fun DashboardScreen(
                     item {
                         DashboardHeader(
                             onStreakClick = onNavigateToStats,
-                            onQuickActionsClick = onNavigateToAddBook
+                            onAcademicClick = onNavigateToAcademic,
+                            onProfileClick = onNavigateToProfile
                         )
                     }
 
@@ -157,7 +160,8 @@ fun DashboardScreen(
 @Composable
 private fun DashboardHeader(
     onStreakClick: () -> Unit = {},
-    onQuickActionsClick: () -> Unit = {}
+    onAcademicClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {}
 ) {
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
@@ -203,7 +207,7 @@ private fun DashboardHeader(
                 .padding(bottom = 12.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Top row: Welcome text and icon
+            // Top row: Welcome text and profile icon
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -224,16 +228,17 @@ private fun DashboardHeader(
                     )
                 }
 
-                // Study icon
+                // Profile icon
                 Surface(
+                    onClick = onProfileClick,
                     shape = RoundedCornerShape(12.dp),
                     color = Color.White.copy(alpha = 0.15f),
                     modifier = Modifier.size(44.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.Default.AutoStories,
-                            contentDescription = null,
+                            imageVector = Icons.Default.Person,
+                            contentDescription = stringResource(R.string.profile),
                             tint = Color.White,
                             modifier = Modifier.size(24.dp)
                         )
@@ -276,7 +281,7 @@ private fun DashboardHeader(
                 }
 
                 Surface(
-                    onClick = onQuickActionsClick,
+                    onClick = onAcademicClick,
                     shape = RoundedCornerShape(20.dp),
                     color = Color.White.copy(alpha = 0.2f),
                     modifier = Modifier.weight(1f)
@@ -287,14 +292,14 @@ private fun DashboardHeader(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.EmojiEvents,
+                            imageVector = Icons.Default.School,
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = stringResource(R.string.quick_actions),
+                            text = stringResource(R.string.academic),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Medium,
                             color = Color.White
