@@ -77,7 +77,7 @@ fun BookDetailScreen(
                         )
                     }
                 },
-                windowInsets = TopAppBarDefaults.windowInsets,
+                windowInsets = WindowInsets(0.dp),
                 actions = {
                     IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(

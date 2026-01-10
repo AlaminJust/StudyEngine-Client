@@ -15,6 +15,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -43,6 +44,7 @@ fun DashboardScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0.dp),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToAddBook,
@@ -60,7 +62,7 @@ fun DashboardScreen(
             onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(bottom = paddingValues.calculateBottomPadding())
         ) {
             if (uiState.isLoading && uiState.todaySessions.isEmpty()) {
                 LoadingScreen()
@@ -157,17 +159,19 @@ private fun DashboardHeader(
     onStreakClick: () -> Unit = {},
     onQuickActionsClick: () -> Unit = {}
 ) {
+    val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
+            .height(140.dp + statusBarHeight)
     ) {
-        // Gradient background as cover image placeholder
+        // Gradient background
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    brush = Brush.linearGradient(
+                    brush = Brush.horizontalGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.primary,
                             MaterialTheme.colorScheme.tertiary
@@ -176,87 +180,96 @@ private fun DashboardHeader(
                 )
         )
 
-        // Study-related decorative elements
+        // Subtle pattern overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    brush = Brush.verticalGradient(
+                    brush = Brush.radialGradient(
                         colors = listOf(
-                            Color.Transparent,
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
+                            Color.White.copy(alpha = 0.1f),
+                            Color.Transparent
                         )
                     )
                 )
         )
 
-        // Content overlay
+        // Content
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(top = statusBarHeight + 4.dp)
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 12.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
+            // Top row: Welcome text and icon
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Column {
                     Text(
                         text = stringResource(R.string.welcome_back),
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = stringResource(R.string.dashboard),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White.copy(alpha = 0.8f)
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.85f)
                     )
                 }
 
-                // Study icon decoration
+                // Study icon
                 Surface(
-                    shape = MaterialTheme.shapes.large,
-                    color = Color.White.copy(alpha = 0.2f),
-                    modifier = Modifier.size(56.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White.copy(alpha = 0.15f),
+                    modifier = Modifier.size(44.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Default.AutoStories,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
             }
 
-            // Motivational text or quick stats
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Bottom row: Quick action chips
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Surface(
                     onClick = onStreakClick,
-                    shape = MaterialTheme.shapes.small,
-                    color = Color.White.copy(alpha = 0.15f)
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color.White.copy(alpha = 0.2f),
+                    modifier = Modifier.weight(1f)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Default.Bolt,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(18.dp)
                         )
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = stringResource(R.string.study_streak),
                             style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Medium,
                             color = Color.White
                         )
                     }
@@ -264,23 +277,26 @@ private fun DashboardHeader(
 
                 Surface(
                     onClick = onQuickActionsClick,
-                    shape = MaterialTheme.shapes.small,
-                    color = Color.White.copy(alpha = 0.15f)
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color.White.copy(alpha = 0.2f),
+                    modifier = Modifier.weight(1f)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Default.EmojiEvents,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(18.dp)
                         )
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = stringResource(R.string.quick_actions),
                             style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Medium,
                             color = Color.White
                         )
                     }
@@ -457,49 +473,135 @@ private fun SessionCard(
         else -> stringResource(R.string.status_planned)
     }
 
-    StudyCard(
-        modifier = modifier,
-        onClick = onClick
+    Card(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = session.bookTitle ?: "Book",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                session.chapterTitle?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "${session.startTime} - ${session.endTime}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = stringResource(R.string.planned_pages, session.plannedPages),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            StatusChip(text = statusLabel, color = statusColor)
-        }
-
-        if (session.isCompleted || session.status == StudySessionStatus.IN_PROGRESS) {
-            Spacer(modifier = Modifier.height(12.dp))
-            AnimatedProgressBar(
-                progress = session.progressPercentage / 100f,
-                color = statusColor
+            // Left accent bar
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(color = statusColor)
             )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = session.bookTitle ?: "Book",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        session.chapterTitle?.let {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = statusColor.copy(alpha = 0.12f)
+                    ) {
+                        Text(
+                            text = statusLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = statusColor,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = "${session.startTime} - ${session.endTime}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.planned_pages, session.plannedPages),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                if (session.isCompleted || session.status == StudySessionStatus.IN_PROGRESS) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        LinearProgressIndicator(
+                            progress = { session.progressPercentage / 100f },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(3.dp)),
+                            color = statusColor,
+                            trackColor = statusColor.copy(alpha = 0.15f)
+                        )
+                        Text(
+                            text = "${session.progressPercentage}%",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = statusColor,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
         }
     }
 }

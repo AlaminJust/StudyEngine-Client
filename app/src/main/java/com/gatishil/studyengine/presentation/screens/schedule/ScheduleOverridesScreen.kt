@@ -50,7 +50,7 @@ fun ScheduleOverridesScreen(
                         )
                     }
                 },
-                windowInsets = TopAppBarDefaults.windowInsets
+                windowInsets = WindowInsets(0.dp)
             )
         },
         floatingActionButton = {

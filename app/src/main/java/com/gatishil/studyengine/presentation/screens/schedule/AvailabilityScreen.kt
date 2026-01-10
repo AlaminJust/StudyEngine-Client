@@ -51,7 +51,7 @@ fun AvailabilityScreen(
                         )
                     }
                 },
-                windowInsets = TopAppBarDefaults.windowInsets
+                windowInsets = WindowInsets(0.dp)
             )
         },
         floatingActionButton = {

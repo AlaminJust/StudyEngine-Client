@@ -39,7 +39,7 @@ fun HowSessionsWorkScreen(
                         )
                     }
                 },
-                windowInsets = TopAppBarDefaults.windowInsets
+                windowInsets = WindowInsets(0.dp)
             )
         }
     ) { paddingValues ->
