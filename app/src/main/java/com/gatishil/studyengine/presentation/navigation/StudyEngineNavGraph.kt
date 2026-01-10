@@ -246,6 +246,13 @@ fun StudyEngineNavGraph(
                 }
             )
         }
+
+        // Profile
+        composable(route = Screen.Profile.route) {
+            com.gatishil.studyengine.presentation.screens.profile.ProfileScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
     }
 }
 

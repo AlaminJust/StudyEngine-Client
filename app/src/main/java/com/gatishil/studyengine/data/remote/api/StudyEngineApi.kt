@@ -355,5 +355,64 @@ interface StudyEngineApi {
 
     @GET("health")
     suspend fun healthCheck(): Response<HealthResponseDto>
+
+    // ==================== Profile Endpoints ====================
+
+    @GET("profile")
+    suspend fun getProfile(): Response<UserProfileDto>
+
+    @PUT("profile")
+    suspend fun updateProfile(
+        @Body request: UpdateProfileRequestDto
+    ): Response<UserProfileDto>
+
+    @GET("profile/public/{userId}")
+    suspend fun getPublicProfile(
+        @Path("userId") userId: String
+    ): Response<PublicProfileDto>
+
+    @GET("profile/preferences")
+    suspend fun getPreferences(): Response<UserPreferencesDto>
+
+    @PUT("profile/preferences/study-goals")
+    suspend fun updateStudyGoals(
+        @Body request: UpdateStudyGoalsRequestDto
+    ): Response<UserPreferencesDto>
+
+    @PUT("profile/preferences/reading-speed")
+    suspend fun updateReadingSpeed(
+        @Body request: UpdateReadingSpeedRequestDto
+    ): Response<UserPreferencesDto>
+
+    @PUT("profile/preferences/session")
+    suspend fun updateSessionPreferences(
+        @Body request: UpdateSessionPreferencesRequestDto
+    ): Response<UserPreferencesDto>
+
+    @PUT("profile/preferences/notifications")
+    suspend fun updateNotificationPreferences(
+        @Body request: UpdateNotificationPreferencesRequestDto
+    ): Response<UserPreferencesDto>
+
+    @PUT("profile/preferences/ui")
+    suspend fun updateUIPreferences(
+        @Body request: UpdateUIPreferencesRequestDto
+    ): Response<UserPreferencesDto>
+
+    @PUT("profile/preferences/privacy")
+    suspend fun updatePrivacySettings(
+        @Body request: UpdatePrivacySettingsRequestDto
+    ): Response<UserPreferencesDto>
+
+    @POST("profile/deactivate")
+    suspend fun deactivateAccount(): Response<MessageResponseDto>
+
+    @POST("profile/reactivate")
+    suspend fun reactivateAccount(): Response<MessageResponseDto>
+
+    @HTTP(method = "DELETE", path = "profile", hasBody = true)
+    suspend fun deleteAccount(
+        @Body request: DeleteAccountRequestDto
+    ): Response<MessageResponseDto>
 }
 

@@ -319,5 +319,25 @@
     <string name="back">পিছনে</string>
     <string name="close">বন্ধ</string>
     <string name="more">আরও</string>
+
+    <!-- Profile -->
+    <string name="study_summary">পড়াশোনার সারসংক্ষেপ</string>
+    <string name="current_streak">বর্তমান ধারা</string>
+    <string name="pages_read">পড়া পৃষ্ঠা</string>
+    <string name="sessions_completed_label">সেশন</string>
+    <string name="study_goals">পড়াশোনার লক্ষ্য</string>
+    <string name="daily_pages_goal">দৈনিক পৃষ্ঠা লক্ষ্য</string>
+    <string name="daily_minutes_goal">দৈনিক মিনিট লক্ষ্য</string>
+    <string name="weekly_study_days">সাপ্তাহিক পড়াশোনার দিন</string>
+    <string name="reading_speed">পড়ার গতি</string>
+    <string name="account_info">অ্যাকাউন্ট তথ্য</string>
+    <string name="email">ইমেইল</string>
+    <string name="auth_provider">প্রমাণীকরণ প্রদানকারী</string>
+    <string name="timezone">সময় অঞ্চল</string>
+    <string name="account_status">অ্যাকাউন্ট স্থিতি</string>
+    <string name="member_for_days">%1$d দিন ধরে সদস্য</string>
+    <string name="edit_name">নাম সম্পাদনা</string>
+    <string name="name">নাম</string>
+    <string name="total_books">মোট</string>
 </resources>
 
