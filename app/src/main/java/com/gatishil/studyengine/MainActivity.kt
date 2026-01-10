@@ -1,9 +1,9 @@
 package com.gatishil.studyengine
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -21,7 +21,6 @@ import androidx.core.animation.doOnEnd
 import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -35,13 +34,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var settingsPreferences: SettingsPreferences
 
     @Inject
     lateinit var authPreferences: AuthPreferences
+
+    companion object {
+        // Track the last language that was applied to prevent recreation loops
+        private var lastAppliedLanguage: String? = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -93,17 +97,39 @@ class MainActivity : ComponentActivity() {
                 .collectAsStateWithLifecycle(initialValue = SettingsPreferences.THEME_SYSTEM)
 
             val language by settingsPreferences.getLanguage()
-                .collectAsStateWithLifecycle(initialValue = SettingsPreferences.LANGUAGE_ENGLISH)
+                .collectAsStateWithLifecycle(initialValue = null)
 
-            // Apply language change using AppCompatDelegate
+            // Handle language change - only apply when it actually changes
             LaunchedEffect(language) {
+                if (language == null) return@LaunchedEffect
+
                 val localeCode = when (language) {
                     SettingsPreferences.LANGUAGE_BENGALI -> "bn"
                     else -> "en"
                 }
-                AppCompatDelegate.setApplicationLocales(
-                    LocaleListCompat.forLanguageTags(localeCode)
-                )
+
+                // Skip if we already applied this language (prevents recreation loop)
+                if (lastAppliedLanguage == localeCode) {
+                    return@LaunchedEffect
+                }
+
+                val currentLocales = AppCompatDelegate.getApplicationLocales()
+                val currentLocale = if (currentLocales.isEmpty) {
+                    resources.configuration.locales[0].language
+                } else {
+                    currentLocales.toLanguageTags().split("-", ",").firstOrNull() ?: "en"
+                }
+
+                // Only set locale if it's actually different
+                if (currentLocale != localeCode) {
+                    lastAppliedLanguage = localeCode
+                    AppCompatDelegate.setApplicationLocales(
+                        LocaleListCompat.forLanguageTags(localeCode)
+                    )
+                } else {
+                    // Update tracking to match current state
+                    lastAppliedLanguage = localeCode
+                }
             }
 
             val darkTheme = when (themeMode) {
