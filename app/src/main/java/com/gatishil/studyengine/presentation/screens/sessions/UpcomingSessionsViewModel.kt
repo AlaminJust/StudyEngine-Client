@@ -18,13 +18,14 @@ data class UpcomingSessionsUiState(
     val sessions: List<StudySession> = emptyList(),
     val groupedSessions: Map<LocalDate, List<StudySession>> = emptyMap(),
     val error: String? = null,
-    val startDate: LocalDate = LocalDate.now().plusDays(1),
+    val startDate: LocalDate = LocalDate.now(),
     val endDate: LocalDate = LocalDate.now().plusDays(30),
-    val selectedFilter: SessionFilter = SessionFilter.ALL
+    val selectedFilter: SessionFilter = SessionFilter.ALL,
+    val showPastSessions: Boolean = false
 )
 
 enum class SessionFilter {
-    ALL, THIS_WEEK, NEXT_WEEK, THIS_MONTH
+    ALL, THIS_WEEK, NEXT_WEEK, THIS_MONTH, PREVIOUS_7_DAYS, PREVIOUS_30_DAYS
 }
 
 @HiltViewModel
@@ -100,20 +101,26 @@ class UpcomingSessionsViewModel @Inject constructor(
 
     fun setFilter(filter: SessionFilter) {
         val today = LocalDate.now()
-        val (newStartDate, newEndDate) = when (filter) {
-            SessionFilter.ALL -> today.plusDays(1) to today.plusDays(30)
+        val (newStartDate, newEndDate, isPast) = when (filter) {
+            SessionFilter.ALL -> Triple(today, today.plusDays(30), false)
             SessionFilter.THIS_WEEK -> {
                 val endOfWeek = today.plusDays((7 - today.dayOfWeek.value).toLong())
-                today.plusDays(1) to endOfWeek
+                Triple(today, endOfWeek, false)
             }
             SessionFilter.NEXT_WEEK -> {
                 val startOfNextWeek = today.plusDays((8 - today.dayOfWeek.value).toLong())
                 val endOfNextWeek = startOfNextWeek.plusDays(6)
-                startOfNextWeek to endOfNextWeek
+                Triple(startOfNextWeek, endOfNextWeek, false)
             }
             SessionFilter.THIS_MONTH -> {
                 val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
-                today.plusDays(1) to endOfMonth
+                Triple(today, endOfMonth, false)
+            }
+            SessionFilter.PREVIOUS_7_DAYS -> {
+                Triple(today.minusDays(7), today.minusDays(1), true)
+            }
+            SessionFilter.PREVIOUS_30_DAYS -> {
+                Triple(today.minusDays(30), today.minusDays(1), true)
             }
         }
 
@@ -121,7 +128,8 @@ class UpcomingSessionsViewModel @Inject constructor(
             it.copy(
                 selectedFilter = filter,
                 startDate = newStartDate,
-                endDate = newEndDate
+                endDate = newEndDate,
+                showPastSessions = isPast
             )
         }
         loadSessions()

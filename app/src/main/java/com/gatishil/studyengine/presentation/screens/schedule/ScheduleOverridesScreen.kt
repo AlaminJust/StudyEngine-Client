@@ -250,7 +250,7 @@ private fun AddOverrideDialog(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Date", style = MaterialTheme.typography.labelSmall)
                         Text(
-                            selectedDate.format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")),
+                            selectedDate.format(DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy")),
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }

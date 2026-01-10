@@ -407,4 +407,33 @@
     <string name="progress">Progress</string>
     <string name="paused">Paused</string>
     <string name="cancelled">Cancelled</string>
+
+    <!-- Sessions Screen -->
+    <string name="session_history">Session History</string>
+    <string name="previous_sessions">Previous Sessions</string>
+    <string name="filter_by">Filter by</string>
+    <string name="filter_last_7_days">Last 7 Days</string>
+    <string name="filter_last_30_days">Last 30 Days</string>
+    <string name="total">Total</string>
+    <string name="missed">Missed</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="no_past_sessions">No Past Sessions</string>
+    <string name="no_past_sessions_desc">You don\'t have any completed sessions in this period.</string>
+
+    <!-- Book Details -->
+    <string name="target_date">Target:</string>
+
+    <!-- Today Sessions -->
+    <string name="pages_to_read">To Read</string>
+    <string name="pages_done">Done</string>
+
+    <!-- Session Details -->
+    <string name="date">Date</string>
+    <string name="minutes">Minutes</string>
+    <string name="planned">Planned</string>
+    <string name="read">Read</string>
+    <string name="add_notes_optional">Add notes (optional)</string>
+    <string name="session_completed_message">Great job! You\'ve completed this study session.</string>
+    <string name="session_missed_message">This session was marked as missed.</string>
+    <string name="session_cancelled_message">This session was cancelled.</string>
 </resources>

@@ -394,7 +394,7 @@ private fun AddContextDialog(
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text("End", style = MaterialTheme.typography.labelSmall)
                             Text(
-                                endDate.format(DateTimeFormatter.ofPattern("MMM d")),
+                                endDate.format(DateTimeFormatter.ofPattern("dd MMM")),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }

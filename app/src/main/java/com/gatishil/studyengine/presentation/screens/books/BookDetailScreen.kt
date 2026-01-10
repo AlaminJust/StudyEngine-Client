@@ -1,6 +1,7 @@
 package com.gatishil.studyengine.presentation.screens.books
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -271,83 +272,148 @@ private fun BookDetailContent(
 
 @Composable
 private fun BookInfoCard(book: Book) {
-    StudyCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = book.title,
-                    style = MaterialTheme.typography.headlineSmall
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+    ) {
+        // Colorful header
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.tertiary
+                        )
+                    )
                 )
-                Text(
-                    text = book.subject,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
+                .padding(20.dp)
         ) {
             Column {
-                Text(
-                    text = stringResource(R.string.total_pages),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = book.effectiveTotalPages.toString(),
-                    style = MaterialTheme.typography.titleLarge
-                )
-            }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = book.title,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = androidx.compose.ui.graphics.Color.White
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = book.subject,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f)
+                        )
+                    }
 
-            Column {
-                Text(
-                    text = stringResource(R.string.chapters),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = book.chapters.size.toString(),
-                    style = MaterialTheme.typography.titleLarge
-                )
+                    // Book icon
+                    Surface(
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+                        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.2f),
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.MenuBook,
+                                contentDescription = null,
+                                tint = androidx.compose.ui.graphics.Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Stats Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    StatItem(
+                        value = book.effectiveTotalPages.toString(),
+                        label = stringResource(R.string.pages)
+                    )
+                    StatItem(
+                        value = book.chapters.size.toString(),
+                        label = stringResource(R.string.chapters)
+                    )
+                    StatItem(
+                        value = when(book.priority) {
+                            3 -> "High"
+                            2 -> "Medium"
+                            else -> "Low"
+                        },
+                        label = stringResource(R.string.priority)
+                    )
+                    StatItem(
+                        value = when(book.difficulty) {
+                            3 -> "Hard"
+                            2 -> "Medium"
+                            else -> "Easy"
+                        },
+                        label = stringResource(R.string.difficulty)
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            PriorityIndicator(priority = book.priority)
-            DifficultyIndicator(difficulty = book.difficulty)
-        }
-
+        // Target date if present
         book.targetEndDate?.let { date ->
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(
-                    imageVector = Icons.Default.Event,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Target: $date",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Event,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = stringResource(R.string.target_date),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = date.toString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun StatItem(value: String, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = androidx.compose.ui.graphics.Color.White
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f)
+        )
     }
 }
 
@@ -780,7 +846,7 @@ private fun EditStudyPlanDialog(
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
 
-    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("MMM d, yyyy")
+    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy")
 
     AlertDialog(
         onDismissRequest = onDismiss,

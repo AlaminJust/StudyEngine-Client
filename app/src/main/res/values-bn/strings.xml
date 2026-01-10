@@ -408,5 +408,34 @@
     <string name="progress">অগ্রগতি</string>
     <string name="paused">বিরতি</string>
     <string name="cancelled">বাতিল</string>
+
+    <!-- Sessions Screen -->
+    <string name="session_history">সেশন ইতিহাস</string>
+    <string name="previous_sessions">আগের সেশন</string>
+    <string name="filter_by">ফিল্টার করুন</string>
+    <string name="filter_last_7_days">শেষ ৭ দিন</string>
+    <string name="filter_last_30_days">শেষ ৩০ দিন</string>
+    <string name="total">মোট</string>
+    <string name="missed">মিস</string>
+    <string name="yesterday">গতকাল</string>
+    <string name="no_past_sessions">কোনো আগের সেশন নেই</string>
+    <string name="no_past_sessions_desc">এই সময়ের মধ্যে আপনার কোনো সম্পূর্ণ সেশন নেই।</string>
+
+    <!-- Book Details -->
+    <string name="target_date">লক্ষ্য:</string>
+
+    <!-- Today Sessions -->
+    <string name="pages_to_read">পড়তে হবে</string>
+    <string name="pages_done">সম্পন্ন</string>
+
+    <!-- Session Details -->
+    <string name="date">তারিখ</string>
+    <string name="minutes">মিনিট</string>
+    <string name="planned">পরিকল্পিত</string>
+    <string name="read">পড়া হয়েছে</string>
+    <string name="add_notes_optional">নোট যোগ করুন (ঐচ্ছিক)</string>
+    <string name="session_completed_message">দারুণ! আপনি এই পড়াশোনার সেশন সম্পন্ন করেছেন।</string>
+    <string name="session_missed_message">এই সেশনটি মিস হিসেবে চিহ্নিত হয়েছে।</string>
+    <string name="session_cancelled_message">এই সেশনটি বাতিল করা হয়েছে।</string>
 </resources>
 

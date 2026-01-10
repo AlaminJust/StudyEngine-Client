@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.core.animation.doOnEnd
 import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -43,8 +44,48 @@ class MainActivity : ComponentActivity() {
     lateinit var authPreferences: AuthPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        // Add splash screen exit animation
+        splashScreen.setOnExitAnimationListener { splashScreenView ->
+            // Create fade out animation
+            val fadeOut = android.animation.ObjectAnimator.ofFloat(
+                splashScreenView.view,
+                android.view.View.ALPHA,
+                1f,
+                0f
+            )
+            fadeOut.interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+            fadeOut.duration = 300L
+
+            // Create scale animation
+            val scaleX = android.animation.ObjectAnimator.ofFloat(
+                splashScreenView.iconView,
+                android.view.View.SCALE_X,
+                1f,
+                1.2f,
+                0f
+            )
+            val scaleY = android.animation.ObjectAnimator.ofFloat(
+                splashScreenView.iconView,
+                android.view.View.SCALE_Y,
+                1f,
+                1.2f,
+                0f
+            )
+            scaleX.interpolator = android.view.animation.AccelerateInterpolator()
+            scaleY.interpolator = android.view.animation.AccelerateInterpolator()
+            scaleX.duration = 400L
+            scaleY.duration = 400L
+
+            // Play animations together
+            val animatorSet = android.animation.AnimatorSet()
+            animatorSet.playTogether(fadeOut, scaleX, scaleY)
+            animatorSet.doOnEnd { splashScreenView.remove() }
+            animatorSet.start()
+        }
+
         enableEdgeToEdge()
 
         setContent {

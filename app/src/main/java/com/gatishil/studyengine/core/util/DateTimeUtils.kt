@@ -11,8 +11,8 @@ import java.util.Locale
  */
 object DateTimeUtils {
 
-    private val dateFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy")
-    private val shortDateFormatter = DateTimeFormatter.ofPattern("MMM dd")
+    private val dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
+    private val shortDateFormatter = DateTimeFormatter.ofPattern("dd MMM")
     private val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
     private val time24Formatter = DateTimeFormatter.ofPattern("HH:mm")
 
