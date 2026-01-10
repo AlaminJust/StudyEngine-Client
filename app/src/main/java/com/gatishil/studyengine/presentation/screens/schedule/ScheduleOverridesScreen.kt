@@ -50,6 +50,10 @@ fun ScheduleOverridesScreen(
                         )
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
                 windowInsets = WindowInsets(0.dp)
             )
         },

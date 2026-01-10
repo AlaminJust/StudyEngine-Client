@@ -8,9 +8,9 @@ val OnPrimaryLight = Color(0xFFFFFFFF)
 val PrimaryContainerLight = Color(0xFFD1E4FF)
 val OnPrimaryContainerLight = Color(0xFF001D36)
 
-val PrimaryDark = Color(0xFFA6C8FF)
-val OnPrimaryDark = Color(0xFF003060)
-val PrimaryContainerDark = Color(0xFF004788)
+val PrimaryDark = Color(0xFF9ECAFF)
+val OnPrimaryDark = Color(0xFF003258)
+val PrimaryContainerDark = Color(0xFF00497D)
 val OnPrimaryContainerDark = Color(0xFFD1E4FF)
 
 // Secondary colors - Teal for accents
@@ -19,9 +19,9 @@ val OnSecondaryLight = Color(0xFFFFFFFF)
 val SecondaryContainerLight = Color(0xFFB2DFDB)
 val OnSecondaryContainerLight = Color(0xFF002021)
 
-val SecondaryDark = Color(0xFF80CBC4)
-val OnSecondaryDark = Color(0xFF003734)
-val SecondaryContainerDark = Color(0xFF00504B)
+val SecondaryDark = Color(0xFF4DB6AC)
+val OnSecondaryDark = Color(0xFF00363D)
+val SecondaryContainerDark = Color(0xFF004F4A)
 val OnSecondaryContainerDark = Color(0xFFB2DFDB)
 
 // Tertiary colors - Amber for highlights
@@ -30,7 +30,7 @@ val OnTertiaryLight = Color(0xFFFFFFFF)
 val TertiaryContainerLight = Color(0xFFFFE0B2)
 val OnTertiaryContainerLight = Color(0xFF2B1700)
 
-val TertiaryDark = Color(0xFFFFCC80)
+val TertiaryDark = Color(0xFFFFB74D)
 val OnTertiaryDark = Color(0xFF462A00)
 val TertiaryContainerDark = Color(0xFF654000)
 val OnTertiaryContainerDark = Color(0xFFFFE0B2)
@@ -46,7 +46,7 @@ val OnErrorDark = Color(0xFF690005)
 val ErrorContainerDark = Color(0xFF93000A)
 val OnErrorContainerDark = Color(0xFFFFDAD6)
 
-// Background and Surface colors
+// Background and Surface colors - Professional dark theme
 val BackgroundLight = Color(0xFFFDFBFF)
 val OnBackgroundLight = Color(0xFF1A1C1E)
 val SurfaceLight = Color(0xFFFDFBFF)
@@ -54,19 +54,34 @@ val OnSurfaceLight = Color(0xFF1A1C1E)
 val SurfaceVariantLight = Color(0xFFE0E2EC)
 val OnSurfaceVariantLight = Color(0xFF43474E)
 
-val BackgroundDark = Color(0xFF1A1C1E)
-val OnBackgroundDark = Color(0xFFE3E2E6)
-val SurfaceDark = Color(0xFF1A1C1E)
-val OnSurfaceDark = Color(0xFFE3E2E6)
-val SurfaceVariantDark = Color(0xFF43474E)
-val OnSurfaceVariantDark = Color(0xFFC3C6CF)
+// Dark mode - refined dark theme with slight blue tint for modern look
+val BackgroundDark = Color(0xFF111318)
+val OnBackgroundDark = Color(0xFFE2E2E6)
+val SurfaceDark = Color(0xFF111318)
+val OnSurfaceDark = Color(0xFFE2E2E6)
+val SurfaceVariantDark = Color(0xFF42474E)
+val OnSurfaceVariantDark = Color(0xFFC2C6D0)
+
+// Additional surface colors for dark mode layering
+val SurfaceContainerLowestDark = Color(0xFF0C0E13)
+val SurfaceContainerLowDark = Color(0xFF191C20)
+val SurfaceContainerDark = Color(0xFF1D2024)
+val SurfaceContainerHighDark = Color(0xFF272A2F)
+val SurfaceContainerHighestDark = Color(0xFF32353A)
+
+// Additional surface colors for light mode layering
+val SurfaceContainerLowestLight = Color(0xFFFFFFFF)
+val SurfaceContainerLowLight = Color(0xFFF7F8FA)
+val SurfaceContainerLight = Color(0xFFF1F3F5)
+val SurfaceContainerHighLight = Color(0xFFEBEDF0)
+val SurfaceContainerHighestLight = Color(0xFFE5E7EB)
 
 // Outline colors
 val OutlineLight = Color(0xFF73777F)
 val OutlineVariantLight = Color(0xFFC3C6CF)
 
-val OutlineDark = Color(0xFF8D9199)
-val OutlineVariantDark = Color(0xFF43474E)
+val OutlineDark = Color(0xFF8C9199)
+val OutlineVariantDark = Color(0xFF42474E)
 
 // Status colors
 val SuccessLight = Color(0xFF2E7D32)

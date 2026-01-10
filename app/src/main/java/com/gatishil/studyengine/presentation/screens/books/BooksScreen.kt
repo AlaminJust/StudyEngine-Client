@@ -42,6 +42,10 @@ fun BooksScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.my_books)) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
                 windowInsets = WindowInsets(0.dp)
             )
         },

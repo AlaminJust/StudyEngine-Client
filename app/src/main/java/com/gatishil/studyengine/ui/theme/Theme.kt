@@ -41,7 +41,13 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = SurfaceVariantLight,
     onSurfaceVariant = OnSurfaceVariantLight,
     outline = OutlineLight,
-    outlineVariant = OutlineVariantLight
+    outlineVariant = OutlineVariantLight,
+    // Surface containers for proper layering
+    surfaceContainerLowest = SurfaceContainerLowestLight,
+    surfaceContainerLow = SurfaceContainerLowLight,
+    surfaceContainer = SurfaceContainerLight,
+    surfaceContainerHigh = SurfaceContainerHighLight,
+    surfaceContainerHighest = SurfaceContainerHighestLight
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -68,7 +74,13 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = SurfaceVariantDark,
     onSurfaceVariant = OnSurfaceVariantDark,
     outline = OutlineDark,
-    outlineVariant = OutlineVariantDark
+    outlineVariant = OutlineVariantDark,
+    // Additional surface containers for proper dark mode layering
+    surfaceContainerLowest = SurfaceContainerLowestDark,
+    surfaceContainerLow = SurfaceContainerLowDark,
+    surfaceContainer = SurfaceContainerDark,
+    surfaceContainerHigh = SurfaceContainerHighDark,
+    surfaceContainerHighest = SurfaceContainerHighestDark
 )
 
 /**
@@ -153,8 +165,15 @@ fun StudyEngineTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.surface.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            // For edge-to-edge, use transparent colors and let the content draw behind
+            @Suppress("DEPRECATION")
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+            @Suppress("DEPRECATION")
+            window.navigationBarColor = colorScheme.surface.toArgb()
+            // Set status bar icons to light/dark based on theme
+            val insetsController = WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 
