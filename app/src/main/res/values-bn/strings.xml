@@ -400,5 +400,13 @@
     <string name="celebrate_achievements">আপনার অর্জন উদযাপন করুন</string>
     <string name="privacy_policy">গোপনীয়তা নীতি</string>
     <string name="sign_out_confirm">আপনি কি সাইন আউট করতে চান?</string>
+    <string name="weekly_summary_email">সাপ্তাহিক অগ্রগতি সারসংক্ষেপ পান</string>
+
+    <!-- Books Screen -->
+    <string name="currently_reading">বর্তমানে পড়ছি</string>
+    <string name="all_books">সব বই</string>
+    <string name="progress">অগ্রগতি</string>
+    <string name="paused">বিরতি</string>
+    <string name="cancelled">বাতিল</string>
 </resources>
 

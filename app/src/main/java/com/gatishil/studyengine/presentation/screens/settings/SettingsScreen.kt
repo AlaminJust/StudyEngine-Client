@@ -45,10 +45,17 @@ fun SettingsScreen(
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showNotificationDialog by remember { mutableStateOf(false) }
     var showReminderDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.signOutEvent.collectLatest {
             onSignOut()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.toastEvent.collectLatest { message ->
+            snackbarHostState.showSnackbar(message)
         }
     }
 
@@ -58,7 +65,8 @@ fun SettingsScreen(
                 title = { Text(stringResource(R.string.settings)) },
                 windowInsets = WindowInsets(0.dp)
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -142,7 +150,8 @@ fun SettingsScreen(
                 SettingsCard(
                     title = stringResource(R.string.notifications),
                     icon = Icons.Default.Notifications,
-                    iconBackgroundColor = StudyEngineTheme.extendedColors.sessionInProgress
+                    iconBackgroundColor = StudyEngineTheme.extendedColors.sessionInProgress,
+                    isSyncing = uiState.isSyncing
                 ) {
                     SettingsCardSwitchItem(
                         icon = Icons.Default.NotificationsActive,
@@ -172,6 +181,16 @@ fun SettingsScreen(
                         subtitle = stringResource(R.string.dont_break_streak),
                         checked = uiState.streakRemindersEnabled,
                         onCheckedChange = viewModel::setStreakRemindersEnabled
+                    )
+
+                    HorizontalDivider(modifier = Modifier.padding(start = 48.dp))
+                    SettingsCardSwitchItem(
+                        icon = Icons.Default.Email,
+                        iconColor = MaterialTheme.colorScheme.secondary,
+                        title = stringResource(R.string.weekly_digest),
+                        subtitle = stringResource(R.string.weekly_summary_email),
+                        checked = uiState.weeklyDigestEnabled,
+                        onCheckedChange = viewModel::setWeeklyDigestEnabled
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(start = 48.dp))
@@ -396,6 +415,7 @@ private fun SettingsCard(
     title: String,
     icon: ImageVector,
     iconBackgroundColor: Color,
+    isSyncing: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
@@ -405,28 +425,39 @@ private fun SettingsCard(
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(bottom = 12.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
             ) {
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = iconBackgroundColor.copy(alpha = 0.15f),
-                    modifier = Modifier.size(36.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = iconBackgroundColor,
-                            modifier = Modifier.size(20.dp)
-                        )
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = iconBackgroundColor.copy(alpha = 0.15f),
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = iconBackgroundColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
+                if (isSyncing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                }
             }
             content()
         }

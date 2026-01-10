@@ -399,4 +399,12 @@
     <string name="celebrate_achievements">Celebrate your achievements</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="sign_out_confirm">Are you sure you want to sign out?</string>
+    <string name="weekly_summary_email">Get weekly progress summary</string>
+
+    <!-- Books Screen -->
+    <string name="currently_reading">Currently Reading</string>
+    <string name="all_books">All Books</string>
+    <string name="progress">Progress</string>
+    <string name="paused">Paused</string>
+    <string name="cancelled">Cancelled</string>
 </resources>
