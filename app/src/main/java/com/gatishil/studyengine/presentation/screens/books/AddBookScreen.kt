@@ -17,6 +17,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.gatishil.studyengine.R
+import com.gatishil.studyengine.presentation.common.components.NotificationDisabledBanner
+import com.gatishil.studyengine.presentation.common.components.NotificationPermissionHandler
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,6 +30,15 @@ fun AddBookScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
+
+    // Handle notification permission dialog
+    NotificationPermissionHandler(
+        showDialog = showNotificationPermissionDialog,
+        onDismiss = { showNotificationPermissionDialog = false },
+        onPermissionResult = { /* Just close dialog */ },
+        context = stringResource(R.string.study_sessions)
+    )
 
     LaunchedEffect(uiState.createdBookId) {
         uiState.createdBookId?.let { bookId ->
@@ -71,6 +82,11 @@ fun AddBookScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Notification permission banner
+            NotificationDisabledBanner(
+                onEnableClick = { showNotificationPermissionDialog = true }
+            )
+
             // Title
             OutlinedTextField(
                 value = uiState.title,

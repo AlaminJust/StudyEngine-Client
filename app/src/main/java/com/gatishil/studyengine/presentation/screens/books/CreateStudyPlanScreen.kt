@@ -10,11 +10,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gatishil.studyengine.R
+import com.gatishil.studyengine.core.util.NotificationPermissionHelper
 import com.gatishil.studyengine.domain.model.RecurrenceType
+import com.gatishil.studyengine.presentation.common.components.NotificationPermissionHandler
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
@@ -29,9 +32,37 @@ fun CreateStudyPlanScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
+    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
+    var pendingCreatePlan by remember { mutableStateOf(false) }
+
+    // Check notification permission when trying to create study plan
+    fun checkNotificationPermissionAndCreate() {
+        val hasPermission = NotificationPermissionHelper.hasNotificationPermission(context)
+        if (!hasPermission && NotificationPermissionHelper.isPermissionRequestNeeded()) {
+            showNotificationPermissionDialog = true
+            pendingCreatePlan = true
+        } else {
+            viewModel.createStudyPlan()
+        }
+    }
+
+    // Handle notification permission dialog
+    NotificationPermissionHandler(
+        showDialog = showNotificationPermissionDialog,
+        onDismiss = { showNotificationPermissionDialog = false },
+        onPermissionResult = { granted ->
+            // Create the plan regardless of permission result
+            if (pendingCreatePlan) {
+                viewModel.createStudyPlan()
+                pendingCreatePlan = false
+            }
+        },
+        context = stringResource(R.string.study_sessions)
+    )
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
@@ -285,7 +316,7 @@ fun CreateStudyPlanScreen(
 
             // Create Button
             Button(
-                onClick = viewModel::createStudyPlan,
+                onClick = { checkNotificationPermissionAndCreate() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

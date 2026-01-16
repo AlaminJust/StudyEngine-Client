@@ -113,6 +113,13 @@
     <string name="notes">নোট (ঐচ্ছিক)</string>
     <string name="session_time">%1$s - %2$s</string>
 
+    <!-- Missed Session Recovery -->
+    <string name="missed_session_pages_redistributed">এই সেশনের পৃষ্ঠাগুলি আপনার আসন্ন সেশনগুলিতে পুনর্বন্টন করা হয়েছে।</string>
+    <string name="actually_completed_this">আসলে সম্পন্ন করেছেন?</string>
+    <string name="record_your_progress">আপনার অগ্রগতি রেকর্ড করুন</string>
+    <string name="missed_recovery_hint">আপনি যদি এই সেশনে পড়াশোনা করে থাকেন, নীচে আপনার অগ্রগতি লিখুন। এটি আপনার পরিসংখ্যান আপডেট করবে।</string>
+    <string name="pages_you_read">যে পৃষ্ঠাগুলি পড়েছেন</string>
+
     <!-- How Sessions Work -->
     <string name="how_sessions_work">সেশন কীভাবে কাজ করে</string>
     <string name="smart_session_scheduling">স্মার্ট সেশন নির্ধারণ</string>
@@ -453,6 +460,19 @@
     <string name="update_available">আপডেট উপলব্ধ</string>
     <string name="update_downloaded">আপডেট ডাউনলোড হয়েছে। প্রয়োগ করতে পুনরায় চালু করুন।</string>
     <string name="install_update">আপডেট ইনস্টল করুন</string>
+
+    <!-- Notification Permission -->
+    <string name="notification_permission_title">ট্র্যাকে থাকুন</string>
+    <string name="notification_permission_message">আপনার %1$s এর জন্য সময়মত রিমাইন্ডার পেতে নোটিফিকেশন চালু করুন এবং কোন পড়াশোনার সেশন মিস করবেন না।</string>
+    <string name="notification_benefit_reminders">পড়াশোনার সেশন শুরু হওয়ার আগে রিমাইন্ডার পান</string>
+    <string name="notification_benefit_streak">প্রতিদিনের অ্যালার্টের মাধ্যমে পড়ার ধারা বজায় রাখুন</string>
+    <string name="notification_benefit_achievements">অগ্রগতির সাথে সাথে অর্জন উদযাপন করুন</string>
+    <string name="notification_skip_warning">নোটিফিকেশন ছাড়া আপনি গুরুত্বপূর্ণ পড়ার রিমাইন্ডার মিস করতে পারেন</string>
+    <string name="skip_for_now">পরে করুন</string>
+    <string name="open_settings">সেটিংস খুলুন</string>
+    <string name="enable">চালু করুন</string>
+    <string name="notifications_disabled_banner">নোটিফিকেশন বন্ধ আছে। আপনি সেশন রিমাইন্ডার মিস করতে পারেন।</string>
+    <string name="notification_permission_rationale">নোটিফিকেশন আপনার পড়ার সময়সূচীতে সামঞ্জস্যপূর্ণ থাকতে সাহায্য করে</string>
 
     <!-- Notification Channels -->
     <string name="channel_session_reminders">সেশন রিমাইন্ডার</string>

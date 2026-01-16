@@ -112,6 +112,13 @@
     <string name="notes">Notes (optional)</string>
     <string name="session_time">%1$s - %2$s</string>
 
+    <!-- Missed Session Recovery -->
+    <string name="missed_session_pages_redistributed">The pages from this session have been redistributed to your upcoming sessions.</string>
+    <string name="actually_completed_this">Actually completed this?</string>
+    <string name="record_your_progress">Record Your Progress</string>
+    <string name="missed_recovery_hint">If you actually studied during this session, enter your progress below. This will update your statistics.</string>
+    <string name="pages_you_read">Pages you read</string>
+
     <!-- How Sessions Work -->
     <string name="how_sessions_work">How Sessions Work</string>
     <string name="smart_session_scheduling">Smart Session Scheduling</string>
@@ -271,7 +278,6 @@
     <string name="theme_system">System Default</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
-    <string name="enable_notifications">Enable Notifications</string>
     <string name="reminder_before">Remind me before</string>
     <string name="minutes_before">%1$d minutes before</string>
     <string name="version">Version</string>
@@ -452,6 +458,20 @@
     <string name="update_available">Update Available</string>
     <string name="update_downloaded">Update downloaded. Restart to apply.</string>
     <string name="install_update">Install Update</string>
+
+    <!-- Notification Permission -->
+    <string name="notification_permission_title">Stay On Track</string>
+    <string name="notification_permission_message">Enable notifications to receive timely reminders for your %1$s and never miss a study session.</string>
+    <string name="notification_benefit_reminders">Get reminders before study sessions start</string>
+    <string name="notification_benefit_streak">Maintain your study streak with daily alerts</string>
+    <string name="notification_benefit_achievements">Celebrate achievements as you progress</string>
+    <string name="notification_skip_warning">Without notifications, you may miss important study reminders</string>
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="skip_for_now">Skip for now</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="enable">Enable</string>
+    <string name="notifications_disabled_banner">Notifications are off. You may miss session reminders.</string>
+    <string name="notification_permission_rationale">Notifications help you stay consistent with your study schedule</string>
 
     <!-- Notification Channels -->
     <string name="channel_session_reminders">Session Reminders</string>

@@ -523,8 +523,20 @@ private fun ActionsSection(
                 onCompleteSession = onCompleteSession
             )
         }
+        StudySessionStatus.MISSED -> {
+            // Missed sessions can be recovered (marked as completed)
+            CompletedSessionInfo(
+                session = session,
+                completedPages = completedPages,
+                notes = notes,
+                isProcessing = isProcessing,
+                onCompletedPagesChange = onCompletedPagesChange,
+                onNotesChange = onNotesChange,
+                onCompleteSession = onCompleteSession
+            )
+        }
         else -> {
-            // Completed, Missed, or Cancelled - show read-only status
+            // Completed or Cancelled - show read-only status
             CompletedSessionInfo(session = session)
         }
     }
@@ -709,53 +721,207 @@ private fun InProgressSessionActions(
 }
 
 @Composable
-private fun CompletedSessionInfo(session: StudySession) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+private fun CompletedSessionInfo(
+    session: StudySession,
+    completedPages: String = "",
+    notes: String = "",
+    isProcessing: Boolean = false,
+    onCompletedPagesChange: (String) -> Unit = {},
+    onNotesChange: (String) -> Unit = {},
+    onCompleteSession: () -> Unit = {}
+) {
+    val (icon, message, color) = when (session.status) {
+        StudySessionStatus.COMPLETED -> Triple(
+            Icons.Default.CheckCircle,
+            stringResource(R.string.session_completed_message),
+            StudyEngineTheme.extendedColors.success
         )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val (icon, message, color) = when (session.status) {
-                StudySessionStatus.COMPLETED -> Triple(
-                    Icons.Default.CheckCircle,
-                    stringResource(R.string.session_completed_message),
-                    StudyEngineTheme.extendedColors.success
-                )
-                StudySessionStatus.MISSED -> Triple(
-                    Icons.Default.ErrorOutline,
-                    stringResource(R.string.session_missed_message),
-                    StudyEngineTheme.extendedColors.sessionMissed
-                )
-                else -> Triple(
-                    Icons.Default.Cancel,
-                    stringResource(R.string.session_cancelled_message),
-                    StudyEngineTheme.extendedColors.sessionCancelled
-                )
-            }
+        StudySessionStatus.MISSED -> Triple(
+            Icons.Default.ErrorOutline,
+            stringResource(R.string.session_missed_message),
+            StudyEngineTheme.extendedColors.sessionMissed
+        )
+        else -> Triple(
+            Icons.Default.Cancel,
+            stringResource(R.string.session_cancelled_message),
+            StudyEngineTheme.extendedColors.sessionCancelled
+        )
+    }
 
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(48.dp)
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Status Info Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+
+                // Additional info for missed sessions
+                if (session.status == StudySessionStatus.MISSED) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.missed_session_pages_redistributed),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+
+        // Recovery option for missed sessions
+        if (session.status == StudySessionStatus.MISSED) {
+            var showRecoveryForm by remember { mutableStateOf(false) }
+
+            if (!showRecoveryForm) {
+                // Button to show recovery form
+                OutlinedButton(
+                    onClick = { showRecoveryForm = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = StudyEngineTheme.extendedColors.sessionInProgress
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.actually_completed_this),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            } else {
+                // Recovery form
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = StudyEngineTheme.extendedColors.sessionInProgress.copy(alpha = 0.1f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null,
+                                tint = StudyEngineTheme.extendedColors.sessionInProgress,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.record_your_progress),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = StudyEngineTheme.extendedColors.sessionInProgress
+                            )
+                        }
+
+                        Text(
+                            text = stringResource(R.string.missed_recovery_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        OutlinedTextField(
+                            value = completedPages,
+                            onValueChange = onCompletedPagesChange,
+                            label = { Text(stringResource(R.string.pages_you_read)) },
+                            placeholder = { Text("e.g., ${session.plannedPages}") },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            enabled = !isProcessing,
+                            shape = RoundedCornerShape(12.dp),
+                            leadingIcon = {
+                                Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null)
+                            }
+                        )
+
+                        OutlinedTextField(
+                            value = notes,
+                            onValueChange = onNotesChange,
+                            label = { Text(stringResource(R.string.notes)) },
+                            placeholder = { Text(stringResource(R.string.add_notes_optional)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 2,
+                            enabled = !isProcessing,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { showRecoveryForm = false },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(stringResource(R.string.cancel))
+                            }
+
+                            Button(
+                                onClick = onCompleteSession,
+                                modifier = Modifier.weight(1f),
+                                enabled = !isProcessing && completedPages.isNotBlank(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = StudyEngineTheme.extendedColors.success
+                                )
+                            ) {
+                                if (isProcessing) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = Color.White
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(stringResource(R.string.save))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

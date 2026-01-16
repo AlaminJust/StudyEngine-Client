@@ -1,5 +1,7 @@
 package com.gatishil.studyengine.presentation.screens.dashboard
 
+import android.Manifest
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,10 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.gatishil.studyengine.core.util.NotificationPermissionHelper
 import com.gatishil.studyengine.domain.model.Book
 import com.gatishil.studyengine.domain.model.StudySession
 import com.gatishil.studyengine.domain.model.StudySessionStatus
@@ -44,6 +48,37 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    // Notification permission state
+    var showNotificationPermissionDialog by remember { mutableStateOf(false) }
+    var hasCheckedNotificationPermission by remember { mutableStateOf(false) }
+
+    // Check notification permission on first load
+    LaunchedEffect(Unit) {
+        if (!hasCheckedNotificationPermission) {
+            hasCheckedNotificationPermission = true
+            val hasPermission = NotificationPermissionHelper.hasNotificationPermission(context)
+            val isFirstTime = NotificationPermissionHelper.isFirstTimeAskingPermission(
+                context,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Manifest.permission.POST_NOTIFICATIONS
+                } else ""
+            )
+            // Show dialog only on first time and if permission not granted
+            if (!hasPermission && isFirstTime && NotificationPermissionHelper.isPermissionRequestNeeded()) {
+                showNotificationPermissionDialog = true
+            }
+        }
+    }
+
+    // Handle notification permission dialog
+    NotificationPermissionHandler(
+        showDialog = showNotificationPermissionDialog,
+        onDismiss = { showNotificationPermissionDialog = false },
+        onPermissionResult = { /* Permission handled */ },
+        context = stringResource(R.string.study_sessions)
+    )
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),

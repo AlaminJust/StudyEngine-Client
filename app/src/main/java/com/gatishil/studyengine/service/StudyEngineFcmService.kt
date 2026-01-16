@@ -78,11 +78,15 @@ class StudyEngineFcmService : FirebaseMessagingService() {
         val channelId = getChannelId(type)
         val notificationId = generateNotificationId(type, data)
 
-        // Create intent to open app
+        // Create intent to open app with proper flags for singleTop activity
         val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            // Use SINGLE_TOP flag since MainActivity has launchMode="singleTop"
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
 
-            // Pass notification data
+            // Add action to distinguish notification clicks from normal launches
+            action = "NOTIFICATION_CLICK_ACTION"
+
+            // Pass notification data as extras
             data.forEach { (key, value) ->
                 putExtra(key, value)
             }

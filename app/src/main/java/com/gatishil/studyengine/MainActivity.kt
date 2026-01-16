@@ -1,6 +1,6 @@
 package com.gatishil.studyengine
 
-import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -267,6 +267,23 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         // Resume any pending immediate updates
         inAppUpdateManager.resumeUpdateIfNeeded(this)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Handle notification click when app is already running
+        // Set the new intent so that the activity processes it
+        setIntent(intent)
+
+        // Process notification data if present
+        intent.extras?.let { extras ->
+            val type = extras.getString("type")
+            val sessionId = extras.getString("sessionId")
+            val bookId = extras.getString("bookId")
+
+            // Log notification data for debugging
+            android.util.Log.d("MainActivity", "Notification clicked - type: $type, sessionId: $sessionId, bookId: $bookId")
+        }
     }
 
     override fun onDestroy() {
