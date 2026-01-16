@@ -1,5 +1,6 @@
 package com.gatishil.studyengine.data.repository
 
+import android.util.Log
 import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.data.local.datastore.AuthPreferences
 import com.gatishil.studyengine.data.mapper.AuthMapper
@@ -10,6 +11,7 @@ import com.gatishil.studyengine.data.remote.dto.RefreshTokenRequestDto
 import com.gatishil.studyengine.domain.model.AuthResult
 import com.gatishil.studyengine.domain.model.User
 import com.gatishil.studyengine.domain.repository.AuthRepository
+import com.gatishil.studyengine.service.FcmTokenManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.time.ZoneOffset
@@ -19,8 +21,13 @@ import javax.inject.Singleton
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val api: StudyEngineApi,
-    private val authPreferences: AuthPreferences
+    private val authPreferences: AuthPreferences,
+    private val fcmTokenManager: FcmTokenManager
 ) : AuthRepository {
+
+    companion object {
+        private const val TAG = "AuthRepositoryImpl"
+    }
 
     override suspend fun signInWithGoogle(idToken: String): Resource<AuthResult> {
         return try {
@@ -44,6 +51,14 @@ class AuthRepositoryImpl @Inject constructor(
                         name = authResponse.user.name,
                         profilePictureUrl = authResponse.user.profilePictureUrl
                     )
+
+                    // Register device for push notifications
+                    try {
+                        fcmTokenManager.registerDevice()
+                        Log.d(TAG, "Device registered for push notifications")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to register device for push notifications", e)
+                    }
 
                     Resource.success(with(AuthMapper) { authResponse.toDomain() })
                 } ?: Resource.error(Exception("Empty response body"))
@@ -160,6 +175,14 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun getAccessToken(): String? = authPreferences.getAccessToken().first()
 
     override suspend fun logout() {
+        // Unregister device from push notifications
+        try {
+            fcmTokenManager.unregisterDevice()
+            Log.d(TAG, "Device unregistered from push notifications")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to unregister device from push notifications", e)
+        }
+
         // Try to revoke token on server
         try {
             val refreshToken = authPreferences.getRefreshToken().first()

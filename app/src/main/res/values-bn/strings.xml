@@ -453,5 +453,15 @@
     <string name="update_available">আপডেট উপলব্ধ</string>
     <string name="update_downloaded">আপডেট ডাউনলোড হয়েছে। প্রয়োগ করতে পুনরায় চালু করুন।</string>
     <string name="install_update">আপডেট ইনস্টল করুন</string>
+
+    <!-- Notification Channels -->
+    <string name="channel_session_reminders">সেশন রিমাইন্ডার</string>
+    <string name="channel_session_reminders_description">আসন্ন পড়াশোনার সেশনের জন্য নোটিফিকেশন</string>
+    <string name="channel_streak_reminders">স্ট্রিক রিমাইন্ডার</string>
+    <string name="channel_streak_reminders_description">আপনার পড়াশোনার স্ট্রিক বজায় রাখার জন্য রিমাইন্ডার</string>
+    <string name="channel_achievements">অর্জন</string>
+    <string name="channel_achievements_description">নতুন অর্জন আনলক করলে নোটিফিকেশন</string>
+    <string name="channel_general">সাধারণ</string>
+    <string name="channel_general_description">StudyEngine থেকে সাধারণ নোটিফিকেশন</string>
 </resources>
 

@@ -452,4 +452,14 @@
     <string name="update_available">Update Available</string>
     <string name="update_downloaded">Update downloaded. Restart to apply.</string>
     <string name="install_update">Install Update</string>
+
+    <!-- Notification Channels -->
+    <string name="channel_session_reminders">Session Reminders</string>
+    <string name="channel_session_reminders_description">Notifications for upcoming study sessions</string>
+    <string name="channel_streak_reminders">Streak Reminders</string>
+    <string name="channel_streak_reminders_description">Reminders to maintain your study streak</string>
+    <string name="channel_achievements">Achievements</string>
+    <string name="channel_achievements_description">Notifications when you unlock new achievements</string>
+    <string name="channel_general">General</string>
+    <string name="channel_general_description">General notifications from StudyEngine</string>
 </resources>

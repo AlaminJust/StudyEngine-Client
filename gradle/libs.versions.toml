@@ -53,6 +53,10 @@ materialIconsExtended = "1.7.6"
 # Google Services
 googleServices = "4.4.2"
 
+# Firebase
+firebaseMessaging = "24.1.0"
+firebaseBom = "33.7.0"
+
 # Play Core (In-App Updates)
 playAppUpdate = "2.1.0"
 
@@ -103,6 +107,7 @@ datastore-preferences = { group = "androidx.datastore", name = "datastore-prefer
 # Coroutines
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
 
 # WorkManager
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
@@ -119,6 +124,10 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 
 # Splash Screen
 splash-screen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashScreen" }
+
+# Firebase
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
 
 # Play Core (In-App Updates)
 play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "playAppUpdate" }

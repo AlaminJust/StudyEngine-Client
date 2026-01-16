@@ -38,8 +38,12 @@ import com.gatishil.studyengine.data.local.datastore.SettingsPreferences
 import com.gatishil.studyengine.presentation.navigation.BottomNavItem
 import com.gatishil.studyengine.presentation.navigation.Screen
 import com.gatishil.studyengine.presentation.navigation.StudyEngineNavGraph
+import com.gatishil.studyengine.service.FcmTokenManager
 import com.gatishil.studyengine.ui.theme.StudyEngineTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -53,6 +57,9 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var inAppUpdateManager: InAppUpdateManager
+
+    @Inject
+    lateinit var fcmTokenManager: FcmTokenManager
 
     companion object {
         // Track the last language that was applied to prevent recreation loops
@@ -167,6 +174,15 @@ class MainActivity : AppCompatActivity() {
             // Check for updates when app starts
             LaunchedEffect(Unit) {
                 inAppUpdateManager.checkForUpdates(forceImmediate = true)
+            }
+
+            // Register device for push notifications when user is logged in
+            LaunchedEffect(isLoggedIn) {
+                if (isLoggedIn == true) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        fcmTokenManager.registerDevice()
+                    }
+                }
             }
 
             // Handle update available

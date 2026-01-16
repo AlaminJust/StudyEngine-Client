@@ -444,5 +444,39 @@ interface StudyEngineApi {
     suspend fun updateSocialLinks(
         @Body request: UpdateSocialLinksRequestDto
     ): Response<UserAcademicProfileDto>
+
+    // ==================== Notification Endpoints ====================
+
+    @POST("notifications/devices/register")
+    suspend fun registerDevice(
+        @Body request: RegisterDeviceTokenRequestDto
+    ): Response<DeviceRegistrationResponseDto>
+
+    @POST("notifications/devices/unregister")
+    suspend fun unregisterDevice(
+        @Body request: UnregisterDeviceTokenRequestDto
+    ): Response<MessageResponseDto>
+
+    @GET("notifications/devices")
+    suspend fun getDevices(): Response<List<DeviceTokenDto>>
+
+    @POST("notifications/devices/deactivate-all")
+    suspend fun deactivateAllDevices(): Response<MessageResponseDto>
+
+    @GET("notifications/settings")
+    suspend fun getNotificationSettings(): Response<NotificationSettingsDto>
+
+    @GET("notifications/scheduled")
+    suspend fun getScheduledNotifications(): Response<ScheduledNotificationsResponseDto>
+
+    @DELETE("notifications/scheduled/{notificationId}")
+    suspend fun cancelScheduledNotification(
+        @Path("notificationId") notificationId: String
+    ): Response<MessageResponseDto>
+
+    @POST("notifications/test")
+    suspend fun sendTestNotification(
+        @Body request: SendTestNotificationRequestDto
+    ): Response<TestNotificationResponseDto>
 }
 
