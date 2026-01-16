@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Base application theme -->
-    <style name="Theme.StudyEngine" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Theme.StudyEngine" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:navigationBarColor">@android:color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
 
     <!-- Splash Screen Theme -->
     <style name="Theme.StudyEngine.Splash" parent="Theme.SplashScreen">

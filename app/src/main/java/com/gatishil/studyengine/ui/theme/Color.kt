@@ -118,3 +118,10 @@ val PriorityMediumDark = Color(0xFFFFCC80)
 
 val PriorityLowLight = Color(0xFF388E3C)
 val PriorityLowDark = Color(0xFF81C784)
+
+// Status bar colors - distinct colors to ensure icons are always visible
+// Light mode: Use primary color (dark blue) so white icons are visible
+val StatusBarLight = Color(0xFF1565C0)  // Primary blue
+// Dark mode: Use a dark color with slight contrast so light icons are visible
+val StatusBarDark = Color(0xFF1A1C20)  // Dark surface with slight blue tint
+

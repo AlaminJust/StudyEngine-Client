@@ -18,6 +18,8 @@ import com.gatishil.studyengine.presentation.screens.books.BookDetailScreen
 import com.gatishil.studyengine.presentation.screens.books.BooksScreen
 import com.gatishil.studyengine.presentation.screens.books.CreateStudyPlanScreen
 import com.gatishil.studyengine.presentation.screens.dashboard.DashboardScreen
+import com.gatishil.studyengine.presentation.screens.legal.LegalDocumentType
+import com.gatishil.studyengine.presentation.screens.legal.LegalScreen
 import com.gatishil.studyengine.presentation.screens.sessions.SessionDetailScreen
 import com.gatishil.studyengine.presentation.screens.sessions.TodaySessionsScreen
 import com.gatishil.studyengine.presentation.screens.settings.SettingsScreen
@@ -70,7 +72,9 @@ fun StudyEngineNavGraph(
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
-                }
+                },
+                onNavigateToPrivacyPolicy = { navController.navigate(Screen.PrivacyPolicy.route) },
+                onNavigateToTermsOfService = { navController.navigate(Screen.TermsOfService.route) }
             )
         }
 
@@ -248,6 +252,8 @@ fun StudyEngineNavGraph(
                 onNavigateToAvailability = { navController.navigate(Screen.Availability.route) },
                 onNavigateToScheduleOverrides = { navController.navigate(Screen.ScheduleOverrides.route) },
                 onNavigateToScheduleContexts = { navController.navigate(Screen.ScheduleContexts.route) },
+                onNavigateToPrivacyPolicy = { navController.navigate(Screen.PrivacyPolicy.route) },
+                onNavigateToTermsOfService = { navController.navigate(Screen.TermsOfService.route) },
                 onSignOut = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
@@ -259,6 +265,23 @@ fun StudyEngineNavGraph(
         // Profile
         composable(route = Screen.Profile.route) {
             com.gatishil.studyengine.presentation.screens.profile.ProfileScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Legal Screens
+        composable(route = Screen.PrivacyPolicy.route) {
+            LegalScreen(
+                documentType = LegalDocumentType.PRIVACY_POLICY,
+                baseUrl = "http://192.168.0.103:8082",
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = Screen.TermsOfService.route) {
+            LegalScreen(
+                documentType = LegalDocumentType.TERMS_OF_SERVICE,
+                baseUrl = "http://192.168.0.103:8082",
                 onNavigateBack = { navController.popBackStack() }
             )
         }

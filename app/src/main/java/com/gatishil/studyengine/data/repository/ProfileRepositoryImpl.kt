@@ -255,15 +255,25 @@ class ProfileRepositoryImpl @Inject constructor(
             if (response.isSuccessful) {
                 Resource.success(true)
             } else {
+                val errorMessage = try {
+                    response.errorBody()?.string()?.let { body ->
+                        kotlinx.serialization.json.Json.decodeFromString<ErrorResponse>(body).error
+                    } ?: "Failed to delete account"
+                } catch (e: Exception) {
+                    "Failed to delete account: ${response.code()}"
+                }
                 Resource.error(
-                    Exception("Failed to delete account: ${response.code()}"),
-                    response.message()
+                    Exception(errorMessage),
+                    errorMessage
                 )
             }
         } catch (e: Exception) {
             Resource.error(e, e.message)
         }
     }
+
+    @kotlinx.serialization.Serializable
+    private data class ErrorResponse(val error: String, val statusCode: Int = 0)
 
     // ==================== Academic Profile ====================
 

@@ -278,6 +278,14 @@
     <string name="version">সংস্করণ %1$s</string>
     <string name="delete_account">অ্যাকাউন্ট মুছুন</string>
     <string name="delete_account_warning">এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না। আপনার সমস্ত ডেটা স্থায়ীভাবে মুছে যাবে।</string>
+    <string name="delete_account_type_confirm">অ্যাকাউন্ট মুছতে DELETE MY ACCOUNT টাইপ করুন</string>
+    <string name="type_delete_confirm">নিশ্চিত করতে DELETE টাইপ করুন</string>
+    <string name="terms_of_service">সেবার শর্তাবলী</string>
+    <string name="danger_zone">বিপদ অঞ্চল</string>
+    <string name="error_loading_document">ডকুমেন্ট লোড করতে ব্যর্থ</string>
+    <string name="go_back">ফিরে যান</string>
+    <string name="by_continuing_agree">চালিয়ে যেতে, আপনি আমাদের সম্মত হন</string>
+    <string name="and">এবং</string>
 
     <!-- Languages -->
     <string name="english">English</string>

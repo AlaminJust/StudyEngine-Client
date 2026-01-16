@@ -1,5 +1,6 @@
 package com.gatishil.studyengine.presentation.screens.auth
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -11,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -19,6 +21,8 @@ import com.gatishil.studyengine.R
 @Composable
 fun LoginScreen(
     onSignInSuccess: () -> Unit,
+    onNavigateToPrivacyPolicy: () -> Unit = {},
+    onNavigateToTermsOfService: () -> Unit = {},
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -126,6 +130,47 @@ fun LoginScreen(
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center
                     )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Legal links
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.by_continuing_agree),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.privacy_policy),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                textDecoration = TextDecoration.Underline
+                            ),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable { onNavigateToPrivacyPolicy() }
+                        )
+                        Text(
+                            text = " ${stringResource(R.string.and)} ",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.terms_of_service),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                textDecoration = TextDecoration.Underline
+                            ),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable { onNavigateToTermsOfService() }
+                        )
+                    }
                 }
             }
         }

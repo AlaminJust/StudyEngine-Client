@@ -36,6 +36,8 @@ fun SettingsScreen(
     onNavigateToAvailability: () -> Unit = {},
     onNavigateToScheduleOverrides: () -> Unit = {},
     onNavigateToScheduleContexts: () -> Unit = {},
+    onNavigateToPrivacyPolicy: () -> Unit = {},
+    onNavigateToTermsOfService: () -> Unit = {},
     onSignOut: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -45,6 +47,8 @@ fun SettingsScreen(
     var showSignOutDialog by remember { mutableStateOf(false) }
     var showNotificationDialog by remember { mutableStateOf(false) }
     var showReminderDialog by remember { mutableStateOf(false) }
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
+    var deleteConfirmationText by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
@@ -228,7 +232,30 @@ fun SettingsScreen(
                         icon = Icons.Default.Policy,
                         iconColor = MaterialTheme.colorScheme.secondary,
                         title = stringResource(R.string.privacy_policy),
-                        onClick = { }
+                        onClick = onNavigateToPrivacyPolicy
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(start = 48.dp))
+                    SettingsCardItem(
+                        icon = Icons.Default.Description,
+                        iconColor = MaterialTheme.colorScheme.tertiary,
+                        title = stringResource(R.string.terms_of_service),
+                        onClick = onNavigateToTermsOfService
+                    )
+                }
+            }
+
+            // Danger Zone - Delete Account
+            item {
+                SettingsCard(
+                    title = stringResource(R.string.danger_zone),
+                    icon = Icons.Default.Warning,
+                    iconBackgroundColor = MaterialTheme.colorScheme.error
+                ) {
+                    SettingsCardItem(
+                        icon = Icons.Default.DeleteForever,
+                        iconColor = MaterialTheme.colorScheme.error,
+                        title = stringResource(R.string.delete_account),
+                        onClick = { showDeleteAccountDialog = true }
                     )
                 }
             }
@@ -342,6 +369,73 @@ fun SettingsScreen(
             },
             dismissButton = { TextButton(onClick = { showSignOutDialog = false }) { Text(stringResource(R.string.cancel)) } }
         )
+    }
+
+    // Delete Account Dialog
+    if (showDeleteAccountDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteAccountDialog = false
+                deleteConfirmationText = ""
+            },
+            title = {
+                Text(
+                    stringResource(R.string.delete_account),
+                    color = MaterialTheme.colorScheme.error
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(stringResource(R.string.delete_account_warning))
+                    Text(
+                        stringResource(R.string.delete_account_type_confirm),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    OutlinedTextField(
+                        value = deleteConfirmationText,
+                        onValueChange = { deleteConfirmationText = it },
+                        label = { Text(stringResource(R.string.type_delete_confirm)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.error,
+                            focusedLabelColor = MaterialTheme.colorScheme.error
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteAccount(deleteConfirmationText)
+                        showDeleteAccountDialog = false
+                        deleteConfirmationText = ""
+                    },
+                enabled = deleteConfirmationText.equals("DELETE MY ACCOUNT", ignoreCase = true)
+                ) {
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDeleteAccountDialog = false
+                    deleteConfirmationText = ""
+                }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    // Show loading overlay when deleting
+    if (uiState.isDeletingAccount) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
 

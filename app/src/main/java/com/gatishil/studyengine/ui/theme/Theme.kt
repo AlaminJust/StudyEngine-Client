@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -165,12 +164,30 @@ fun StudyEngineTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // For edge-to-edge, use transparent colors and let the content draw behind
+
+            // Ensure window draws behind system bars for proper control
+            WindowCompat.setDecorFitsSystemWindows(window, true)
+
+            // Set status bar color - use primary for visibility
+            val statusBarColorValue = if (darkTheme) {
+                0xFF1E2128.toInt() // Dark blue-gray for dark mode
+            } else {
+                0xFFFFFFFF.toInt() // White for light mode
+            }
+
+            // Set navigation bar color
+            val navBarColorValue = if (darkTheme) {
+                0xFF111318.toInt() // Match dark background
+            } else {
+                0xFFFFFFFF.toInt() // White for light mode
+            }
+
             @Suppress("DEPRECATION")
-            window.statusBarColor = android.graphics.Color.TRANSPARENT
+            window.statusBarColor = statusBarColorValue
             @Suppress("DEPRECATION")
-            window.navigationBarColor = colorScheme.surface.toArgb()
-            // Set status bar icons to light/dark based on theme
+            window.navigationBarColor = navBarColorValue
+
+            // Set icon colors - light icons on dark background, dark icons on light background
             val insetsController = WindowCompat.getInsetsController(window, view)
             insetsController.isAppearanceLightStatusBars = !darkTheme
             insetsController.isAppearanceLightNavigationBars = !darkTheme

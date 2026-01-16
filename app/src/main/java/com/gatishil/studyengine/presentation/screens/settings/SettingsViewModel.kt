@@ -23,7 +23,8 @@ data class SettingsUiState(
     val achievementNotificationsEnabled: Boolean = true,
 
     val isLoading: Boolean = false,
-    val isSyncing: Boolean = false
+    val isSyncing: Boolean = false,
+    val isDeletingAccount: Boolean = false
 )
 
 @HiltViewModel
@@ -152,6 +153,23 @@ class SettingsViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             authRepository.logout()
             _signOutEvent.emit(Unit)
+        }
+    }
+
+    fun deleteAccount(confirmationPhrase: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isDeletingAccount = true) }
+            when (val result = profileRepository.deleteAccount(confirmationPhrase)) {
+                is Resource.Success -> {
+                    authRepository.logout()
+                    _signOutEvent.emit(Unit)
+                }
+                is Resource.Error -> {
+                    _uiState.update { it.copy(isDeletingAccount = false) }
+                    _toastEvent.emit("Failed to delete account: ${result.message}")
+                }
+                else -> {}
+            }
         }
     }
 }

@@ -2,7 +2,6 @@ package com.gatishil.studyengine
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -90,7 +89,8 @@ class MainActivity : AppCompatActivity() {
             animatorSet.start()
         }
 
-        enableEdgeToEdge()
+        // Note: We don't use enableEdgeToEdge() to have better control over status bar
+        // Status bar colors are set in Theme.kt
 
         setContent {
             val themeMode by settingsPreferences.getThemeMode()

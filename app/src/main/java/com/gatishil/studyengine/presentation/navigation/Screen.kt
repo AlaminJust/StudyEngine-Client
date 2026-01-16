@@ -61,6 +61,10 @@ sealed class Screen(val route: String) {
 
     // Academic
     data object Academic : Screen("academic")
+
+    // Legal
+    data object PrivacyPolicy : Screen("legal/privacy-policy")
+    data object TermsOfService : Screen("legal/terms-of-service")
 }
 
 /**
