@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -109,6 +110,10 @@ dependencies {
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
+
+    // Play Core (In-App Updates)
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 
     // Coil for images
     implementation(libs.coil.compose)

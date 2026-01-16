@@ -1,13 +1,20 @@
 package com.gatishil.studyengine
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
@@ -16,6 +23,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.os.LocaleListCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -23,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.gatishil.studyengine.core.util.InAppUpdateManager
 import com.gatishil.studyengine.data.local.datastore.AuthPreferences
 import com.gatishil.studyengine.data.local.datastore.SettingsPreferences
 import com.gatishil.studyengine.presentation.navigation.BottomNavItem
@@ -41,9 +51,18 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var authPreferences: AuthPreferences
 
+    @Inject
+    lateinit var inAppUpdateManager: InAppUpdateManager
+
     companion object {
         // Track the last language that was applied to prevent recreation loops
         private var lastAppliedLanguage: String? = null
+    }
+
+    private val updateResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        inAppUpdateManager.handleUpdateResult(result.resultCode)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -142,28 +161,128 @@ class MainActivity : AppCompatActivity() {
             val isLoggedIn by authPreferences.isLoggedIn()
                 .collectAsStateWithLifecycle(initialValue = null)
 
-            StudyEngineTheme(darkTheme = darkTheme) {
-                // Show loading until we know login state
-                if (isLoggedIn == null) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
+            // Observe update state
+            val updateState by inAppUpdateManager.updateState.collectAsStateWithLifecycle()
+
+            // Check for updates when app starts
+            LaunchedEffect(Unit) {
+                inAppUpdateManager.checkForUpdates(forceImmediate = true)
+            }
+
+            // Handle update available
+            LaunchedEffect(updateState) {
+                when (updateState) {
+                    is InAppUpdateManager.UpdateState.UpdateAvailable -> {
+                        inAppUpdateManager.startUpdate(this@MainActivity)
                     }
-                } else {
-                    StudyEngineApp(isLoggedIn = isLoggedIn!!)
+                    is InAppUpdateManager.UpdateState.Downloaded -> {
+                        // Show snackbar or prompt to complete update
+                    }
+                    else -> {}
+                }
+            }
+
+            StudyEngineTheme(darkTheme = darkTheme) {
+                // Show update required screen for immediate updates that user rejected
+                val updateError = (updateState as? InAppUpdateManager.UpdateState.Error)
+                val isForceUpdateRequired = updateError?.message == "Update is required to continue"
+
+                when {
+                    isForceUpdateRequired -> {
+                        // Force update required screen
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.padding(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.SystemUpdate,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(64.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = stringResource(R.string.update_required),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = stringResource(R.string.update_required_message),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Center,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(24.dp))
+                                Button(
+                                    onClick = { inAppUpdateManager.checkForUpdates(forceImmediate = true) }
+                                ) {
+                                    Text(stringResource(R.string.update_now))
+                                }
+                            }
+                        }
+                    }
+                    isLoggedIn == null -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                    else -> {
+                        StudyEngineApp(
+                            isLoggedIn = isLoggedIn!!,
+                            updateState = updateState,
+                            onCompleteUpdate = { inAppUpdateManager.completeUpdate() }
+                        )
+                    }
                 }
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        // Resume any pending immediate updates
+        inAppUpdateManager.resumeUpdateIfNeeded(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        inAppUpdateManager.cleanup()
+    }
 }
 
 @Composable
-fun StudyEngineApp(isLoggedIn: Boolean) {
+fun StudyEngineApp(
+    isLoggedIn: Boolean,
+    updateState: InAppUpdateManager.UpdateState = InAppUpdateManager.UpdateState.Idle,
+    onCompleteUpdate: () -> Unit = {}
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Show snackbar when update is downloaded
+    LaunchedEffect(updateState) {
+        if (updateState is InAppUpdateManager.UpdateState.Downloaded) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Update downloaded!",
+                actionLabel = "Install",
+                duration = SnackbarDuration.Indefinite
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                onCompleteUpdate()
+            }
+        }
+    }
 
     // Determine if we should show bottom navigation
     val showBottomBar = currentDestination?.route in listOf(
@@ -178,6 +297,7 @@ fun StudyEngineApp(isLoggedIn: Boolean) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar {

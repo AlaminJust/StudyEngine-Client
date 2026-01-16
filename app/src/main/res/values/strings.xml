@@ -274,7 +274,7 @@
     <string name="enable_notifications">Enable Notifications</string>
     <string name="reminder_before">Remind me before</string>
     <string name="minutes_before">%1$d minutes before</string>
-    <string name="version">Version %1$s</string>
+    <string name="version">Version</string>
     <string name="delete_account">Delete Account</string>
     <string name="delete_account_warning">This action cannot be undone. All your data will be permanently deleted.</string>
     <string name="delete_account_type_confirm">Type DELETE MY ACCOUNT to confirm account deletion</string>
@@ -444,4 +444,12 @@
     <string name="session_completed_message">Great job! You\'ve completed this study session.</string>
     <string name="session_missed_message">This session was marked as missed.</string>
     <string name="session_cancelled_message">This session was cancelled.</string>
+
+    <!-- App Update -->
+    <string name="update_required">Update Required</string>
+    <string name="update_required_message">A new version of StudyEngine is available. Please update to continue using the app.</string>
+    <string name="update_now">Update Now</string>
+    <string name="update_available">Update Available</string>
+    <string name="update_downloaded">Update downloaded. Restart to apply.</string>
+    <string name="install_update">Install Update</string>
 </resources>

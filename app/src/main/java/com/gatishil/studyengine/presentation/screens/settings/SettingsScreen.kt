@@ -18,10 +18,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.gatishil.studyengine.BuildConfig
 import com.gatishil.studyengine.R
 import com.gatishil.studyengine.data.local.datastore.SettingsPreferences
 import com.gatishil.studyengine.ui.theme.StudyEngineTheme
@@ -220,11 +222,13 @@ fun SettingsScreen(
                     icon = Icons.Default.Info,
                     iconBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
                 ) {
+                    val versionName = BuildConfig.VERSION_NAME
+                    val versionCode = BuildConfig.VERSION_CODE
                     SettingsCardItem(
                         icon = Icons.Default.Code,
                         iconColor = MaterialTheme.colorScheme.primary,
                         title = stringResource(R.string.version),
-                        value = "1.0.0",
+                        value = "$versionName ($versionCode)",
                         onClick = { }
                     )
                     HorizontalDivider(modifier = Modifier.padding(start = 48.dp))

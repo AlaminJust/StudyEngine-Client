@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "60187445916",
+    "project_id": "studyengine-6b52d",
+    "storage_bucket": "studyengine-6b52d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:60187445916:android:2c4eaff5d8a952324ebb59",
+        "android_client_info": {
+          "package_name": "com.gatishil.studyengine"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYq44jYqCbkDcQJ5dKAoS1chqCOzxYck4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

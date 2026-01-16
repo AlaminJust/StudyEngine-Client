@@ -275,7 +275,7 @@
     <string name="enable_notifications">নোটিফিকেশন চালু করুন</string>
     <string name="reminder_before">আগে মনে করিয়ে দিন</string>
     <string name="minutes_before">%1$d মিনিট আগে</string>
-    <string name="version">সংস্করণ %1$s</string>
+    <string name="version">সংস্করণ</string>
     <string name="delete_account">অ্যাকাউন্ট মুছুন</string>
     <string name="delete_account_warning">এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না। আপনার সমস্ত ডেটা স্থায়ীভাবে মুছে যাবে।</string>
     <string name="delete_account_type_confirm">অ্যাকাউন্ট মুছতে DELETE MY ACCOUNT টাইপ করুন</string>
@@ -445,5 +445,13 @@
     <string name="session_completed_message">দারুণ! আপনি এই পড়াশোনার সেশন সম্পন্ন করেছেন।</string>
     <string name="session_missed_message">এই সেশনটি মিস হিসেবে চিহ্নিত হয়েছে।</string>
     <string name="session_cancelled_message">এই সেশনটি বাতিল করা হয়েছে।</string>
+
+    <!-- App Update -->
+    <string name="update_required">আপডেট প্রয়োজন</string>
+    <string name="update_required_message">StudyEngine এর নতুন সংস্করণ উপলব্ধ। অ্যাপ ব্যবহার চালিয়ে যেতে আপডেট করুন।</string>
+    <string name="update_now">এখনই আপডেট করুন</string>
+    <string name="update_available">আপডেট উপলব্ধ</string>
+    <string name="update_downloaded">আপডেট ডাউনলোড হয়েছে। প্রয়োগ করতে পুনরায় চালু করুন।</string>
+    <string name="install_update">আপডেট ইনস্টল করুন</string>
 </resources>
 
