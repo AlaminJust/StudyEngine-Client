@@ -21,7 +21,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // API Configuration
+        // API Configuration - Centralized Base URL
+        buildConfigField("String", "BASE_URL", "\"http://192.168.0.101:8082\"")
         buildConfigField("String", "API_BASE_URL", "\"http://192.168.0.101:8082/api/v1/\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"629081030104-8rq6e63104m8i3dhcr69arpunhgkg59r.apps.googleusercontent.com\"")
 

@@ -11,6 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.gatishil.studyengine.BuildConfig
 import com.gatishil.studyengine.presentation.screens.auth.LoginScreen
 import com.gatishil.studyengine.presentation.screens.books.AddBookScreen
 import com.gatishil.studyengine.presentation.screens.books.AddChapterScreen
@@ -273,7 +274,7 @@ fun StudyEngineNavGraph(
         composable(route = Screen.PrivacyPolicy.route) {
             LegalScreen(
                 documentType = LegalDocumentType.PRIVACY_POLICY,
-                baseUrl = "http://192.168.0.103:8082",
+                baseUrl = BuildConfig.BASE_URL,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -281,7 +282,7 @@ fun StudyEngineNavGraph(
         composable(route = Screen.TermsOfService.route) {
             LegalScreen(
                 documentType = LegalDocumentType.TERMS_OF_SERVICE,
-                baseUrl = "http://192.168.0.103:8082",
+                baseUrl = BuildConfig.BASE_URL,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
