@@ -138,3 +138,58 @@ data class SocialLinks(
     val gitHub: String?
 )
 
+/**
+ * Public profile for sharing
+ */
+data class PublicProfile(
+    val id: String,
+    val name: String,
+    val profilePictureUrl: String?,
+    val daysSinceJoined: Int,
+    val studySummary: PublicStudySummary?
+)
+
+/**
+ * Public study summary
+ */
+data class PublicStudySummary(
+    val currentStreak: Int,
+    val longestStreak: Int,
+    val totalStudyDays: Int,
+    val totalBooksCompleted: Int,
+    val achievementsUnlocked: Int
+)
+
+/**
+ * Public profile card for discovery listing
+ */
+data class PublicProfileCard(
+    val id: String,
+    val name: String,
+    val profilePictureUrl: String?,
+    val role: String?,
+    val academicLevel: String?,
+    val major: String?,
+    val department: String?,
+    val institutionName: String?,
+    val institutionCountry: String?,
+    val currentStreak: Int?,
+    val totalBooksCompleted: Int?,
+    val totalStudyDays: Int?,
+    val matchScore: Double?,
+    val matchedFields: List<String>?
+)
+
+/**
+ * Paginated response for discover profiles
+ */
+data class PublicProfilesPage(
+    val profiles: List<PublicProfileCard>,
+    val totalCount: Int,
+    val page: Int,
+    val pageSize: Int,
+    val totalPages: Int,
+    val hasNextPage: Boolean,
+    val hasPreviousPage: Boolean
+)
+

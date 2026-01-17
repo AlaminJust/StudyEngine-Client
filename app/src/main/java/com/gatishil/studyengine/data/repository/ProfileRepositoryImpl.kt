@@ -429,5 +429,68 @@ class ProfileRepositoryImpl @Inject constructor(
             Resource.error(e, e.message)
         }
     }
+
+    // ==================== Public Profiles ====================
+
+    override suspend fun getPublicProfile(userId: String): Resource<PublicProfile> {
+        return try {
+            val response = api.getPublicProfile(userId)
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(ProfileMapper.toPublicProfileDomain(dto))
+                } ?: Resource.error(Exception("Empty response body"))
+            } else if (response.code() == 404) {
+                Resource.error(
+                    Exception("Profile not found or is private"),
+                    "Profile not found or is private"
+                )
+            } else {
+                Resource.error(
+                    Exception("Failed to get public profile: ${response.code()}"),
+                    response.message()
+                )
+            }
+        } catch (e: Exception) {
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun discoverProfiles(
+        searchTerm: String?,
+        role: String?,
+        academicLevel: String?,
+        institutionType: String?,
+        institutionCountry: String?,
+        major: String?,
+        department: String?,
+        page: Int,
+        pageSize: Int
+    ): Resource<PublicProfilesPage> {
+        return try {
+            val response = api.discoverProfiles(
+                searchTerm = searchTerm,
+                role = role,
+                academicLevel = academicLevel,
+                institutionType = institutionType,
+                institutionCountry = institutionCountry,
+                major = major,
+                department = department,
+                page = page,
+                pageSize = pageSize
+            )
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(ProfileMapper.toPublicProfilesPageDomain(dto))
+                } ?: Resource.error(Exception("Empty response body"))
+            } else {
+                Resource.error(
+                    Exception("Failed to discover profiles: ${response.code()}"),
+                    response.message()
+                )
+            }
+        } catch (e: Exception) {
+            Resource.error(e, e.message)
+        }
+    }
 }
 

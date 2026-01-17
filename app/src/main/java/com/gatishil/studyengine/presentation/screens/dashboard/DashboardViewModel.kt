@@ -6,9 +6,11 @@ import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.data.mapper.StatsMapper
 import com.gatishil.studyengine.data.remote.api.StudyEngineApi
 import com.gatishil.studyengine.domain.model.Book
+import com.gatishil.studyengine.domain.model.PublicProfileCard
 import com.gatishil.studyengine.domain.model.QuickStats
 import com.gatishil.studyengine.domain.model.StudySession
 import com.gatishil.studyengine.domain.repository.BookRepository
+import com.gatishil.studyengine.domain.repository.ProfileRepository
 import com.gatishil.studyengine.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -24,6 +26,7 @@ data class DashboardUiState(
     val todayCompletedCount: Int = 0,
     val totalPagesReadToday: Int = 0,
     val quickStats: QuickStats? = null,
+    val relatedProfiles: List<PublicProfileCard> = emptyList(),
     val error: String? = null
 )
 
@@ -31,6 +34,7 @@ data class DashboardUiState(
 class DashboardViewModel @Inject constructor(
     private val bookRepository: BookRepository,
     private val sessionRepository: SessionRepository,
+    private val profileRepository: ProfileRepository,
     private val api: StudyEngineApi
 ) : ViewModel() {
 
@@ -120,6 +124,7 @@ class DashboardViewModel @Inject constructor(
             bookRepository.refreshBooks()
             sessionRepository.refreshSessions()
             loadQuickStats()
+            loadRelatedProfiles()
         }
     }
 
@@ -144,6 +149,29 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
+    private fun loadRelatedProfiles() {
+        viewModelScope.launch {
+            try {
+                val result = profileRepository.discoverProfiles(
+                    page = 1,
+                    pageSize = 10
+                )
+                when (result) {
+                    is Resource.Success -> {
+                        _uiState.update {
+                            it.copy(relatedProfiles = result.data.profiles.take(5))
+                        }
+                    }
+                    else -> {
+                        // Silently fail - not critical
+                    }
+                }
+            } catch (e: Exception) {
+                // Silently fail for profiles - not critical
+            }
+        }
+    }
+
     fun refresh() {
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true) }
@@ -151,6 +179,7 @@ class DashboardViewModel @Inject constructor(
             bookRepository.refreshBooks()
             sessionRepository.refreshSessions()
             loadQuickStats()
+            loadRelatedProfiles()
 
             _uiState.update { it.copy(isRefreshing = false) }
         }

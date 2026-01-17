@@ -94,13 +94,39 @@ fun StudyEngineNavGraph(
                 onNavigateToStats = { navController.navigate(Screen.Stats.route) },
                 onNavigateToAddBook = { navController.navigate(Screen.AddBook.route) },
                 onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
-                onNavigateToAcademic = { navController.navigate(Screen.Academic.route) }
+                onNavigateToAcademic = { navController.navigate(Screen.Academic.route) },
+                onNavigateToDiscoverProfiles = { navController.navigate(Screen.DiscoverProfiles.route) },
+                onNavigateToPublicProfile = { userId ->
+                    navController.navigate(Screen.PublicProfile.createRoute(userId))
+                }
             )
         }
 
         // Academic
         composable(route = Screen.Academic.route) {
             com.gatishil.studyengine.presentation.screens.academic.AcademicScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Discover Profiles
+        composable(route = Screen.DiscoverProfiles.route) {
+            com.gatishil.studyengine.presentation.screens.discover.DiscoverProfilesScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToProfile = { userId ->
+                    navController.navigate(Screen.PublicProfile.createRoute(userId))
+                }
+            )
+        }
+
+        // Public Profile
+        composable(
+            route = Screen.PublicProfile.route,
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType }
+            )
+        ) {
+            com.gatishil.studyengine.presentation.screens.discover.PublicProfileScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

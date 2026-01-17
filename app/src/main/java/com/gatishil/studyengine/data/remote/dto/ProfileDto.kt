@@ -201,6 +201,43 @@ data class PublicStudySummaryDto(
     @SerialName("achievementsUnlocked") val achievementsUnlocked: Int
 )
 
+// ==================== Discover Profiles DTOs ====================
+
+/**
+ * Paginated response for public profile search/discovery.
+ */
+@Serializable
+data class PublicProfilesPagedResponseDto(
+    @SerialName("profiles") val profiles: List<PublicProfileCardDto>,
+    @SerialName("totalCount") val totalCount: Int,
+    @SerialName("page") val page: Int,
+    @SerialName("pageSize") val pageSize: Int,
+    @SerialName("totalPages") val totalPages: Int,
+    @SerialName("hasNextPage") val hasNextPage: Boolean,
+    @SerialName("hasPreviousPage") val hasPreviousPage: Boolean
+)
+
+/**
+ * Compact public profile card for discovery/listing.
+ */
+@Serializable
+data class PublicProfileCardDto(
+    @SerialName("id") val id: String,
+    @SerialName("name") val name: String,
+    @SerialName("profilePictureUrl") val profilePictureUrl: String?,
+    @SerialName("role") val role: String?,
+    @SerialName("academicLevel") val academicLevel: String?,
+    @SerialName("major") val major: String?,
+    @SerialName("department") val department: String?,
+    @SerialName("institutionName") val institutionName: String?,
+    @SerialName("institutionCountry") val institutionCountry: String?,
+    @SerialName("currentStreak") val currentStreak: Int?,
+    @SerialName("totalBooksCompleted") val totalBooksCompleted: Int?,
+    @SerialName("totalStudyDays") val totalStudyDays: Int?,
+    @SerialName("matchScore") val matchScore: Double?,
+    @SerialName("matchedFields") val matchedFields: List<String>?
+)
+
 // ==================== Academic Profile DTOs ====================
 
 /**

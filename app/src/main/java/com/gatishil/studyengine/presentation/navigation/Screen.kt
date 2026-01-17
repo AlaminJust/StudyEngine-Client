@@ -62,6 +62,12 @@ sealed class Screen(val route: String) {
     // Academic
     data object Academic : Screen("academic")
 
+    // Discover Profiles
+    data object DiscoverProfiles : Screen("profiles/discover")
+    data object PublicProfile : Screen("profiles/{userId}") {
+        fun createRoute(userId: String) = "profiles/$userId"
+    }
+
     // Legal
     data object PrivacyPolicy : Screen("legal/privacy-policy")
     data object TermsOfService : Screen("legal/terms-of-service")

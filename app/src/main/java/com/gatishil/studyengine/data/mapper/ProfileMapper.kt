@@ -150,5 +150,58 @@ object ProfileMapper {
             }
         }
     }
+
+    // ==================== Public Profile Mappers ====================
+
+    fun toPublicProfileDomain(dto: PublicProfileDto): PublicProfile {
+        return PublicProfile(
+            id = dto.id,
+            name = dto.name,
+            profilePictureUrl = dto.profilePictureUrl,
+            daysSinceJoined = dto.daysSinceJoined,
+            studySummary = dto.studySummary?.let { toPublicStudySummaryDomain(it) }
+        )
+    }
+
+    fun toPublicStudySummaryDomain(dto: PublicStudySummaryDto): PublicStudySummary {
+        return PublicStudySummary(
+            currentStreak = dto.currentStreak,
+            longestStreak = dto.longestStreak,
+            totalStudyDays = dto.totalStudyDays,
+            totalBooksCompleted = dto.totalBooksCompleted,
+            achievementsUnlocked = dto.achievementsUnlocked
+        )
+    }
+
+    fun toPublicProfileCardDomain(dto: PublicProfileCardDto): PublicProfileCard {
+        return PublicProfileCard(
+            id = dto.id,
+            name = dto.name,
+            profilePictureUrl = dto.profilePictureUrl,
+            role = dto.role,
+            academicLevel = dto.academicLevel,
+            major = dto.major,
+            department = dto.department,
+            institutionName = dto.institutionName,
+            institutionCountry = dto.institutionCountry,
+            currentStreak = dto.currentStreak,
+            totalBooksCompleted = dto.totalBooksCompleted,
+            totalStudyDays = dto.totalStudyDays,
+            matchScore = dto.matchScore,
+            matchedFields = dto.matchedFields
+        )
+    }
+
+    fun toPublicProfilesPageDomain(dto: PublicProfilesPagedResponseDto): PublicProfilesPage {
+        return PublicProfilesPage(
+            profiles = dto.profiles.map { toPublicProfileCardDomain(it) },
+            totalCount = dto.totalCount,
+            page = dto.page,
+            pageSize = dto.pageSize,
+            totalPages = dto.totalPages,
+            hasNextPage = dto.hasNextPage,
+            hasPreviousPage = dto.hasPreviousPage
+        )
+    }
 }
 

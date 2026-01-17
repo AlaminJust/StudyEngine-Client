@@ -483,5 +483,27 @@
     <string name="channel_achievements_description">নতুন অর্জন আনলক করলে নোটিফিকেশন</string>
     <string name="channel_general">সাধারণ</string>
     <string name="channel_general_description">StudyEngine থেকে সাধারণ নোটিফিকেশন</string>
+
+    <!-- Discover Profiles -->
+    <string name="discover_profiles">প্রোফাইল আবিষ্কার করুন</string>
+    <string name="discover_learners">শিক্ষার্থী আবিষ্কার করুন</string>
+    <string name="search_profiles_hint">নাম, বিষয়, প্রতিষ্ঠান দিয়ে খুঁজুন…</string>
+    <string name="discover_results_count">%1$d টি প্রোফাইল পাওয়া গেছে</string>
+    <string name="filters">ফিল্টার</string>
+    <string name="filter_by_role">ভূমিকা অনুসারে</string>
+    <string name="filter_by_academic_level">শিক্ষা স্তর অনুসারে</string>
+    <string name="clear_filters">পরিষ্কার</string>
+    <string name="clear">পরিষ্কার</string>
+    <string name="no_profiles_found">কোন প্রোফাইল পাওয়া যায়নি</string>
+    <string name="try_adjusting_filters">আপনার অনুসন্ধান বা ফিল্টার পরিবর্তন করে দেখুন</string>
+    <string name="streak">স্ট্রিক</string>
+    <string name="public_profile">পাবলিক প্রোফাইল</string>
+    <string name="joined_since">সদস্য হয়েছেন</string>
+    <string name="days_ago">%1$d দিন আগে</string>
+    <string name="study_statistics">পড়াশোনার পরিসংখ্যান</string>
+    <string name="achievements_unlocked">আনলক করা অর্জন</string>
+    <string name="stats_private">এই ব্যবহারকারী তাদের পরিসংখ্যান ব্যক্তিগত করেছেন</string>
+    <string name="unknown_error">একটি অপ্রত্যাশিত ত্রুটি ঘটেছে</string>
 </resources>
+
 

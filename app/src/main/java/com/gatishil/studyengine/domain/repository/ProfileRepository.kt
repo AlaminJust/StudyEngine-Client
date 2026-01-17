@@ -151,5 +151,27 @@ interface ProfileRepository {
         linkedIn: String?,
         gitHub: String?
     ): Resource<UserAcademicProfile>
+
+    // ==================== Public Profiles ====================
+
+    /**
+     * Get a public profile by user ID
+     */
+    suspend fun getPublicProfile(userId: String): Resource<PublicProfile>
+
+    /**
+     * Discover public profiles with filtering and pagination
+     */
+    suspend fun discoverProfiles(
+        searchTerm: String? = null,
+        role: String? = null,
+        academicLevel: String? = null,
+        institutionType: String? = null,
+        institutionCountry: String? = null,
+        major: String? = null,
+        department: String? = null,
+        page: Int = 1,
+        pageSize: Int = 20
+    ): Resource<PublicProfilesPage>
 }
 

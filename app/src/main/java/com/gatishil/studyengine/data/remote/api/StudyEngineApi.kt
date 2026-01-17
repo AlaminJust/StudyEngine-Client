@@ -371,6 +371,19 @@ interface StudyEngineApi {
         @Path("userId") userId: String
     ): Response<PublicProfileDto>
 
+    @GET("profile/discover")
+    suspend fun discoverProfiles(
+        @Query("searchTerm") searchTerm: String? = null,
+        @Query("role") role: String? = null,
+        @Query("academicLevel") academicLevel: String? = null,
+        @Query("institutionType") institutionType: String? = null,
+        @Query("institutionCountry") institutionCountry: String? = null,
+        @Query("major") major: String? = null,
+        @Query("department") department: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20
+    ): Response<PublicProfilesPagedResponseDto>
+
     @GET("profile/preferences")
     suspend fun getPreferences(): Response<UserPreferencesDto>
 

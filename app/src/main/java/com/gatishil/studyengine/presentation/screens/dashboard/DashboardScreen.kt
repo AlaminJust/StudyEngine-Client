@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -45,6 +46,8 @@ fun DashboardScreen(
     onNavigateToAddBook: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToAcademic: () -> Unit,
+    onNavigateToDiscoverProfiles: () -> Unit,
+    onNavigateToPublicProfile: (String) -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -182,6 +185,31 @@ fun DashboardScreen(
                                 // Add Book card at the end
                                 item {
                                     AddBookCard(onClick = onNavigateToAddBook)
+                                }
+                            }
+                        }
+                    }
+
+                    // Discover Profiles Section
+                    if (uiState.relatedProfiles.isNotEmpty()) {
+                        item {
+                            SectionHeader(
+                                title = stringResource(R.string.discover_learners),
+                                actionLabel = stringResource(R.string.view_all),
+                                onAction = onNavigateToDiscoverProfiles
+                            )
+                        }
+
+                        item {
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(uiState.relatedProfiles) { profile ->
+                                    RelatedProfileCard(
+                                        profile = profile,
+                                        onClick = { onNavigateToPublicProfile(profile.id) }
+                                    )
                                 }
                             }
                         }
@@ -863,6 +891,125 @@ private fun EmptyBooksCard(onAddBook: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onAddBook) {
                 Text(stringResource(R.string.add_book))
+            }
+        }
+    }
+}
+
+@Composable
+private fun RelatedProfileCard(
+    profile: com.gatishil.studyengine.domain.model.PublicProfileCard,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier
+            .width(160.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Avatar
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = profile.name.firstOrNull()?.uppercase() ?: "?",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Name
+            Text(
+                text = profile.name,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
+
+            // Role
+            profile.role?.let { role ->
+                Text(
+                    text = role,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Stats row
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                profile.currentStreak?.let { streak ->
+                    if (streak > 0) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Whatshot,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.tertiary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = streak.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                    }
+                }
+
+                profile.totalBooksCompleted?.let { books ->
+                    if (books > 0) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MenuBook,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = books.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
             }
         }
     }

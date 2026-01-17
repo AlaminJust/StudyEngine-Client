@@ -482,4 +482,24 @@
     <string name="channel_achievements_description">Notifications when you unlock new achievements</string>
     <string name="channel_general">General</string>
     <string name="channel_general_description">General notifications from StudyEngine</string>
+    <!-- Discover Profiles -->
+    <string name="discover_profiles">Discover Profiles</string>
+    <string name="discover_learners">Discover Learners</string>
+    <string name="search_profiles_hint">Search by name, major, institution…</string>
+    <string name="discover_results_count">%1$d profiles found</string>
+    <string name="filters">Filters</string>
+    <string name="filter_by_role">Filter by Role</string>
+    <string name="filter_by_academic_level">Filter by Academic Level</string>
+    <string name="clear_filters">Clear</string>
+    <string name="clear">Clear</string>
+    <string name="no_profiles_found">No profiles found</string>
+    <string name="try_adjusting_filters">Try adjusting your search or filters</string>
+    <string name="streak">streak</string>
+    <string name="public_profile">Public Profile</string>
+    <string name="joined_since">Member since</string>
+    <string name="days_ago">%1$d days ago</string>
+    <string name="study_statistics">Study Statistics</string>
+    <string name="achievements_unlocked">Achievements Unlocked</string>
+    <string name="stats_private">This user has made their statistics private</string>
+    <string name="unknown_error">An unexpected error occurred</string>
 </resources>
