@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gatishil.studyengine.R
+import com.gatishil.studyengine.domain.model.AnswerOptionDetail
 import com.gatishil.studyengine.domain.model.ExamAnswerResult
 import com.gatishil.studyengine.domain.model.ExamResult
 import com.gatishil.studyengine.presentation.common.components.LoadingScreen
@@ -450,45 +451,26 @@ private fun AnswerResultCard(
             // Question text
             Text(
                 text = answerResult.questionText,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Your answer
-            if (answerResult.selectedOptionIds.isNotEmpty()) {
-                Row {
-                    Text(
-                        text = stringResource(R.string.exam_your_answer),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-            }
-
-            // Correct answer (if wrong)
-            if (!isCorrect) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Row {
-                    Icon(
-                        imageVector = Icons.Filled.Lightbulb,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = Color(0xFF4CAF50)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.exam_correct_answer),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color(0xFF4CAF50)
-                    )
+            // Options list
+            answerResult.options.forEachIndexed { index, option ->
+                AnswerOptionItem(
+                    option = option,
+                    optionLabel = ('A' + index).toString()
+                )
+                if (index < answerResult.options.size - 1) {
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
             // Explanation
             answerResult.explanation?.let { explanation ->
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     shape = RoundedCornerShape(8.dp)
@@ -516,6 +498,107 @@ private fun AnswerResultCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnswerOptionItem(
+    option: AnswerOptionDetail,
+    optionLabel: String
+) {
+    val (bgColor, borderColor, iconColor) = when {
+        option.isCorrect && option.wasSelected -> Triple(
+            Color(0xFF4CAF50).copy(alpha = 0.15f),
+            Color(0xFF4CAF50),
+            Color(0xFF4CAF50)
+        )
+        option.isCorrect && !option.wasSelected -> Triple(
+            Color(0xFF4CAF50).copy(alpha = 0.1f),
+            Color(0xFF4CAF50).copy(alpha = 0.5f),
+            Color(0xFF4CAF50)
+        )
+        !option.isCorrect && option.wasSelected -> Triple(
+            Color(0xFFF44336).copy(alpha = 0.15f),
+            Color(0xFFF44336),
+            Color(0xFFF44336)
+        )
+        else -> Triple(
+            MaterialTheme.colorScheme.surfaceContainerLow,
+            MaterialTheme.colorScheme.outlineVariant,
+            MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = if (option.wasSelected || option.isCorrect) 1.5.dp else 1.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(8.dp)
+            ),
+        color = bgColor,
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Option label
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(
+                        when {
+                            option.isCorrect -> Color(0xFF4CAF50)
+                            option.wasSelected -> Color(0xFFF44336)
+                            else -> MaterialTheme.colorScheme.surfaceContainerHigh
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = optionLabel,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = when {
+                        option.isCorrect || option.wasSelected -> Color.White
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // Option text
+            Text(
+                text = option.optionText,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            // Status icon
+            when {
+                option.isCorrect -> {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = Color(0xFF4CAF50),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                option.wasSelected && !option.isCorrect -> {
+                    Icon(
+                        imageVector = Icons.Default.Cancel,
+                        contentDescription = null,
+                        tint = Color(0xFFF44336),
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }

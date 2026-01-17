@@ -3,16 +3,27 @@ package com.gatishil.studyengine.domain.model
 import java.time.LocalDateTime
 
 /**
- * Question difficulty levels
+ * Question difficulty levels - matches backend enum values
  */
 enum class QuestionDifficulty(val value: Int) {
-    EASY(0),
-    MEDIUM(1),
-    HARD(2);
+    EASY(1),
+    MEDIUM(2),
+    HARD(3),
+    EXPERT(4);
 
     companion object {
         fun fromValue(value: Int): QuestionDifficulty {
             return entries.find { it.value == value } ?: MEDIUM
+        }
+
+        fun fromString(value: String): QuestionDifficulty {
+            return when (value.uppercase()) {
+                "EASY" -> EASY
+                "MEDIUM" -> MEDIUM
+                "HARD" -> HARD
+                "EXPERT" -> EXPERT
+                else -> MEDIUM
+            }
         }
     }
 }
@@ -91,6 +102,16 @@ data class ExamQuestionSet(
 )
 
 /**
+ * Option detail for answer review
+ */
+data class AnswerOptionDetail(
+    val id: String,
+    val optionText: String,
+    val isCorrect: Boolean,
+    val wasSelected: Boolean
+)
+
+/**
  * Answer result for a single question
  */
 data class ExamAnswerResult(
@@ -99,6 +120,7 @@ data class ExamAnswerResult(
     val explanation: String?,
     val selectedOptionIds: List<String>,
     val correctOptionIds: List<String>,
+    val options: List<AnswerOptionDetail>,
     val isCorrect: Boolean,
     val pointsEarned: Int,
     val maxPoints: Int

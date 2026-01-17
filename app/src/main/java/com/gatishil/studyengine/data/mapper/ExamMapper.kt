@@ -61,7 +61,7 @@ object ExamMapper {
         return ExamQuestion(
             id = id,
             questionText = questionText,
-            difficulty = QuestionDifficulty.fromValue(difficulty),
+            difficulty = QuestionDifficulty.fromString(difficulty),
             allowMultipleCorrectAnswers = allowMultipleCorrectAnswers,
             points = points,
             options = options.map { it.toDomain() }.sortedBy { it.displayOrder }
@@ -77,7 +77,7 @@ object ExamMapper {
             subjectName = subjectName,
             totalQuestions = totalQuestions,
             totalPoints = totalPoints,
-            difficultyFilter = difficultyFilter?.let { QuestionDifficulty.fromValue(it) },
+            difficultyFilter = difficultyFilter?.let { QuestionDifficulty.fromString(it) },
             timeLimitMinutes = timeLimitMinutes,
             startedAt = parseDateTime(startedAt),
             expiresAt = expiresAt?.let { parseDateTime(it) },
@@ -90,7 +90,7 @@ object ExamMapper {
         return StartExamRequestDto(
             subjectId = subjectId,
             questionCount = questionCount,
-            difficultyFilter = difficultyFilter?.value,
+            difficultyFilter = difficultyFilter?.name,
             timeLimitMinutes = timeLimitMinutes
         )
     }
@@ -111,6 +111,16 @@ object ExamMapper {
         )
     }
 
+    // Answer option detail mapping
+    fun AnswerOptionDetailDto.toDomain(): AnswerOptionDetail {
+        return AnswerOptionDetail(
+            id = id,
+            optionText = optionText,
+            isCorrect = isCorrect,
+            wasSelected = wasSelected
+        )
+    }
+
     // Exam answer result mapping
     fun ExamAnswerResultDto.toDomain(): ExamAnswerResult {
         return ExamAnswerResult(
@@ -119,6 +129,7 @@ object ExamMapper {
             explanation = explanation,
             selectedOptionIds = selectedOptionIds,
             correctOptionIds = correctOptionIds,
+            options = options.map { it.toDomain() },
             isCorrect = isCorrect,
             pointsEarned = pointsEarned,
             maxPoints = maxPoints

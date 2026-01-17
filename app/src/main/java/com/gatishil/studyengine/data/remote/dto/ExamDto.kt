@@ -60,7 +60,7 @@ data class QuestionForExamDto(
     @SerialName("questionText")
     val questionText: String,
     @SerialName("difficulty")
-    val difficulty: Int,
+    val difficulty: String,
     @SerialName("allowMultipleCorrectAnswers")
     val allowMultipleCorrectAnswers: Boolean,
     @SerialName("points")
@@ -74,7 +74,7 @@ data class AvailableQuestionCountDto(
     @SerialName("subjectId")
     val subjectId: String,
     @SerialName("difficulty")
-    val difficulty: Int?,
+    val difficulty: String?,
     @SerialName("availableCount")
     val availableCount: Int
 )
@@ -88,7 +88,7 @@ data class StartExamRequestDto(
     @SerialName("QuestionCount")
     val questionCount: Int = 10,
     @SerialName("DifficultyFilter")
-    val difficultyFilter: Int? = null,
+    val difficultyFilter: String? = null,
     @SerialName("TimeLimitMinutes")
     val timeLimitMinutes: Int? = null
 )
@@ -108,7 +108,7 @@ data class ExamQuestionSetDto(
     @SerialName("totalPoints")
     val totalPoints: Int,
     @SerialName("difficultyFilter")
-    val difficultyFilter: Int?,
+    val difficultyFilter: String?,
     @SerialName("timeLimitMinutes")
     val timeLimitMinutes: Int?,
     @SerialName("startedAt")
@@ -136,6 +136,18 @@ data class SubmitExamRequestDto(
 )
 
 @Serializable
+data class AnswerOptionDetailDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("optionText")
+    val optionText: String,
+    @SerialName("isCorrect")
+    val isCorrect: Boolean,
+    @SerialName("wasSelected")
+    val wasSelected: Boolean
+)
+
+@Serializable
 data class ExamAnswerResultDto(
     @SerialName("questionId")
     val questionId: String,
@@ -147,6 +159,8 @@ data class ExamAnswerResultDto(
     val selectedOptionIds: List<String>,
     @SerialName("correctOptionIds")
     val correctOptionIds: List<String>,
+    @SerialName("options")
+    val options: List<AnswerOptionDetailDto> = emptyList(),
     @SerialName("isCorrect")
     val isCorrect: Boolean,
     @SerialName("pointsEarned")

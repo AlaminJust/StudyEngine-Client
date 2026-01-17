@@ -542,7 +542,7 @@ interface StudyEngineApi {
     @GET("questions/count")
     suspend fun getAvailableQuestionCount(
         @Query("subjectId") subjectId: String,
-        @Query("difficulty") difficulty: Int? = null
+        @Query("difficulty") difficulty: String? = null
     ): Response<AvailableQuestionCountDto>
 
     // ==================== Exam Endpoints ====================

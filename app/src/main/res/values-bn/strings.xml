@@ -551,6 +551,7 @@
     <string name="exam_difficulty_easy">সহজ</string>
     <string name="exam_difficulty_medium">মাঝারি</string>
     <string name="exam_difficulty_hard">কঠিন</string>
+    <string name="exam_difficulty_expert">বিশেষজ্ঞ</string>
     <string name="exam_time_limit_label">সময়সীমা</string>
     <string name="exam_time_no_limit">সীমা নেই</string>
     <string name="exam_time_minutes">%1$d মিনিট</string>

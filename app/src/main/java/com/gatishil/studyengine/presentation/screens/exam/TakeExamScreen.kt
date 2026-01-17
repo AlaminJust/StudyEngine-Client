@@ -438,6 +438,7 @@ private fun DifficultyBadge(difficulty: QuestionDifficulty) {
         QuestionDifficulty.EASY -> stringResource(R.string.exam_difficulty_easy) to Color(0xFF4CAF50)
         QuestionDifficulty.MEDIUM -> stringResource(R.string.exam_difficulty_medium) to Color(0xFFFF9800)
         QuestionDifficulty.HARD -> stringResource(R.string.exam_difficulty_hard) to Color(0xFFF44336)
+        QuestionDifficulty.EXPERT -> stringResource(R.string.exam_difficulty_expert) to Color(0xFF9C27B0)
     }
 
     Surface(

@@ -63,7 +63,7 @@ class ExamRepositoryImpl @Inject constructor(
         difficulty: QuestionDifficulty?
     ): Resource<Int> {
         return try {
-            val response = api.getAvailableQuestionCount(subjectId, difficulty?.value)
+            val response = api.getAvailableQuestionCount(subjectId, difficulty?.name)
 
             if (response.isSuccessful) {
                 val count = response.body()?.availableCount ?: 0
