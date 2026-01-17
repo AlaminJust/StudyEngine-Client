@@ -491,5 +491,38 @@ interface StudyEngineApi {
     suspend fun sendTestNotification(
         @Body request: SendTestNotificationRequestDto
     ): Response<TestNotificationResponseDto>
+
+    // ==================== Custom Reminders Endpoints ====================
+
+    @POST("reminders")
+    suspend fun createReminder(
+        @Body request: CreateCustomReminderRequestDto
+    ): Response<CustomReminderResponseDto>
+
+    @GET("reminders/{id}")
+    suspend fun getReminderById(
+        @Path("id") id: String
+    ): Response<CustomReminderResponseDto>
+
+    @GET("reminders/upcoming")
+    suspend fun getUpcomingReminders(
+        @Query("limit") limit: Int = 20
+    ): Response<UpcomingRemindersResponseDto>
+
+    @GET("reminders")
+    suspend fun getAllReminders(
+        @Query("limit") limit: Int = 50
+    ): Response<UpcomingRemindersResponseDto>
+
+    @PUT("reminders/{id}")
+    suspend fun updateReminder(
+        @Path("id") id: String,
+        @Body request: UpdateCustomReminderRequestDto
+    ): Response<CustomReminderResponseDto>
+
+    @DELETE("reminders/{id}")
+    suspend fun deleteReminder(
+        @Path("id") id: String
+    ): Response<Unit>
 }
 

@@ -98,7 +98,8 @@ fun StudyEngineNavGraph(
                 onNavigateToDiscoverProfiles = { navController.navigate(Screen.DiscoverProfiles.route) },
                 onNavigateToPublicProfile = { userId ->
                     navController.navigate(Screen.PublicProfile.createRoute(userId))
-                }
+                },
+                onNavigateToReminders = { navController.navigate(Screen.Reminders.route) }
             )
         }
 
@@ -127,6 +128,13 @@ fun StudyEngineNavGraph(
             )
         ) {
             com.gatishil.studyengine.presentation.screens.discover.PublicProfileScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Reminders
+        composable(route = Screen.Reminders.route) {
+            com.gatishil.studyengine.presentation.screens.reminders.RemindersScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

@@ -504,6 +504,22 @@
     <string name="achievements_unlocked">আনলক করা অর্জন</string>
     <string name="stats_private">এই ব্যবহারকারী তাদের পরিসংখ্যান ব্যক্তিগত করেছেন</string>
     <string name="unknown_error">একটি অপ্রত্যাশিত ত্রুটি ঘটেছে</string>
+
+    <!-- Reminders -->
+    <string name="my_reminders">আমার রিমাইন্ডার</string>
+    <string name="reminders_subtitle">আপনার পড়াশোনার লক্ষ্যের জন্য কাস্টম রিমাইন্ডার সেট করুন</string>
+    <string name="add_reminder">রিমাইন্ডার যোগ করুন</string>
+    <string name="edit_reminder">রিমাইন্ডার সম্পাদনা</string>
+    <string name="delete_reminder">রিমাইন্ডার মুছুন</string>
+    <string name="delete_reminder_message">আপনি কি নিশ্চিত যে এই রিমাইন্ডারটি মুছে ফেলতে চান?</string>
+    <string name="reminder_title">শিরোনাম</string>
+    <string name="reminder_message">বার্তা</string>
+    <string name="upcoming_reminders">আসন্ন রিমাইন্ডার</string>
+    <string name="past_reminders">আগের রিমাইন্ডার</string>
+    <string name="no_reminders">এখনও কোন রিমাইন্ডার নেই</string>
+    <string name="no_reminders_message">আপনার পড়াশোনার লক্ষ্যে ট্র্যাকে থাকতে কাস্টম রিমাইন্ডার তৈরি করুন</string>
+    <string name="upcoming_reminders_count">%1$d টি আসন্ন</string>
+    <string name="no_upcoming_reminders">কোন আসন্ন রিমাইন্ডার নেই</string>
 </resources>
 
 

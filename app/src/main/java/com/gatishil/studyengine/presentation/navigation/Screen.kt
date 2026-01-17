@@ -68,6 +68,9 @@ sealed class Screen(val route: String) {
         fun createRoute(userId: String) = "profiles/$userId"
     }
 
+    // Reminders
+    data object Reminders : Screen("reminders")
+
     // Legal
     data object PrivacyPolicy : Screen("legal/privacy-policy")
     data object TermsOfService : Screen("legal/terms-of-service")

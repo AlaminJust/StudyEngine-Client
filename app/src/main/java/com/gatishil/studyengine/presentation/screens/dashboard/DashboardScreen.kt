@@ -48,6 +48,7 @@ fun DashboardScreen(
     onNavigateToAcademic: () -> Unit,
     onNavigateToDiscoverProfiles: () -> Unit,
     onNavigateToPublicProfile: (String) -> Unit,
+    onNavigateToReminders: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -131,6 +132,14 @@ fun DashboardScreen(
                             isStreakActive = uiState.quickStats?.isStreakActive ?: false,
                             onUpcomingClick = onNavigateToUpcomingSessions,
                             onStatsClick = onNavigateToStats
+                        )
+                    }
+
+                    // Reminders Quick Access Card
+                    item {
+                        RemindersQuickCard(
+                            upcomingCount = uiState.upcomingRemindersCount,
+                            onClick = onNavigateToReminders
                         )
                     }
 
@@ -1011,6 +1020,74 @@ private fun RelatedProfileCard(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RemindersQuickCard(
+    upcomingCount: Int,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.NotificationsActive,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Column {
+                    Text(
+                        text = stringResource(R.string.my_reminders),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = if (upcomingCount > 0) {
+                            stringResource(R.string.upcoming_reminders_count, upcomingCount)
+                        } else {
+                            stringResource(R.string.no_upcoming_reminders)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

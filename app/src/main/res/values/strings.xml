@@ -502,4 +502,20 @@
     <string name="achievements_unlocked">Achievements Unlocked</string>
     <string name="stats_private">This user has made their statistics private</string>
     <string name="unknown_error">An unexpected error occurred</string>
+
+    <!-- Reminders -->
+    <string name="my_reminders">My Reminders</string>
+    <string name="reminders_subtitle">Set custom reminders for your study goals</string>
+    <string name="add_reminder">Add Reminder</string>
+    <string name="edit_reminder">Edit Reminder</string>
+    <string name="delete_reminder">Delete Reminder</string>
+    <string name="delete_reminder_message">Are you sure you want to delete this reminder?</string>
+    <string name="reminder_title">Title</string>
+    <string name="reminder_message">Message</string>
+    <string name="upcoming_reminders">Upcoming Reminders</string>
+    <string name="past_reminders">Past Reminders</string>
+    <string name="no_reminders">No Reminders Yet</string>
+    <string name="no_reminders_message">Create custom reminders to stay on track with your study goals</string>
+    <string name="upcoming_reminders_count">%1$d upcoming</string>
+    <string name="no_upcoming_reminders">No upcoming reminders</string>
 </resources>

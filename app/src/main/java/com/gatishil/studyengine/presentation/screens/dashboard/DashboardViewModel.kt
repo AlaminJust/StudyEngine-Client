@@ -11,6 +11,7 @@ import com.gatishil.studyengine.domain.model.QuickStats
 import com.gatishil.studyengine.domain.model.StudySession
 import com.gatishil.studyengine.domain.repository.BookRepository
 import com.gatishil.studyengine.domain.repository.ProfileRepository
+import com.gatishil.studyengine.domain.repository.ReminderRepository
 import com.gatishil.studyengine.domain.repository.SessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -27,6 +28,7 @@ data class DashboardUiState(
     val totalPagesReadToday: Int = 0,
     val quickStats: QuickStats? = null,
     val relatedProfiles: List<PublicProfileCard> = emptyList(),
+    val upcomingRemindersCount: Int = 0,
     val error: String? = null
 )
 
@@ -35,6 +37,7 @@ class DashboardViewModel @Inject constructor(
     private val bookRepository: BookRepository,
     private val sessionRepository: SessionRepository,
     private val profileRepository: ProfileRepository,
+    private val reminderRepository: ReminderRepository,
     private val api: StudyEngineApi
 ) : ViewModel() {
 
@@ -125,6 +128,7 @@ class DashboardViewModel @Inject constructor(
             sessionRepository.refreshSessions()
             loadQuickStats()
             loadRelatedProfiles()
+            loadUpcomingReminders()
         }
     }
 
@@ -172,6 +176,26 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
+    private fun loadUpcomingReminders() {
+        viewModelScope.launch {
+            try {
+                val result = reminderRepository.getUpcomingReminders(10)
+                when (result) {
+                    is Resource.Success -> {
+                        _uiState.update {
+                            it.copy(upcomingRemindersCount = result.data.totalCount)
+                        }
+                    }
+                    else -> {
+                        // Silently fail - not critical
+                    }
+                }
+            } catch (e: Exception) {
+                // Silently fail for reminders - not critical
+            }
+        }
+    }
+
     fun refresh() {
         viewModelScope.launch {
             _uiState.update { it.copy(isRefreshing = true) }
@@ -180,6 +204,7 @@ class DashboardViewModel @Inject constructor(
             sessionRepository.refreshSessions()
             loadQuickStats()
             loadRelatedProfiles()
+            loadUpcomingReminders()
 
             _uiState.update { it.copy(isRefreshing = false) }
         }
