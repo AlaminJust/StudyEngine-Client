@@ -553,7 +553,7 @@ interface StudyEngineApi {
     ): Response<ExamQuestionSetDto>
 
     @GET("exams/current")
-    suspend fun getCurrentExam(): Response<ExamQuestionSetDto>
+    suspend fun getCurrentExam(): Response<ExamQuestionSetDto?>
 
     @POST("exams/submit")
     suspend fun submitExam(

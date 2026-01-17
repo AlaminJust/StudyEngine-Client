@@ -311,7 +311,7 @@ private fun SubjectCard(
             .height(140.dp),
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Box(
             modifier = Modifier
@@ -320,6 +320,20 @@ private fun SubjectCard(
                     brush = Brush.linearGradient(colors = gradientColors)
                 )
         ) {
+            // Subtle overlay for better text contrast
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.1f)
+                            )
+                        )
+                    )
+            )
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -331,7 +345,7 @@ private fun SubjectCard(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f)),
+                        .background(Color.White.copy(alpha = 0.25f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -351,11 +365,23 @@ private fun SubjectCard(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = stringResource(R.string.exam_question_count, subject.questionCount),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Quiz,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.9f),
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.exam_question_count, subject.questionCount),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
                 }
             }
         }
@@ -569,7 +595,7 @@ private fun QuickStatsSection(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         QuickStatCard(
-            icon = Icons.Outlined.Assignment,
+            icon = Icons.Outlined.Description,
             value = totalAttempts.toString(),
             label = stringResource(R.string.exam_stat_attempts),
             color = MaterialTheme.colorScheme.primary,
@@ -630,15 +656,16 @@ private fun QuickStatCard(
 // Helper functions for subject styling
 private fun getSubjectGradient(subjectName: String): List<Color> {
     val hash = subjectName.hashCode()
+    // Professional, modern gradient colors that work well in both light and dark modes
     val gradients = listOf(
-        listOf(Color(0xFF667eea), Color(0xFF764ba2)),
-        listOf(Color(0xFF11998e), Color(0xFF38ef7d)),
-        listOf(Color(0xFFf093fb), Color(0xFFf5576c)),
-        listOf(Color(0xFF4facfe), Color(0xFF00f2fe)),
-        listOf(Color(0xFFfa709a), Color(0xFFfee140)),
-        listOf(Color(0xFF30cfd0), Color(0xFF330867)),
-        listOf(Color(0xFFa8edea), Color(0xFFfed6e3)),
-        listOf(Color(0xFF5ee7df), Color(0xFFb490ca))
+        listOf(Color(0xFF6366F1), Color(0xFF8B5CF6)), // Indigo to Purple
+        listOf(Color(0xFF0EA5E9), Color(0xFF06B6D4)), // Sky to Cyan
+        listOf(Color(0xFF10B981), Color(0xFF34D399)), // Emerald
+        listOf(Color(0xFFF59E0B), Color(0xFFFBBF24)), // Amber
+        listOf(Color(0xFFEF4444), Color(0xFFF87171)), // Red
+        listOf(Color(0xFF8B5CF6), Color(0xFFA78BFA)), // Violet
+        listOf(Color(0xFF14B8A6), Color(0xFF2DD4BF)), // Teal
+        listOf(Color(0xFFEC4899), Color(0xFFF472B6))  // Pink
     )
     return gradients[kotlin.math.abs(hash) % gradients.size]
 }
@@ -655,7 +682,7 @@ private fun getSubjectIcon(subjectName: String): ImageVector {
         name.contains("english") -> Icons.Outlined.Translate
         name.contains("geography") -> Icons.Outlined.Public
         name.contains("computer") -> Icons.Outlined.Computer
-        name.contains("economics") -> Icons.Outlined.TrendingUp
+        name.contains("economics") -> Icons.Outlined.Analytics
         else -> Icons.Outlined.School
     }
 }

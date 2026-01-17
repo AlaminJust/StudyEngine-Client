@@ -310,11 +310,12 @@ private fun QuestionCountSelector(
             }
 
             Slider(
-                value = count.toFloat(),
+                value = count.toFloat().coerceIn(5f, maxOf(5f, maxCount.toFloat())),
                 onValueChange = { onCountChange(it.toInt()) },
                 valueRange = 5f..maxOf(5f, maxCount.toFloat()),
-                steps = (maxCount / 5) - 1,
-                modifier = Modifier.fillMaxWidth()
+                steps = maxOf(0, (maxCount / 5) - 1),
+                modifier = Modifier.fillMaxWidth(),
+                enabled = maxCount > 5
             )
 
             Text(

@@ -31,7 +31,7 @@ object ExamMapper {
             description = description,
             iconUrl = iconUrl,
             questionCount = questionCount,
-            isActive = true
+            isActive = isActive
         )
     }
 

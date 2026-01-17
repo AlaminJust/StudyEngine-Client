@@ -35,6 +35,8 @@ data class SubjectListDto(
     val description: String?,
     @SerialName("iconUrl")
     val iconUrl: String?,
+    @SerialName("isActive")
+    val isActive: Boolean = true,
     @SerialName("questionCount")
     val questionCount: Int
 )

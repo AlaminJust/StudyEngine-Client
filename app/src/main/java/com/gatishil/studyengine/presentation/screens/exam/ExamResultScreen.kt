@@ -279,7 +279,7 @@ private fun StatsSection(result: ExamResult) {
             modifier = Modifier.weight(1f)
         )
         StatCard(
-            icon = Icons.Outlined.HelpOutline,
+            icon = Icons.Outlined.Help,
             value = (result.totalQuestions - result.answeredQuestions).toString(),
             label = stringResource(R.string.exam_stat_skipped),
             color = MaterialTheme.colorScheme.outline,
