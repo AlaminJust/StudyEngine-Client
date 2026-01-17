@@ -322,6 +322,7 @@ fun StudyEngineApp(
         Screen.Dashboard.route,
         Screen.Books.route,
         Screen.TodaySessions.route,
+        Screen.Exams.route,
         Screen.Settings.route
     )
 
@@ -345,6 +346,7 @@ fun StudyEngineApp(
                                         BottomNavItem.HOME -> Icons.Default.Home
                                         BottomNavItem.BOOKS -> Icons.AutoMirrored.Filled.MenuBook
                                         BottomNavItem.SESSIONS -> Icons.Default.CalendarToday
+                                        BottomNavItem.EXAMS -> Icons.Default.Quiz
                                         BottomNavItem.SETTINGS -> Icons.Default.Settings
                                     },
                                     contentDescription = stringResource(navItem.titleResId)

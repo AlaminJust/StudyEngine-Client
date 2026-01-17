@@ -71,6 +71,17 @@ sealed class Screen(val route: String) {
     // Reminders
     data object Reminders : Screen("reminders")
 
+    // Exams
+    data object Exams : Screen("exams")
+    data object StartExam : Screen("exams/start/{subjectId}") {
+        fun createRoute(subjectId: String) = "exams/start/$subjectId"
+    }
+    data object TakeExam : Screen("exams/take")
+    data object ExamResult : Screen("exams/result/{examAttemptId}") {
+        fun createRoute(examAttemptId: String) = "exams/result/$examAttemptId"
+    }
+    data object ExamHistory : Screen("exams/history")
+
     // Legal
     data object PrivacyPolicy : Screen("legal/privacy-policy")
     data object TermsOfService : Screen("legal/terms-of-service")
@@ -87,6 +98,7 @@ enum class BottomNavItem(
     HOME("dashboard", com.gatishil.studyengine.R.string.nav_home, "home"),
     BOOKS("books", com.gatishil.studyengine.R.string.nav_books, "book"),
     SESSIONS("sessions/today", com.gatishil.studyengine.R.string.nav_sessions, "calendar_today"),
+    EXAMS("exams", com.gatishil.studyengine.R.string.nav_exams, "quiz"),
     SETTINGS("settings", com.gatishil.studyengine.R.string.nav_settings, "settings")
 }
 

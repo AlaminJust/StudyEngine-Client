@@ -524,5 +524,58 @@ interface StudyEngineApi {
     suspend fun deleteReminder(
         @Path("id") id: String
     ): Response<Unit>
+
+    // ==================== Subject Endpoints ====================
+
+    @GET("subjects")
+    suspend fun getSubjects(
+        @Query("includeInactive") includeInactive: Boolean = false
+    ): Response<List<SubjectListDto>>
+
+    @GET("subjects/{id}")
+    suspend fun getSubjectById(
+        @Path("id") id: String
+    ): Response<SubjectDto>
+
+    // ==================== Question Endpoints ====================
+
+    @GET("questions/count")
+    suspend fun getAvailableQuestionCount(
+        @Query("subjectId") subjectId: String,
+        @Query("difficulty") difficulty: Int? = null
+    ): Response<AvailableQuestionCountDto>
+
+    // ==================== Exam Endpoints ====================
+
+    @POST("exams/start")
+    suspend fun startExam(
+        @Body request: StartExamRequestDto
+    ): Response<ExamQuestionSetDto>
+
+    @GET("exams/current")
+    suspend fun getCurrentExam(): Response<ExamQuestionSetDto>
+
+    @POST("exams/submit")
+    suspend fun submitExam(
+        @Body request: SubmitExamRequestDto
+    ): Response<ExamResultDto>
+
+    @GET("exams/{examAttemptId}/result")
+    suspend fun getExamResult(
+        @Path("examAttemptId") examAttemptId: String
+    ): Response<ExamResultDto>
+
+    @GET("exams/history")
+    suspend fun getExamHistory(
+        @Query("subjectId") subjectId: String? = null,
+        @Query("status") status: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20
+    ): Response<ExamAttemptPagedResponseDto>
+
+    @POST("exams/{examAttemptId}/cancel")
+    suspend fun cancelExam(
+        @Path("examAttemptId") examAttemptId: String
+    ): Response<Unit>
 }
 

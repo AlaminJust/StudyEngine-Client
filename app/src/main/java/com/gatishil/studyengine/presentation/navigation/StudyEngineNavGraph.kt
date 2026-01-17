@@ -139,6 +139,84 @@ fun StudyEngineNavGraph(
             )
         }
 
+        // Exams
+        composable(route = Screen.Exams.route) {
+            com.gatishil.studyengine.presentation.screens.exam.ExamListScreen(
+                onNavigateToStartExam = { subjectId ->
+                    navController.navigate(Screen.StartExam.createRoute(subjectId))
+                },
+                onNavigateToContinueExam = {
+                    navController.navigate(Screen.TakeExam.route)
+                },
+                onNavigateToExamHistory = {
+                    navController.navigate(Screen.ExamHistory.route)
+                },
+                onNavigateToExamResult = { examAttemptId ->
+                    navController.navigate(Screen.ExamResult.createRoute(examAttemptId))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.StartExam.route,
+            arguments = listOf(
+                navArgument("subjectId") { type = NavType.StringType }
+            )
+        ) {
+            com.gatishil.studyengine.presentation.screens.exam.StartExamScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onExamStarted = {
+                    navController.navigate(Screen.TakeExam.route) {
+                        popUpTo(Screen.StartExam.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(route = Screen.TakeExam.route) {
+            com.gatishil.studyengine.presentation.screens.exam.TakeExamScreen(
+                onNavigateBack = {
+                    navController.navigate(Screen.Exams.route) {
+                        popUpTo(Screen.TakeExam.route) { inclusive = true }
+                    }
+                },
+                onExamCompleted = { examAttemptId ->
+                    navController.navigate(Screen.ExamResult.createRoute(examAttemptId)) {
+                        popUpTo(Screen.TakeExam.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.ExamResult.route,
+            arguments = listOf(
+                navArgument("examAttemptId") { type = NavType.StringType }
+            )
+        ) {
+            com.gatishil.studyengine.presentation.screens.exam.ExamResultScreen(
+                onNavigateBack = {
+                    navController.navigate(Screen.Exams.route) {
+                        popUpTo(Screen.ExamResult.route) { inclusive = true }
+                    }
+                },
+                onRetakeExam = { subjectId ->
+                    navController.navigate(Screen.StartExam.createRoute(subjectId)) {
+                        popUpTo(Screen.ExamResult.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(route = Screen.ExamHistory.route) {
+            com.gatishil.studyengine.presentation.screens.exam.ExamHistoryScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToResult = { examAttemptId ->
+                    navController.navigate(Screen.ExamResult.createRoute(examAttemptId))
+                }
+            )
+        }
+
         // Stats
         composable(route = Screen.Stats.route) {
             com.gatishil.studyengine.presentation.screens.stats.StatsScreen(
