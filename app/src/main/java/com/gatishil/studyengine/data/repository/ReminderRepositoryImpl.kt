@@ -9,6 +9,8 @@ import com.gatishil.studyengine.domain.model.CustomReminder
 import com.gatishil.studyengine.domain.model.RemindersList
 import com.gatishil.studyengine.domain.repository.ReminderRepository
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,6 +22,15 @@ class ReminderRepositoryImpl @Inject constructor(
 
     private val dateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
 
+    /**
+     * Convert local datetime to UTC ISO string for sending to backend
+     */
+    private fun toUtcString(localDateTime: LocalDateTime): String {
+        val zonedDateTime = localDateTime.atZone(ZoneId.systemDefault())
+        val utcDateTime = zonedDateTime.withZoneSameInstant(ZoneOffset.UTC)
+        return utcDateTime.format(DateTimeFormatter.ISO_INSTANT)
+    }
+
     override suspend fun createReminder(
         title: String,
         message: String,
@@ -30,7 +41,7 @@ class ReminderRepositoryImpl @Inject constructor(
                 CreateCustomReminderRequestDto(
                     title = title,
                     message = message,
-                    scheduledFor = scheduledFor.format(dateTimeFormatter)
+                    scheduledFor = toUtcString(scheduledFor)
                 )
             )
             if (response.isSuccessful) {
@@ -119,7 +130,7 @@ class ReminderRepositoryImpl @Inject constructor(
                 request = UpdateCustomReminderRequestDto(
                     title = title,
                     message = message,
-                    scheduledFor = scheduledFor?.format(dateTimeFormatter)
+                    scheduledFor = scheduledFor?.let { toUtcString(it) }
                 )
             )
             if (response.isSuccessful) {
