@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -24,6 +25,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gatishil.studyengine.core.util.NotificationPermissionHelper
@@ -49,6 +52,7 @@ fun DashboardScreen(
     onNavigateToDiscoverProfiles: () -> Unit,
     onNavigateToPublicProfile: (String) -> Unit,
     onNavigateToReminders: () -> Unit,
+    onNavigateToExams: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -196,6 +200,49 @@ fun DashboardScreen(
                                     AddBookCard(onClick = onNavigateToAddBook)
                                 }
                             }
+                        }
+                    }
+
+                    // Exam Section
+                    item {
+                        ExamSectionHeader(
+                            hasInProgressExam = uiState.hasInProgressExam,
+                            onNavigateToExams = onNavigateToExams
+                        )
+                    }
+
+                    if (uiState.popularSubjects.isNotEmpty()) {
+                        item {
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(uiState.popularSubjects) { subject ->
+                                    SubjectQuickCard(
+                                        subject = subject,
+                                        onClick = onNavigateToExams
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (uiState.recentExamAttempts.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.recent_exams),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+
+                        items(uiState.recentExamAttempts.take(2)) { attempt ->
+                            RecentExamCard(
+                                attempt = attempt,
+                                onClick = onNavigateToExams,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                            )
                         }
                     }
 
@@ -1077,6 +1124,209 @@ private fun RemindersQuickCard(
                         } else {
                             stringResource(R.string.no_upcoming_reminders)
                         },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun ExamSectionHeader(
+    hasInProgressExam: Boolean,
+    onNavigateToExams: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onNavigateToExams,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Quiz,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Column {
+                    Text(
+                        text = stringResource(R.string.exam_center),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = if (hasInProgressExam) {
+                            stringResource(R.string.exam_in_progress)
+                        } else {
+                            stringResource(R.string.exam_take_now)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (hasInProgressExam) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun SubjectQuickCard(
+    subject: com.gatishil.studyengine.domain.model.Subject,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.width(140.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.MenuBook,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = subject.name,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+
+            Text(
+                text = stringResource(R.string.exam_question_count, subject.questionCount),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun RecentExamCard(
+    attempt: com.gatishil.studyengine.domain.model.ExamAttemptSummary,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scorePercentage = attempt.scorePercentage ?: 0.0
+    val scoreColor = when {
+        scorePercentage >= 80 -> StudyEngineTheme.extendedColors.success
+        scorePercentage >= 60 -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.error
+    }
+
+    Card(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(scoreColor.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "${scorePercentage.toInt()}%",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = scoreColor
+                    )
+                }
+
+                Column {
+                    Text(
+                        text = attempt.subjects.firstOrNull()?.name ?: stringResource(R.string.exam_multi_subject),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.exam_score_summary,
+                            attempt.earnedPoints ?: 0,
+                            attempt.totalPoints
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

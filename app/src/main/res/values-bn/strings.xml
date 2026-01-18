@@ -531,6 +531,9 @@
     <string name="nav_exams">পরীক্ষা</string>
     <string name="exam_center">পরীক্ষা কেন্দ্র</string>
     <string name="exam_center_subtitle">MCQ পরীক্ষার মাধ্যমে আপনার জ্ঞান পরীক্ষা করুন</string>
+    <string name="exam_take_now">এখনই কুইজ দিন</string>
+    <string name="recent_exams">সাম্প্রতিক পরীক্ষা</string>
+    <string name="exam_score_summary">%2$d এর মধ্যে %1$d সঠিক</string>
     <string name="exam_subjects">বিষয়সমূহ</string>
     <string name="exam_recent_attempts">সাম্প্রতিক প্রচেষ্টা</string>
     <string name="exam_no_subjects">কোন বিষয় নেই</string>

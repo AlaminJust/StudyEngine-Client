@@ -6,10 +6,13 @@ import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.data.mapper.StatsMapper
 import com.gatishil.studyengine.data.remote.api.StudyEngineApi
 import com.gatishil.studyengine.domain.model.Book
+import com.gatishil.studyengine.domain.model.ExamAttemptSummary
 import com.gatishil.studyengine.domain.model.PublicProfileCard
 import com.gatishil.studyengine.domain.model.QuickStats
 import com.gatishil.studyengine.domain.model.StudySession
+import com.gatishil.studyengine.domain.model.Subject
 import com.gatishil.studyengine.domain.repository.BookRepository
+import com.gatishil.studyengine.domain.repository.ExamRepository
 import com.gatishil.studyengine.domain.repository.ProfileRepository
 import com.gatishil.studyengine.domain.repository.ReminderRepository
 import com.gatishil.studyengine.domain.repository.SessionRepository
@@ -29,6 +32,10 @@ data class DashboardUiState(
     val quickStats: QuickStats? = null,
     val relatedProfiles: List<PublicProfileCard> = emptyList(),
     val upcomingRemindersCount: Int = 0,
+    // Exam data
+    val recentExamAttempts: List<ExamAttemptSummary> = emptyList(),
+    val popularSubjects: List<Subject> = emptyList(),
+    val hasInProgressExam: Boolean = false,
     val error: String? = null
 )
 
@@ -38,6 +45,7 @@ class DashboardViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val profileRepository: ProfileRepository,
     private val reminderRepository: ReminderRepository,
+    private val examRepository: ExamRepository,
     private val api: StudyEngineApi
 ) : ViewModel() {
 
@@ -47,6 +55,29 @@ class DashboardViewModel @Inject constructor(
     init {
         loadDashboardData()
         observeData()
+        syncDeviceTimezone()
+    }
+
+    /**
+     * Sync device timezone with server to ensure session notifications are sent at correct times
+     */
+    private fun syncDeviceTimezone() {
+        viewModelScope.launch {
+            try {
+                val deviceTimeZone = java.util.TimeZone.getDefault().id
+                profileRepository.getProfile().collect { resource ->
+                    if (resource is Resource.Success) {
+                        val profile = resource.data
+                        // Only update if timezone is different
+                        if (profile.timeZone != deviceTimeZone) {
+                            profileRepository.updateProfile(profile.name, deviceTimeZone)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Silently ignore timezone sync errors
+            }
+        }
     }
 
     private fun observeData() {
@@ -129,6 +160,43 @@ class DashboardViewModel @Inject constructor(
             loadQuickStats()
             loadRelatedProfiles()
             loadUpcomingReminders()
+            loadExamData()
+        }
+    }
+
+    private fun loadExamData() {
+        viewModelScope.launch {
+            try {
+                // Check for in-progress exam
+                val currentExamResult = examRepository.getCurrentExam()
+                val hasInProgress = currentExamResult is Resource.Success && currentExamResult.data != null
+
+                // Load recent exam attempts
+                val historyResult = examRepository.getExamHistory(page = 1, pageSize = 3)
+                val recentAttempts = if (historyResult is Resource.Success) {
+                    historyResult.data.items
+                } else {
+                    emptyList()
+                }
+
+                // Load popular subjects
+                val subjectsResult = examRepository.getSubjects()
+                val subjects = if (subjectsResult is Resource.Success) {
+                    subjectsResult.data.take(4)
+                } else {
+                    emptyList()
+                }
+
+                _uiState.update {
+                    it.copy(
+                        hasInProgressExam = hasInProgress,
+                        recentExamAttempts = recentAttempts,
+                        popularSubjects = subjects
+                    )
+                }
+            } catch (e: Exception) {
+                // Silently fail - not critical
+            }
         }
     }
 
@@ -205,6 +273,7 @@ class DashboardViewModel @Inject constructor(
             loadQuickStats()
             loadRelatedProfiles()
             loadUpcomingReminders()
+            loadExamData()
 
             _uiState.update { it.copy(isRefreshing = false) }
         }

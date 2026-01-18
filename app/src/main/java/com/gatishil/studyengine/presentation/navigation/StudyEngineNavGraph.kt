@@ -99,7 +99,8 @@ fun StudyEngineNavGraph(
                 onNavigateToPublicProfile = { userId ->
                     navController.navigate(Screen.PublicProfile.createRoute(userId))
                 },
-                onNavigateToReminders = { navController.navigate(Screen.Reminders.route) }
+                onNavigateToReminders = { navController.navigate(Screen.Reminders.route) },
+                onNavigateToExams = { navController.navigate(Screen.Exams.route) }
             )
         }
 

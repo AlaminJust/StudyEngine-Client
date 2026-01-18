@@ -529,6 +529,9 @@
     <string name="nav_exams">Exams</string>
     <string name="exam_center">Exam Center</string>
     <string name="exam_center_subtitle">Test your knowledge with MCQ exams</string>
+    <string name="exam_take_now">Take a quiz now</string>
+    <string name="recent_exams">Recent Exams</string>
+    <string name="exam_score_summary">%1$d of %2$d correct</string>
     <string name="exam_subjects">Subjects</string>
     <string name="exam_recent_attempts">Recent Attempts</string>
     <string name="exam_no_subjects">No Subjects Available</string>

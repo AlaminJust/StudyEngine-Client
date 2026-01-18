@@ -134,7 +134,8 @@ class ProfileViewModel @Inject constructor(
 
     fun saveProfileName() {
         val name = _uiState.value.editName
-        val timeZone = _uiState.value.profile?.timeZone ?: "UTC"
+        // Always use device's current timezone to ensure notifications work correctly
+        val timeZone = java.util.TimeZone.getDefault().id
         if (name.isBlank()) return
 
         viewModelScope.launch {
@@ -151,6 +152,31 @@ class ProfileViewModel @Inject constructor(
                     _events.emit(ProfileEvent.Error(result.message ?: "Failed to update profile"))
                 }
                 else -> {}
+            }
+        }
+    }
+
+    /**
+     * Sync device timezone with server to ensure notifications are sent at correct times
+     */
+    fun syncDeviceTimezone() {
+        val deviceTimeZone = java.util.TimeZone.getDefault().id
+        val currentTimeZone = _uiState.value.profile?.timeZone
+
+        // Only update if timezone has changed
+        if (deviceTimeZone != currentTimeZone && currentTimeZone != null) {
+            viewModelScope.launch {
+                val name = _uiState.value.profile?.name ?: return@launch
+                when (val result = profileRepository.updateProfile(name, deviceTimeZone)) {
+                    is Resource.Success -> {
+                        _uiState.update { it.copy(profile = result.data) }
+                        _events.emit(ProfileEvent.ProfileUpdated)
+                    }
+                    is Resource.Error -> {
+                        _events.emit(ProfileEvent.Error("Failed to sync timezone"))
+                    }
+                    else -> {}
+                }
             }
         }
     }
