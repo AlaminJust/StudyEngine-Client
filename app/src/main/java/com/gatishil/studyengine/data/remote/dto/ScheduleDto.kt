@@ -13,14 +13,34 @@ data class UserAvailabilityDto(
     @SerialName("userId")
     val userId: String,
     @SerialName("dayOfWeek")
-    val dayOfWeek: Int,
+    val dayOfWeek: String,  // Backend sends enum as string: "Sunday", "Monday", etc.
     @SerialName("startTime")
     val startTime: String,
     @SerialName("endTime")
     val endTime: String,
     @SerialName("isActive")
     val isActive: Boolean
-)
+) {
+    /**
+     * Convert dayOfWeek string to integer (Sunday=0, Monday=1, etc.)
+     */
+    fun getDayOfWeekInt(): Int {
+        return when (dayOfWeek.lowercase()) {
+            "sunday" -> 0
+            "monday" -> 1
+            "tuesday" -> 2
+            "wednesday" -> 3
+            "thursday" -> 4
+            "friday" -> 5
+            "saturday" -> 6
+            else -> try {
+                dayOfWeek.toInt()
+            } catch (e: Exception) {
+                0
+            }
+        }
+    }
+}
 
 /**
  * Request DTO for creating availability

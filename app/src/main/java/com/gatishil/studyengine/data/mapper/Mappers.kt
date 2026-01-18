@@ -385,7 +385,16 @@ object StudySessionMapper {
 
     private fun parseTime(timeString: String): LocalTime {
         return try {
-            LocalTime.parse(timeString, timeFormatter)
+            val cleanedTime = timeString.trim()
+
+            // Handle TimeOnly format with microseconds (HH:mm:ss.fffffff)
+            val normalizedTime = if (cleanedTime.contains(".")) {
+                cleanedTime.split(".")[0]  // Remove microseconds
+            } else {
+                cleanedTime
+            }
+
+            LocalTime.parse(normalizedTime, timeFormatter)
         } catch (e: Exception) {
             try {
                 LocalTime.parse(timeString)
@@ -511,19 +520,22 @@ object ScheduleMapper {
     private val timeFormatter = DateTimeFormatter.ISO_TIME
 
     // UserAvailability
-    fun UserAvailabilityDto.toDomain(): UserAvailability = UserAvailability(
-        id = id,
-        userId = userId,
-        dayOfWeek = DayOfWeek.of(if (dayOfWeek == 0) 7 else dayOfWeek),
-        startTime = parseTime(startTime),
-        endTime = parseTime(endTime),
-        isActive = isActive
-    )
+    fun UserAvailabilityDto.toDomain(): UserAvailability {
+        val dayOfWeekInt = getDayOfWeekInt()
+        return UserAvailability(
+            id = id,
+            userId = userId,
+            dayOfWeek = DayOfWeek.of(if (dayOfWeekInt == 0) 7 else dayOfWeekInt),
+            startTime = parseTime(startTime),
+            endTime = parseTime(endTime),
+            isActive = isActive
+        )
+    }
 
     fun UserAvailabilityDto.toEntity(): UserAvailabilityEntity = UserAvailabilityEntity(
         id = id,
         userId = userId,
-        dayOfWeek = dayOfWeek,
+        dayOfWeek = getDayOfWeekInt(),
         startTime = startTime,
         endTime = endTime,
         isActive = isActive
@@ -624,7 +636,16 @@ object ScheduleMapper {
 
     private fun parseTime(timeString: String): LocalTime {
         return try {
-            LocalTime.parse(timeString, timeFormatter)
+            val cleanedTime = timeString.trim()
+
+            // Handle TimeOnly format with microseconds (HH:mm:ss.fffffff)
+            val normalizedTime = if (cleanedTime.contains(".")) {
+                cleanedTime.split(".")[0]  // Remove microseconds
+            } else {
+                cleanedTime
+            }
+
+            LocalTime.parse(normalizedTime, timeFormatter)
         } catch (e: Exception) {
             try {
                 LocalTime.parse(timeString)

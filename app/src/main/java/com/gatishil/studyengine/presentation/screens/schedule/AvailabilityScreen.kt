@@ -140,8 +140,8 @@ private fun AvailabilityList(
     availabilities: List<UserAvailabilityDto>,
     onDelete: (String) -> Unit
 ) {
-    // Group by day of week
-    val groupedByDay = availabilities.groupBy { it.dayOfWeek }
+    // Group by day of week (using getDayOfWeekInt to handle string enum from backend)
+    val groupedByDay = availabilities.groupBy { it.getDayOfWeekInt() }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -396,10 +396,29 @@ private fun getDayName(dayValue: Int): String {
 
 private fun formatTime(timeString: String): String {
     return try {
-        val time = LocalTime.parse(timeString)
-        time.toString()
+        // Handle various time formats from backend
+        val cleanedTime = timeString.trim()
+
+        // Try parsing different formats
+        val time = when {
+            // Format: "HH:mm:ss.fffffff" (TimeOnly with microseconds)
+            cleanedTime.contains(".") -> {
+                val parts = cleanedTime.split(".")
+                LocalTime.parse(parts[0])
+            }
+            // Standard formats
+            else -> LocalTime.parse(cleanedTime)
+        }
+
+        // Return in readable format
+        time.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
     } catch (e: Exception) {
-        timeString
+        // Fallback: just return first 5 characters (HH:mm) if possible
+        if (timeString.length >= 5) {
+            timeString.substring(0, 5)
+        } else {
+            timeString
+        }
     }
 }
 

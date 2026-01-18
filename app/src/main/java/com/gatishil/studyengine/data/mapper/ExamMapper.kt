@@ -2,7 +2,11 @@ package com.gatishil.studyengine.data.mapper
 
 import com.gatishil.studyengine.data.remote.dto.*
 import com.gatishil.studyengine.domain.model.*
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
@@ -10,11 +14,29 @@ object ExamMapper {
 
     private val dateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
 
+    /**
+     * Parse datetime string from backend (which is in UTC) to LocalDateTime in the device's timezone.
+     * This ensures proper time comparison for exam timers.
+     */
     private fun parseDateTime(dateString: String): LocalDateTime {
         return try {
-            LocalDateTime.parse(dateString, dateTimeFormatter)
-        } catch (e: DateTimeParseException) {
-            // Try with just date
+            // Try to parse as Instant first (handles Z suffix for UTC)
+            val cleanedString = dateString.trim()
+
+            val instant = if (cleanedString.endsWith("Z")) {
+                Instant.parse(cleanedString)
+            } else if (cleanedString.contains("+") || cleanedString.contains("-", startIndex = 10)) {
+                // Has timezone offset
+                ZonedDateTime.parse(cleanedString, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant()
+            } else {
+                // No timezone info - assume UTC
+                LocalDateTime.parse(cleanedString, dateTimeFormatter).toInstant(ZoneOffset.UTC)
+            }
+
+            // Convert UTC instant to device's local timezone
+            instant.atZone(ZoneId.systemDefault()).toLocalDateTime()
+        } catch (e: Exception) {
+            // Fallback: try parsing as LocalDateTime directly
             try {
                 LocalDateTime.parse(dateString.removeSuffix("Z"), dateTimeFormatter)
             } catch (e2: Exception) {
