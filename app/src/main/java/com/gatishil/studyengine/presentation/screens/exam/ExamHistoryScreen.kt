@@ -290,7 +290,7 @@ private fun HistoryAttemptCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = attempt.subjectName,
+                    text = attempt.subjects.joinToString(", ") { it.name },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,

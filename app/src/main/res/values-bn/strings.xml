@@ -495,6 +495,7 @@
     <string name="filter_by_academic_level">শিক্ষা স্তর অনুসারে</string>
     <string name="clear_filters">পরিষ্কার</string>
     <string name="clear">পরিষ্কার</string>
+    <string name="select_all">সব নির্বাচন</string>
     <string name="no_profiles_found">কোন প্রোফাইল পাওয়া যায়নি</string>
     <string name="try_adjusting_filters">আপনার অনুসন্ধান বা ফিল্টার পরিবর্তন করে দেখুন</string>
     <string name="streak">স্ট্রিক</string>
@@ -600,6 +601,19 @@
     <string name="exam_filter_subject">বিষয় অনুযায়ী ফিল্টার</string>
     <string name="exam_filter_status">স্ট্যাটাস অনুযায়ী ফিল্টার</string>
     <string name="exam_filter_all">সব</string>
+
+    <!-- Multiple Subjects Selection -->
+    <string name="exam_select_subjects">বিষয় নির্বাচন করুন</string>
+    <string name="exam_choose_subjects">বিষয় বেছে নিন</string>
+    <string name="exam_choose_subjects_desc">আপনার পরীক্ষার জন্য এক বা একাধিক বিষয় নির্বাচন করুন</string>
+    <string name="exam_subjects_selected">%1$d বিষয় নির্বাচিত</string>
+    <string name="exam_total_questions_available">মোট %1$d প্রশ্ন</string>
+    <string name="exam_continue_to_config">চালিয়ে যান</string>
+    <string name="exam_multiple_subjects">%1$d বিষয়</string>
+    <string name="exam_multi_subject">মাল্টি-সাবজেক্ট</string>
+    <string name="exam_multi_subject_title">মাল্টি-সাবজেক্ট পরীক্ষা</string>
+    <string name="exam_multi_subject_desc">একাধিক বিষয় থেকে প্রশ্ন একত্রিত করুন</string>
+    <string name="exam_subject_count">%1$d বিষয়</string>
 </resources>
 
 

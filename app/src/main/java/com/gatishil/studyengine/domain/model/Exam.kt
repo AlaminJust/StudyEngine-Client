@@ -90,8 +90,7 @@ data class ExamQuestion(
 data class ExamQuestionSet(
     val examAttemptId: String,
     val examTitle: String,
-    val subjectId: String,
-    val subjectName: String,
+    val subjects: List<SubjectInfo>,
     val totalQuestions: Int,
     val totalPoints: Int,
     val difficultyFilter: QuestionDifficulty?,
@@ -132,8 +131,7 @@ data class ExamAnswerResult(
 data class ExamResult(
     val examAttemptId: String,
     val examTitle: String,
-    val subjectId: String,
-    val subjectName: String,
+    val subjects: List<SubjectInfo>,
     val totalQuestions: Int,
     val answeredQuestions: Int,
     val correctAnswers: Int,
@@ -152,8 +150,7 @@ data class ExamResult(
  */
 data class ExamAttemptSummary(
     val id: String,
-    val subjectId: String,
-    val subjectName: String,
+    val subjects: List<SubjectInfo>,
     val examTitle: String,
     val totalQuestions: Int,
     val totalPoints: Int,
@@ -176,10 +173,18 @@ data class ExamAttemptPagedResponse(
 )
 
 /**
+ * Subject info for exam (minimal info)
+ */
+data class SubjectInfo(
+    val id: String,
+    val name: String
+)
+
+/**
  * Request to start an exam
  */
 data class StartExamRequest(
-    val subjectId: String,
+    val subjectIds: List<String>,
     val questionCount: Int = 10,
     val difficultyFilter: QuestionDifficulty? = null,
     val timeLimitMinutes: Int? = null

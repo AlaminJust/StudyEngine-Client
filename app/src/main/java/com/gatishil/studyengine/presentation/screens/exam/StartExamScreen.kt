@@ -82,12 +82,11 @@ fun StartExamScreen(
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Subject Header
-                uiState.subject?.let { subject ->
-                    SubjectHeader(
-                        subjectName = subject.name,
-                        description = subject.description,
-                        questionCount = subject.questionCount
+                // Subjects Header
+                if (uiState.subjects.isNotEmpty()) {
+                    SubjectsHeader(
+                        subjects = uiState.subjects,
+                        totalQuestionCount = uiState.totalAvailableQuestionCount
                     )
                 }
 
@@ -106,7 +105,7 @@ fun StartExamScreen(
                 // Question Count
                 QuestionCountSelector(
                     count = uiState.questionCount,
-                    maxCount = uiState.availableQuestionCount,
+                    maxCount = uiState.totalAvailableQuestionCount,
                     onCountChange = { viewModel.setQuestionCount(it) },
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
@@ -179,10 +178,9 @@ fun StartExamScreen(
 }
 
 @Composable
-private fun SubjectHeader(
-    subjectName: String,
-    description: String?,
-    questionCount: Int,
+private fun SubjectsHeader(
+    subjects: List<com.gatishil.studyengine.domain.model.Subject>,
+    totalQuestionCount: Int,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -217,20 +215,36 @@ private fun SubjectHeader(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = subjectName,
+                text = if (subjects.size == 1) {
+                    subjects.first().name
+                } else {
+                    stringResource(R.string.exam_multiple_subjects, subjects.size)
+                },
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
 
-            description?.let { desc ->
+            if (subjects.size > 1) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = desc,
+                    text = subjects.joinToString(", ") { it.name },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
+            } else if (subjects.size == 1) {
+                subjects.first().description?.let { desc ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = desc,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -240,7 +254,7 @@ private fun SubjectHeader(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.exam_available_questions, questionCount),
+                    text = stringResource(R.string.exam_available_questions, totalQuestionCount),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)

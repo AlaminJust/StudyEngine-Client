@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ExamListScreen(
     onNavigateToStartExam: (String) -> Unit,
+    onNavigateToSelectSubjects: () -> Unit,
     onNavigateToContinueExam: () -> Unit,
     onNavigateToExamHistory: () -> Unit,
     onNavigateToExamResult: (String) -> Unit,
@@ -81,7 +82,9 @@ fun ExamListScreen(
                     item {
                         SectionHeader(
                             title = stringResource(R.string.exam_subjects),
-                            icon = Icons.Outlined.Category
+                            icon = Icons.Outlined.Category,
+                            actionLabel = stringResource(R.string.exam_multi_subject),
+                            onAction = onNavigateToSelectSubjects
                         )
                     }
 
@@ -90,6 +93,20 @@ fun ExamListScreen(
                             EmptySubjectsCard(modifier = Modifier.padding(horizontal = 16.dp))
                         }
                     } else {
+                        item {
+                            // Multi-subject exam card
+                            MultiSubjectExamCard(
+                                subjectCount = uiState.subjects.size,
+                                totalQuestions = uiState.subjects.sumOf { it.questionCount },
+                                onClick = onNavigateToSelectSubjects,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
                         item {
                             LazyRow(
                                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -196,6 +213,8 @@ private fun ContinueExamCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val subjectNames = exam.subjects.joinToString(", ") { it.name }
+
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -234,9 +253,11 @@ private fun ContinueExamCard(
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
                 Text(
-                    text = exam.subjectName,
+                    text = subjectNames,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = stringResource(R.string.exam_questions_count, exam.totalQuestions),
@@ -249,6 +270,108 @@ private fun ContinueExamCard(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onErrorContainer
+            )
+        }
+    }
+}
+
+@Composable
+private fun MultiSubjectExamCard(
+    subjectCount: Int,
+    totalQuestions: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Layers,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.exam_multi_subject_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.exam_multi_subject_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Outlined.Category,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.exam_subject_count, subjectCount),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Outlined.Quiz,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.exam_question_count, totalQuestions),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                }
+            }
+
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }
@@ -455,7 +578,7 @@ private fun ExamAttemptCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = attempt.subjectName,
+                    text = attempt.subjects.joinToString(", ") { it.name },
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,

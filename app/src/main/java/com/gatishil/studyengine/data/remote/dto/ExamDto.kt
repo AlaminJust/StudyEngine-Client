@@ -82,9 +82,17 @@ data class AvailableQuestionCountDto(
 // ==================== Exam DTOs ====================
 
 @Serializable
+data class SubjectInfoDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("name")
+    val name: String
+)
+
+@Serializable
 data class StartExamRequestDto(
-    @SerialName("SubjectId")
-    val subjectId: String,
+    @SerialName("SubjectIds")
+    val subjectIds: List<String>,
     @SerialName("QuestionCount")
     val questionCount: Int = 10,
     @SerialName("DifficultyFilter")
@@ -99,10 +107,8 @@ data class ExamQuestionSetDto(
     val examAttemptId: String,
     @SerialName("examTitle")
     val examTitle: String,
-    @SerialName("subjectId")
-    val subjectId: String,
-    @SerialName("subjectName")
-    val subjectName: String,
+    @SerialName("subjects")
+    val subjects: List<SubjectInfoDto>,
     @SerialName("totalQuestions")
     val totalQuestions: Int,
     @SerialName("totalPoints")
@@ -175,10 +181,8 @@ data class ExamResultDto(
     val examAttemptId: String,
     @SerialName("examTitle")
     val examTitle: String,
-    @SerialName("subjectId")
-    val subjectId: String,
-    @SerialName("subjectName")
-    val subjectName: String,
+    @SerialName("subjects")
+    val subjects: List<SubjectInfoDto>,
     @SerialName("totalQuestions")
     val totalQuestions: Int,
     @SerialName("answeredQuestions")
@@ -207,10 +211,8 @@ data class ExamResultDto(
 data class ExamAttemptSummaryDto(
     @SerialName("id")
     val id: String,
-    @SerialName("subjectId")
-    val subjectId: String,
-    @SerialName("subjectName")
-    val subjectName: String,
+    @SerialName("subjects")
+    val subjects: List<SubjectInfoDto>,
     @SerialName("examTitle")
     val examTitle: String,
     @SerialName("totalQuestions")

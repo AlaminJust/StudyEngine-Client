@@ -68,13 +68,20 @@ object ExamMapper {
         )
     }
 
+    // Subject info mapping
+    fun SubjectInfoDto.toDomain(): SubjectInfo {
+        return SubjectInfo(
+            id = id,
+            name = name
+        )
+    }
+
     // Exam question set mapping
     fun ExamQuestionSetDto.toDomain(): ExamQuestionSet {
         return ExamQuestionSet(
             examAttemptId = examAttemptId,
             examTitle = examTitle,
-            subjectId = subjectId,
-            subjectName = subjectName,
+            subjects = subjects.map { it.toDomain() },
             totalQuestions = totalQuestions,
             totalPoints = totalPoints,
             difficultyFilter = difficultyFilter?.let { QuestionDifficulty.fromString(it) },
@@ -88,7 +95,7 @@ object ExamMapper {
     // Start exam request mapping
     fun StartExamRequest.toDto(): StartExamRequestDto {
         return StartExamRequestDto(
-            subjectId = subjectId,
+            subjectIds = subjectIds,
             questionCount = questionCount,
             difficultyFilter = difficultyFilter?.name,
             timeLimitMinutes = timeLimitMinutes
@@ -141,8 +148,7 @@ object ExamMapper {
         return ExamResult(
             examAttemptId = examAttemptId,
             examTitle = examTitle,
-            subjectId = subjectId,
-            subjectName = subjectName,
+            subjects = subjects.map { it.toDomain() },
             totalQuestions = totalQuestions,
             answeredQuestions = answeredQuestions,
             correctAnswers = correctAnswers,
@@ -161,8 +167,7 @@ object ExamMapper {
     fun ExamAttemptSummaryDto.toDomain(): ExamAttemptSummary {
         return ExamAttemptSummary(
             id = id,
-            subjectId = subjectId,
-            subjectName = subjectName,
+            subjects = subjects.map { it.toDomain() },
             examTitle = examTitle,
             totalQuestions = totalQuestions,
             totalPoints = totalPoints,

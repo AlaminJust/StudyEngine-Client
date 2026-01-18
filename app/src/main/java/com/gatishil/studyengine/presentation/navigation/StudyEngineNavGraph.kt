@@ -145,6 +145,9 @@ fun StudyEngineNavGraph(
                 onNavigateToStartExam = { subjectId ->
                     navController.navigate(Screen.StartExam.createRoute(subjectId))
                 },
+                onNavigateToSelectSubjects = {
+                    navController.navigate(Screen.SelectSubjects.route)
+                },
                 onNavigateToContinueExam = {
                     navController.navigate(Screen.TakeExam.route)
                 },
@@ -157,10 +160,25 @@ fun StudyEngineNavGraph(
             )
         }
 
+        // Select Subjects
+        composable(route = Screen.SelectSubjects.route) {
+            com.gatishil.studyengine.presentation.screens.exam.SelectSubjectsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSubjectsSelected = { subjectIds ->
+                    navController.navigate(Screen.StartExam.createRoute(subjectIds)) {
+                        popUpTo(Screen.SelectSubjects.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(
             route = Screen.StartExam.route,
             arguments = listOf(
-                navArgument("subjectId") { type = NavType.StringType }
+                navArgument("subjectIds") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
             )
         ) {
             com.gatishil.studyengine.presentation.screens.exam.StartExamScreen(
@@ -200,8 +218,9 @@ fun StudyEngineNavGraph(
                         popUpTo(Screen.ExamResult.route) { inclusive = true }
                     }
                 },
-                onRetakeExam = { subjectId ->
-                    navController.navigate(Screen.StartExam.createRoute(subjectId)) {
+                onRetakeExam = { subjectIds ->
+                    // subjectIds can be single or comma-separated
+                    navController.navigate(Screen.StartExam.createRoute(subjectIds.split(",").filter { it.isNotBlank() })) {
                         popUpTo(Screen.ExamResult.route) { inclusive = true }
                     }
                 }

@@ -129,7 +129,7 @@ fun TakeExamScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             ExamTopBar(
-                subjectName = uiState.exam?.subjectName ?: "",
+                subjectNames = uiState.exam?.subjects?.joinToString(", ") { it.name } ?: "",
                 remainingSeconds = uiState.remainingSeconds,
                 onExitClick = { viewModel.showExitConfirmation() }
             )
@@ -191,7 +191,7 @@ fun TakeExamScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ExamTopBar(
-    subjectName: String,
+    subjectNames: String,
     remainingSeconds: Long?,
     onExitClick: () -> Unit
 ) {
@@ -199,7 +199,7 @@ private fun ExamTopBar(
         title = {
             Column {
                 Text(
-                    text = subjectName,
+                    text = subjectNames,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1
                 )

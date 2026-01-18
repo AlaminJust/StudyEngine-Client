@@ -493,6 +493,7 @@
     <string name="filter_by_academic_level">Filter by Academic Level</string>
     <string name="clear_filters">Clear</string>
     <string name="clear">Clear</string>
+    <string name="select_all">Select All</string>
     <string name="no_profiles_found">No profiles found</string>
     <string name="try_adjusting_filters">Try adjusting your search or filters</string>
     <string name="streak">streak</string>
@@ -598,4 +599,17 @@
     <string name="exam_filter_subject">Filter by Subject</string>
     <string name="exam_filter_status">Filter by Status</string>
     <string name="exam_filter_all">All</string>
+
+    <!-- Multiple Subjects Selection -->
+    <string name="exam_select_subjects">Select Subjects</string>
+    <string name="exam_choose_subjects">Choose Subjects</string>
+    <string name="exam_choose_subjects_desc">Select one or more subjects for your exam</string>
+    <string name="exam_subjects_selected">%1$d subjects selected</string>
+    <string name="exam_total_questions_available">%1$d questions total</string>
+    <string name="exam_continue_to_config">Continue</string>
+    <string name="exam_multiple_subjects">%1$d Subjects</string>
+    <string name="exam_multi_subject">Multi-Subject</string>
+    <string name="exam_multi_subject_title">Multi-Subject Exam</string>
+    <string name="exam_multi_subject_desc">Combine questions from multiple subjects</string>
+    <string name="exam_subject_count">%1$d subjects</string>
 </resources>

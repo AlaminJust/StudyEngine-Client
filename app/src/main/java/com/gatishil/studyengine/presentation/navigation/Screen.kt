@@ -73,8 +73,10 @@ sealed class Screen(val route: String) {
 
     // Exams
     data object Exams : Screen("exams")
-    data object StartExam : Screen("exams/start/{subjectId}") {
-        fun createRoute(subjectId: String) = "exams/start/$subjectId"
+    data object SelectSubjects : Screen("exams/select-subjects")
+    data object StartExam : Screen("exams/start?subjectIds={subjectIds}") {
+        fun createRoute(subjectIds: List<String>) = "exams/start?subjectIds=${subjectIds.joinToString(",")}"
+        fun createRoute(subjectId: String) = "exams/start?subjectIds=$subjectId"
     }
     data object TakeExam : Screen("exams/take")
     data object ExamResult : Screen("exams/result/{examAttemptId}") {

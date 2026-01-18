@@ -16,11 +16,11 @@ import javax.inject.Inject
 data class StartExamUiState(
     val isLoading: Boolean = true,
     val isStarting: Boolean = false,
-    val subject: Subject? = null,
+    val subjects: List<Subject> = emptyList(),
     val questionCount: Int = 10,
     val selectedDifficulty: QuestionDifficulty? = null,
     val timeLimitMinutes: Int? = null,
-    val availableQuestionCount: Int = 0,
+    val totalAvailableQuestionCount: Int = 0,
     val error: String? = null,
     val examStarted: ExamQuestionSet? = null
 )
@@ -31,32 +31,38 @@ class StartExamViewModel @Inject constructor(
     private val examRepository: ExamRepository
 ) : ViewModel() {
 
-    private val subjectId: String = savedStateHandle.get<String>("subjectId") ?: ""
+    private val subjectIdsString: String = savedStateHandle.get<String>("subjectIds") ?: ""
+    private val subjectIds: List<String> = subjectIdsString.split(",").filter { it.isNotBlank() }
 
     private val _uiState = MutableStateFlow(StartExamUiState())
     val uiState: StateFlow<StartExamUiState> = _uiState.asStateFlow()
 
     init {
-        loadSubject()
+        loadSubjects()
     }
 
-    private fun loadSubject() {
+    private fun loadSubjects() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
-            when (val result = examRepository.getSubjectById(subjectId)) {
+            val allSubjectsResult = examRepository.getSubjects()
+
+            when (allSubjectsResult) {
                 is Resource.Success -> {
+                    val selectedSubjects = allSubjectsResult.data.filter { it.id in subjectIds }
+                    val totalQuestions = selectedSubjects.sumOf { it.questionCount }
+
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        subject = result.data,
-                        availableQuestionCount = result.data.questionCount
+                        subjects = selectedSubjects,
+                        totalAvailableQuestionCount = totalQuestions,
+                        questionCount = minOf(10, totalQuestions)
                     )
-                    updateAvailableCount()
                 }
                 is Resource.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = result.message ?: "Failed to load subject"
+                        error = allSubjectsResult.message ?: "Failed to load subjects"
                     )
                 }
                 is Resource.Loading -> { /* Already handled */ }
@@ -66,34 +72,16 @@ class StartExamViewModel @Inject constructor(
 
     fun setQuestionCount(count: Int) {
         _uiState.value = _uiState.value.copy(
-            questionCount = count.coerceIn(5, minOf(50, _uiState.value.availableQuestionCount))
+            questionCount = count.coerceIn(5, minOf(50, _uiState.value.totalAvailableQuestionCount))
         )
     }
 
     fun setDifficulty(difficulty: QuestionDifficulty?) {
         _uiState.value = _uiState.value.copy(selectedDifficulty = difficulty)
-        updateAvailableCount()
     }
 
     fun setTimeLimit(minutes: Int?) {
         _uiState.value = _uiState.value.copy(timeLimitMinutes = minutes)
-    }
-
-    private fun updateAvailableCount() {
-        viewModelScope.launch {
-            val result = examRepository.getAvailableQuestionCount(
-                subjectId = subjectId,
-                difficulty = _uiState.value.selectedDifficulty
-            )
-
-            if (result.isSuccess) {
-                val availableCount = result.getOrNull() ?: 0
-                _uiState.value = _uiState.value.copy(
-                    availableQuestionCount = availableCount,
-                    questionCount = minOf(_uiState.value.questionCount, maxOf(5, availableCount))
-                )
-            }
-        }
     }
 
     fun startExam() {
@@ -101,7 +89,7 @@ class StartExamViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isStarting = true, error = null)
 
             val request = StartExamRequest(
-                subjectId = subjectId,
+                subjectIds = subjectIds,
                 questionCount = _uiState.value.questionCount,
                 difficultyFilter = _uiState.value.selectedDifficulty,
                 timeLimitMinutes = _uiState.value.timeLimitMinutes

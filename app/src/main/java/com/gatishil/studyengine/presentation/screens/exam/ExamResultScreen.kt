@@ -85,7 +85,12 @@ fun ExamResultScreen(
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                     ActionsSection(
-                        onRetake = { onRetakeExam(result.subjectId) },
+                        onRetake = {
+                            val subjectIds = result.subjects.map { it.id }
+                            if (subjectIds.isNotEmpty()) {
+                                onRetakeExam(subjectIds.joinToString(","))
+                            }
+                        },
                         onViewAnswers = { viewModel.toggleShowAllAnswers() },
                         showAnswers = uiState.showAllAnswers
                     )
@@ -210,9 +215,10 @@ private fun ScoreHeader(result: ExamResult) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = result.subjectName,
+                text = result.subjects.joinToString(", ") { it.name },
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(4.dp))
