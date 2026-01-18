@@ -319,7 +319,7 @@ private fun QuestionCountSelector(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.QuestionMark,
+                    imageVector = Icons.Outlined.Quiz,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -604,7 +604,7 @@ private fun ExamSummaryCard(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 SummaryItem(
-                    icon = Icons.Outlined.QuestionMark,
+                    icon = Icons.Outlined.Quiz,
                     value = questionCount.toString(),
                     label = stringResource(R.string.exam_summary_questions)
                 )
