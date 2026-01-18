@@ -3,6 +3,7 @@ package com.gatishil.studyengine.presentation.screens.exam
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -20,8 +22,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gatishil.studyengine.R
+import com.gatishil.studyengine.domain.model.CategoryWithSubjects
 import com.gatishil.studyengine.domain.model.Subject
 import com.gatishil.studyengine.presentation.common.components.LoadingScreen
 
@@ -156,9 +161,9 @@ fun SelectSubjectsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiState.isLoading && uiState.subjects.isEmpty()) {
+            if (uiState.isLoading && uiState.subjects.isEmpty() && uiState.categories.isEmpty()) {
                 LoadingScreen()
-            } else if (uiState.subjects.isEmpty()) {
+            } else if (uiState.subjects.isEmpty() && uiState.categories.isEmpty()) {
                 EmptySubjectsMessage(
                     modifier = Modifier
                         .fillMaxSize()
@@ -175,12 +180,46 @@ fun SelectSubjectsScreen(
                         SelectSubjectsHeader()
                     }
 
-                    items(uiState.subjects) { subject ->
-                        SelectableSubjectCard(
-                            subject = subject,
-                            isSelected = subject.id in uiState.selectedSubjectIds,
-                            onClick = { viewModel.toggleSubjectSelection(subject.id) }
-                        )
+                    // Display categories with subjects
+                    if (uiState.categories.isNotEmpty()) {
+                        uiState.categories.forEach { category ->
+                            if (category.subjects.isNotEmpty()) {
+                                item(key = "category_${category.id}") {
+                                    CategorySection(
+                                        category = category,
+                                        isExpanded = category.id in uiState.expandedCategoryIds,
+                                        onToggleExpand = { viewModel.toggleCategoryExpanded(category.id) },
+                                        selectedCount = viewModel.getSelectedCountInCategory(category.id),
+                                        isAllSelected = viewModel.isAllSelectedInCategory(category.id),
+                                        onSelectAll = { viewModel.selectAllSubjectsInCategory(category.id) },
+                                        onDeselectAll = { viewModel.deselectAllSubjectsInCategory(category.id) }
+                                    )
+                                }
+
+                                if (category.id in uiState.expandedCategoryIds) {
+                                    items(
+                                        items = category.subjects,
+                                        key = { "subject_${it.id}" }
+                                    ) { subject ->
+                                        SelectableSubjectCard(
+                                            subject = subject,
+                                            isSelected = subject.id in uiState.selectedSubjectIds,
+                                            onClick = { viewModel.toggleSubjectSelection(subject.id) },
+                                            modifier = Modifier.padding(start = 16.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Fallback: show subjects without categories
+                        items(uiState.subjects) { subject ->
+                            SelectableSubjectCard(
+                                subject = subject,
+                                isSelected = subject.id in uiState.selectedSubjectIds,
+                                onClick = { viewModel.toggleSubjectSelection(subject.id) }
+                            )
+                        }
                     }
 
                     // Bottom spacing
@@ -413,6 +452,134 @@ private fun EmptySubjectsMessage(modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Composable
+private fun CategorySection(
+    category: CategoryWithSubjects,
+    isExpanded: Boolean,
+    onToggleExpand: () -> Unit,
+    selectedCount: Int,
+    isAllSelected: Boolean,
+    onSelectAll: () -> Unit,
+    onDeselectAll: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onToggleExpand)
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Category Icon
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = getCategoryIcon(category.name),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // Category Info
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = category.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.exam_subject_count, category.subjects.size),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (selectedCount > 0) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(4.dp)
+                            ) {
+                                Text(
+                                    text = "$selectedCount selected",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Select/Deselect All Button
+                IconButton(
+                    onClick = if (isAllSelected) onDeselectAll else onSelectAll
+                ) {
+                    Icon(
+                        imageVector = if (isAllSelected) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
+                        contentDescription = if (isAllSelected) "Deselect all" else "Select all",
+                        tint = if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // Expand/Collapse Icon
+                Icon(
+                    imageVector = Icons.Default.ExpandMore,
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.rotate(if (isExpanded) 180f else 0f)
+                )
+            }
+
+            // Category description
+            category.description?.let { desc ->
+                AnimatedVisibility(visible = isExpanded) {
+                    Text(
+                        text = desc,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun getCategoryIcon(categoryName: String): ImageVector {
+    val name = categoryName.lowercase()
+    return when {
+        name.contains("bcs") -> Icons.Outlined.WorkspacePremium
+        name.contains("hsc") -> Icons.Outlined.School
+        name.contains("ssc") -> Icons.AutoMirrored.Outlined.MenuBook
+        name.contains("admission") -> Icons.AutoMirrored.Outlined.Assignment
+        name.contains("university") -> Icons.Outlined.AccountBalance
+        name.contains("job") -> Icons.Outlined.Work
+        name.contains("bank") -> Icons.Outlined.AccountBalance
+        else -> Icons.Outlined.Category
     }
 }
 

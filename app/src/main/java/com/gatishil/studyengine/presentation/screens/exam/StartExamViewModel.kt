@@ -88,8 +88,16 @@ class StartExamViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isStarting = true, error = null)
 
+            // Convert subjectIds to ExamSubjectSelection list
+            val subjectSelections = subjectIds.map { subjectId ->
+                ExamSubjectSelection(
+                    subjectId = subjectId,
+                    chapterIds = null // No chapter filtering for now
+                )
+            }
+
             val request = StartExamRequest(
-                subjectIds = subjectIds,
+                subjects = subjectSelections,
                 questionCount = _uiState.value.questionCount,
                 difficultyFilter = _uiState.value.selectedDifficulty,
                 timeLimitMinutes = _uiState.value.timeLimitMinutes

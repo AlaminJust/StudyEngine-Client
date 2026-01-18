@@ -51,15 +51,75 @@ enum class ExamAttemptStatus {
 }
 
 /**
+ * Category for subjects (BCS, HSC, SSC, etc.)
+ */
+data class Category(
+    val id: String,
+    val name: String,
+    val description: String?,
+    val iconUrl: String?,
+    val displayOrder: Int,
+    val isActive: Boolean,
+    val subjectCount: Int
+)
+
+/**
+ * Category with subjects
+ */
+data class CategoryWithSubjects(
+    val id: String,
+    val name: String,
+    val description: String?,
+    val iconUrl: String?,
+    val displayOrder: Int,
+    val isActive: Boolean,
+    val subjects: List<Subject>
+)
+
+/**
  * Subject for MCQ exams
  */
 data class Subject(
     val id: String,
     val name: String,
+    val categoryId: String? = null,
+    val categoryName: String? = null,
     val description: String?,
     val iconUrl: String?,
+    val displayOrder: Int = 0,
     val questionCount: Int,
+    val chapterCount: Int = 0,
     val isActive: Boolean = true
+)
+
+/**
+ * Subject with chapters
+ */
+data class SubjectWithChapters(
+    val id: String,
+    val name: String,
+    val categoryId: String?,
+    val categoryName: String?,
+    val description: String?,
+    val iconUrl: String?,
+    val displayOrder: Int,
+    val isActive: Boolean,
+    val questionCount: Int,
+    val chapters: List<SubjectChapter>
+)
+
+/**
+ * Subject chapter for MCQ exams
+ */
+data class SubjectChapter(
+    val id: String,
+    val subjectId: String,
+    val subjectName: String? = null,
+    val name: String,
+    val description: String?,
+    val displayOrder: Int,
+    val isActive: Boolean,
+    val questionCount: Int
 )
 
 /**
@@ -85,12 +145,30 @@ data class ExamQuestion(
 )
 
 /**
+ * Subject info for exam (minimal info)
+ */
+data class SubjectInfo(
+    val id: String,
+    val name: String
+)
+
+/**
+ * Chapter info for exam (minimal info)
+ */
+data class ChapterInfo(
+    val id: String,
+    val name: String,
+    val subjectId: String
+)
+
+/**
  * Active exam with questions
  */
 data class ExamQuestionSet(
     val examAttemptId: String,
     val examTitle: String,
     val subjects: List<SubjectInfo>,
+    val chapters: List<ChapterInfo> = emptyList(),
     val totalQuestions: Int,
     val totalPoints: Int,
     val difficultyFilter: QuestionDifficulty?,
@@ -132,6 +210,7 @@ data class ExamResult(
     val examAttemptId: String,
     val examTitle: String,
     val subjects: List<SubjectInfo>,
+    val chapters: List<ChapterInfo> = emptyList(),
     val totalQuestions: Int,
     val answeredQuestions: Int,
     val correctAnswers: Int,
@@ -173,18 +252,18 @@ data class ExamAttemptPagedResponse(
 )
 
 /**
- * Subject info for exam (minimal info)
+ * Subject selection for starting an exam (with optional chapter filtering)
  */
-data class SubjectInfo(
-    val id: String,
-    val name: String
+data class ExamSubjectSelection(
+    val subjectId: String,
+    val chapterIds: List<String>? = null
 )
 
 /**
  * Request to start an exam
  */
 data class StartExamRequest(
-    val subjectIds: List<String>,
+    val subjects: List<ExamSubjectSelection>,
     val questionCount: Int = 10,
     val difficultyFilter: QuestionDifficulty? = null,
     val timeLimitMinutes: Int? = null

@@ -3,10 +3,10 @@ package com.gatishil.studyengine.data.remote.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// ==================== Subject DTOs ====================
+// ==================== Category DTOs ====================
 
 @Serializable
-data class SubjectDto(
+data class CategoryDto(
     @SerialName("id")
     val id: String,
     @SerialName("name")
@@ -15,10 +15,78 @@ data class SubjectDto(
     val description: String?,
     @SerialName("iconUrl")
     val iconUrl: String?,
+    @SerialName("displayOrder")
+    val displayOrder: Int,
+    @SerialName("isActive")
+    val isActive: Boolean,
+    @SerialName("subjectCount")
+    val subjectCount: Int,
+    @SerialName("createdAt")
+    val createdAt: String? = null,
+    @SerialName("updatedAt")
+    val updatedAt: String? = null
+)
+
+@Serializable
+data class CategoryListDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("name")
+    val name: String,
+    @SerialName("description")
+    val description: String?,
+    @SerialName("iconUrl")
+    val iconUrl: String?,
+    @SerialName("displayOrder")
+    val displayOrder: Int,
+    @SerialName("isActive")
+    val isActive: Boolean,
+    @SerialName("subjectCount")
+    val subjectCount: Int
+)
+
+@Serializable
+data class CategoryWithSubjectsDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("name")
+    val name: String,
+    @SerialName("description")
+    val description: String?,
+    @SerialName("iconUrl")
+    val iconUrl: String?,
+    @SerialName("displayOrder")
+    val displayOrder: Int,
+    @SerialName("isActive")
+    val isActive: Boolean,
+    @SerialName("subjects")
+    val subjects: List<SubjectListDto>
+)
+
+// ==================== Subject DTOs ====================
+
+@Serializable
+data class SubjectDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("name")
+    val name: String,
+    @SerialName("categoryId")
+    val categoryId: String? = null,
+    @SerialName("categoryName")
+    val categoryName: String? = null,
+    @SerialName("description")
+    val description: String?,
+    @SerialName("iconUrl")
+    val iconUrl: String?,
+    @SerialName("displayOrder")
+    val displayOrder: Int = 0,
     @SerialName("isActive")
     val isActive: Boolean? = true,
     @SerialName("questionCount")
     val questionCount: Int,
+    @SerialName("chapterCount")
+    val chapterCount: Int = 0,
     @SerialName("createdAt")
     val createdAt: String? = null,
     @SerialName("updatedAt")
@@ -31,12 +99,88 @@ data class SubjectListDto(
     val id: String,
     @SerialName("name")
     val name: String,
+    @SerialName("categoryId")
+    val categoryId: String? = null,
+    @SerialName("categoryName")
+    val categoryName: String? = null,
     @SerialName("description")
     val description: String?,
     @SerialName("iconUrl")
     val iconUrl: String?,
+    @SerialName("displayOrder")
+    val displayOrder: Int = 0,
     @SerialName("isActive")
     val isActive: Boolean = true,
+    @SerialName("questionCount")
+    val questionCount: Int,
+    @SerialName("chapterCount")
+    val chapterCount: Int = 0
+)
+
+@Serializable
+data class SubjectWithChaptersDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("name")
+    val name: String,
+    @SerialName("categoryId")
+    val categoryId: String? = null,
+    @SerialName("categoryName")
+    val categoryName: String? = null,
+    @SerialName("description")
+    val description: String?,
+    @SerialName("iconUrl")
+    val iconUrl: String?,
+    @SerialName("displayOrder")
+    val displayOrder: Int = 0,
+    @SerialName("isActive")
+    val isActive: Boolean = true,
+    @SerialName("questionCount")
+    val questionCount: Int,
+    @SerialName("chapters")
+    val chapters: List<SubjectChapterListDto>
+)
+
+// ==================== Subject Chapter DTOs ====================
+
+@Serializable
+data class SubjectChapterDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("subjectId")
+    val subjectId: String,
+    @SerialName("subjectName")
+    val subjectName: String,
+    @SerialName("name")
+    val name: String,
+    @SerialName("description")
+    val description: String?,
+    @SerialName("displayOrder")
+    val displayOrder: Int,
+    @SerialName("isActive")
+    val isActive: Boolean,
+    @SerialName("questionCount")
+    val questionCount: Int,
+    @SerialName("createdAt")
+    val createdAt: String? = null,
+    @SerialName("updatedAt")
+    val updatedAt: String? = null
+)
+
+@Serializable
+data class SubjectChapterListDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("subjectId")
+    val subjectId: String,
+    @SerialName("name")
+    val name: String,
+    @SerialName("description")
+    val description: String?,
+    @SerialName("displayOrder")
+    val displayOrder: Int,
+    @SerialName("isActive")
+    val isActive: Boolean,
     @SerialName("questionCount")
     val questionCount: Int
 )
@@ -90,9 +234,27 @@ data class SubjectInfoDto(
 )
 
 @Serializable
+data class ChapterInfoDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("name")
+    val name: String,
+    @SerialName("subjectId")
+    val subjectId: String
+)
+
+@Serializable
+data class ExamSubjectSelectionDto(
+    @SerialName("SubjectId")
+    val subjectId: String,
+    @SerialName("ChapterIds")
+    val chapterIds: List<String>? = null
+)
+
+@Serializable
 data class StartExamRequestDto(
-    @SerialName("SubjectIds")
-    val subjectIds: List<String>,
+    @SerialName("Subjects")
+    val subjects: List<ExamSubjectSelectionDto>,
     @SerialName("QuestionCount")
     val questionCount: Int = 10,
     @SerialName("DifficultyFilter")
@@ -109,6 +271,8 @@ data class ExamQuestionSetDto(
     val examTitle: String,
     @SerialName("subjects")
     val subjects: List<SubjectInfoDto>,
+    @SerialName("chapters")
+    val chapters: List<ChapterInfoDto> = emptyList(),
     @SerialName("totalQuestions")
     val totalQuestions: Int,
     @SerialName("totalPoints")
@@ -183,6 +347,8 @@ data class ExamResultDto(
     val examTitle: String,
     @SerialName("subjects")
     val subjects: List<SubjectInfoDto>,
+    @SerialName("chapters")
+    val chapters: List<ChapterInfoDto> = emptyList(),
     @SerialName("totalQuestions")
     val totalQuestions: Int,
     @SerialName("answeredQuestions")
@@ -244,4 +410,3 @@ data class ExamAttemptPagedResponseDto(
     @SerialName("totalPages")
     val totalPages: Int
 )
-

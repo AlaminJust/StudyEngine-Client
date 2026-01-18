@@ -525,6 +525,28 @@ interface StudyEngineApi {
         @Path("id") id: String
     ): Response<Unit>
 
+    // ==================== Category Endpoints ====================
+
+    @GET("categories")
+    suspend fun getCategories(
+        @Query("includeInactive") includeInactive: Boolean = false
+    ): Response<List<CategoryListDto>>
+
+    @GET("categories/with-subjects")
+    suspend fun getCategoriesWithSubjects(
+        @Query("includeInactive") includeInactive: Boolean = false
+    ): Response<List<CategoryWithSubjectsDto>>
+
+    @GET("categories/{id}")
+    suspend fun getCategoryById(
+        @Path("id") id: String
+    ): Response<CategoryDto>
+
+    @GET("categories/{id}/with-subjects")
+    suspend fun getCategoryWithSubjects(
+        @Path("id") id: String
+    ): Response<CategoryWithSubjectsDto>
+
     // ==================== Subject Endpoints ====================
 
     @GET("subjects")
@@ -532,10 +554,34 @@ interface StudyEngineApi {
         @Query("includeInactive") includeInactive: Boolean = false
     ): Response<List<SubjectListDto>>
 
+    @GET("subjects/by-category/{categoryId}")
+    suspend fun getSubjectsByCategory(
+        @Path("categoryId") categoryId: String,
+        @Query("includeInactive") includeInactive: Boolean = false
+    ): Response<List<SubjectListDto>>
+
     @GET("subjects/{id}")
     suspend fun getSubjectById(
         @Path("id") id: String
     ): Response<SubjectDto>
+
+    @GET("subjects/{id}/with-chapters")
+    suspend fun getSubjectWithChapters(
+        @Path("id") id: String
+    ): Response<SubjectWithChaptersDto>
+
+    // ==================== Subject Chapter Endpoints ====================
+
+    @GET("subject-chapters/by-subject/{subjectId}")
+    suspend fun getSubjectChapters(
+        @Path("subjectId") subjectId: String,
+        @Query("includeInactive") includeInactive: Boolean = false
+    ): Response<List<SubjectChapterListDto>>
+
+    @GET("subject-chapters/{id}")
+    suspend fun getSubjectChapterById(
+        @Path("id") id: String
+    ): Response<SubjectChapterDto>
 
     // ==================== Question Endpoints ====================
 

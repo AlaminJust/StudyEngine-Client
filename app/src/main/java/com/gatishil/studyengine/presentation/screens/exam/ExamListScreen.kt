@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -88,7 +90,7 @@ fun ExamListScreen(
                         )
                     }
 
-                    if (uiState.subjects.isEmpty()) {
+                    if (uiState.subjects.isEmpty() && uiState.categories.isEmpty()) {
                         item {
                             EmptySubjectsCard(modifier = Modifier.padding(horizontal = 16.dp))
                         }
@@ -107,16 +109,45 @@ fun ExamListScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
-                        item {
-                            LazyRow(
-                                contentPadding = PaddingValues(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                items(uiState.subjects) { subject ->
-                                    SubjectCard(
-                                        subject = subject,
-                                        onClick = { onNavigateToStartExam(subject.id) }
-                                    )
+                        // Show categories with their subjects if available
+                        if (uiState.categories.isNotEmpty()) {
+                            uiState.categories.forEach { category ->
+                                if (category.subjects.isNotEmpty()) {
+                                    item {
+                                        CategoryHeader(
+                                            category = category,
+                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                        )
+                                    }
+
+                                    item {
+                                        LazyRow(
+                                            contentPadding = PaddingValues(horizontal = 16.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            items(category.subjects) { subject ->
+                                                SubjectCard(
+                                                    subject = subject,
+                                                    onClick = { onNavigateToStartExam(subject.id) }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            // Fallback: show subjects without categories
+                            item {
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(uiState.subjects) { subject ->
+                                        SubjectCard(
+                                            subject = subject,
+                                            onClick = { onNavigateToStartExam(subject.id) }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -731,6 +762,65 @@ private fun QuickStatsSection(
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.weight(1f)
         )
+    }
+}
+
+@Composable
+private fun CategoryHeader(
+    category: CategoryWithSubjects,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = getCategoryIcon(category.name),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = category.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(R.string.exam_subject_count, category.subjects.size),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+private fun getCategoryIcon(categoryName: String): ImageVector {
+    val name = categoryName.lowercase()
+    return when {
+        name.contains("bcs") -> Icons.Outlined.WorkspacePremium
+        name.contains("hsc") -> Icons.Outlined.School
+        name.contains("ssc") -> Icons.AutoMirrored.Outlined.MenuBook
+        name.contains("admission") -> Icons.AutoMirrored.Outlined.Assignment
+        name.contains("university") -> Icons.Outlined.AccountBalance
+        name.contains("job") -> Icons.Outlined.Work
+        name.contains("bank") -> Icons.Outlined.AccountBalance
+        else -> Icons.Outlined.Category
     }
 }
 

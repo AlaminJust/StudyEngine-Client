@@ -19,23 +19,18 @@ object ExamMapper {
      */
     private fun parseDateTime(dateString: String): LocalDateTime {
         return try {
-            // Try to parse as Instant first (handles Z suffix for UTC)
             val cleanedString = dateString.trim()
 
             val instant = if (cleanedString.endsWith("Z")) {
                 Instant.parse(cleanedString)
             } else if (cleanedString.contains("+") || hasTimezoneOffset(cleanedString)) {
-                // Has timezone offset
                 ZonedDateTime.parse(cleanedString, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant()
             } else {
-                // No timezone info - assume UTC
                 LocalDateTime.parse(cleanedString, dateTimeFormatter).toInstant(ZoneOffset.UTC)
             }
 
-            // Convert UTC instant to device's local timezone
             instant.atZone(ZoneId.systemDefault()).toLocalDateTime()
         } catch (e: Exception) {
-            // Fallback: try parsing as LocalDateTime directly
             try {
                 LocalDateTime.parse(dateString.removeSuffix("Z"), dateTimeFormatter)
             } catch (e2: Exception) {
@@ -44,20 +39,51 @@ object ExamMapper {
         }
     }
 
-    /**
-     * Check if the datetime string has a timezone offset like "-05:00"
-     * We need to check for "-" after the "T" separator to avoid matching the date part
-     */
     private fun hasTimezoneOffset(dateString: String): Boolean {
         val tIndex = dateString.indexOf('T')
         if (tIndex == -1) return false
 
-        // Look for "-" after the time part (after index 10, e.g., "2026-01-18T10:30:00-05:00")
         val timePartIndex = tIndex + 1
         val afterTime = dateString.substring(timePartIndex)
 
-        // Check if there's a "-" that's part of timezone offset (typically at position 8+ after T)
         return afterTime.length > 8 && afterTime.substring(8).contains("-")
+    }
+
+    // Category mapping
+    fun CategoryListDto.toDomain(): Category {
+        return Category(
+            id = id,
+            name = name,
+            description = description,
+            iconUrl = iconUrl,
+            displayOrder = displayOrder,
+            isActive = isActive,
+            subjectCount = subjectCount
+        )
+    }
+
+    fun CategoryDto.toDomain(): Category {
+        return Category(
+            id = id,
+            name = name,
+            description = description,
+            iconUrl = iconUrl,
+            displayOrder = displayOrder,
+            isActive = isActive,
+            subjectCount = subjectCount
+        )
+    }
+
+    fun CategoryWithSubjectsDto.toDomain(): CategoryWithSubjects {
+        return CategoryWithSubjects(
+            id = id,
+            name = name,
+            description = description,
+            iconUrl = iconUrl,
+            displayOrder = displayOrder,
+            isActive = isActive,
+            subjects = subjects.map { it.toDomain() }
+        )
     }
 
     // Subject mapping
@@ -65,9 +91,13 @@ object ExamMapper {
         return Subject(
             id = id,
             name = name,
+            categoryId = categoryId,
+            categoryName = categoryName,
             description = description,
             iconUrl = iconUrl,
+            displayOrder = displayOrder,
             questionCount = questionCount,
+            chapterCount = chapterCount,
             isActive = isActive
         )
     }
@@ -76,10 +106,55 @@ object ExamMapper {
         return Subject(
             id = id,
             name = name,
+            categoryId = categoryId,
+            categoryName = categoryName,
             description = description,
             iconUrl = iconUrl,
+            displayOrder = displayOrder,
             questionCount = questionCount,
+            chapterCount = chapterCount,
             isActive = isActive ?: true
+        )
+    }
+
+    fun SubjectWithChaptersDto.toDomain(): SubjectWithChapters {
+        return SubjectWithChapters(
+            id = id,
+            name = name,
+            categoryId = categoryId,
+            categoryName = categoryName,
+            description = description,
+            iconUrl = iconUrl,
+            displayOrder = displayOrder,
+            isActive = isActive,
+            questionCount = questionCount,
+            chapters = chapters.map { it.toDomain() }
+        )
+    }
+
+    // Subject chapter mapping
+    fun SubjectChapterListDto.toDomain(): SubjectChapter {
+        return SubjectChapter(
+            id = id,
+            subjectId = subjectId,
+            name = name,
+            description = description,
+            displayOrder = displayOrder,
+            isActive = isActive,
+            questionCount = questionCount
+        )
+    }
+
+    fun SubjectChapterDto.toDomain(): SubjectChapter {
+        return SubjectChapter(
+            id = id,
+            subjectId = subjectId,
+            subjectName = subjectName,
+            name = name,
+            description = description,
+            displayOrder = displayOrder,
+            isActive = isActive,
+            questionCount = questionCount
         )
     }
 
@@ -89,7 +164,7 @@ object ExamMapper {
             id = id,
             optionText = optionText,
             displayOrder = displayOrder,
-            isCorrect = false // Not revealed in exam
+            isCorrect = false
         )
     }
 
@@ -113,12 +188,22 @@ object ExamMapper {
         )
     }
 
+    // Chapter info mapping
+    fun ChapterInfoDto.toDomain(): ChapterInfo {
+        return ChapterInfo(
+            id = id,
+            name = name,
+            subjectId = subjectId
+        )
+    }
+
     // Exam question set mapping
     fun ExamQuestionSetDto.toDomain(): ExamQuestionSet {
         return ExamQuestionSet(
             examAttemptId = examAttemptId,
             examTitle = examTitle,
             subjects = subjects.map { it.toDomain() },
+            chapters = chapters.map { it.toDomain() },
             totalQuestions = totalQuestions,
             totalPoints = totalPoints,
             difficultyFilter = difficultyFilter?.let { QuestionDifficulty.fromString(it) },
@@ -129,10 +214,18 @@ object ExamMapper {
         )
     }
 
+    // Exam subject selection mapping
+    fun ExamSubjectSelection.toDto(): ExamSubjectSelectionDto {
+        return ExamSubjectSelectionDto(
+            subjectId = subjectId,
+            chapterIds = chapterIds
+        )
+    }
+
     // Start exam request mapping
     fun StartExamRequest.toDto(): StartExamRequestDto {
         return StartExamRequestDto(
-            subjectIds = subjectIds,
+            subjects = subjects.map { it.toDto() },
             questionCount = questionCount,
             difficultyFilter = difficultyFilter?.name,
             timeLimitMinutes = timeLimitMinutes
@@ -186,6 +279,7 @@ object ExamMapper {
             examAttemptId = examAttemptId,
             examTitle = examTitle,
             subjects = subjects.map { it.toDomain() },
+            chapters = chapters.map { it.toDomain() },
             totalQuestions = totalQuestions,
             answeredQuestions = answeredQuestions,
             correctAnswers = correctAnswers,
@@ -227,4 +321,3 @@ object ExamMapper {
         )
     }
 }
-

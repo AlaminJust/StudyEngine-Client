@@ -17,6 +17,92 @@ class ExamRepositoryImpl @Inject constructor(
     private val api: StudyEngineApi
 ) : ExamRepository {
 
+    // ==================== Category Operations ====================
+
+    override suspend fun getCategories(includeInactive: Boolean): Resource<List<Category>> {
+        return try {
+            val response = api.getCategories(includeInactive)
+
+            if (response.isSuccessful) {
+                val categories = response.body()?.map { it.toDomain() } ?: emptyList()
+                Resource.success(categories)
+            } else {
+                Log.e(TAG, "Failed to get categories: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get categories: ${response.code()}"),
+                    "Failed to load categories"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting categories", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun getCategoriesWithSubjects(includeInactive: Boolean): Resource<List<CategoryWithSubjects>> {
+        return try {
+            val response = api.getCategoriesWithSubjects(includeInactive)
+
+            if (response.isSuccessful) {
+                val categories = response.body()?.map { it.toDomain() } ?: emptyList()
+                Resource.success(categories)
+            } else {
+                Log.e(TAG, "Failed to get categories with subjects: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get categories with subjects: ${response.code()}"),
+                    "Failed to load categories"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting categories with subjects", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun getCategoryById(categoryId: String): Resource<Category> {
+        return try {
+            val response = api.getCategoryById(categoryId)
+
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(dto.toDomain())
+                } ?: Resource.error(Exception("Category not found"), "Category not found")
+            } else {
+                Log.e(TAG, "Failed to get category: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get category: ${response.code()}"),
+                    "Failed to load category"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting category", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun getCategoryWithSubjects(categoryId: String): Resource<CategoryWithSubjects> {
+        return try {
+            val response = api.getCategoryWithSubjects(categoryId)
+
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(dto.toDomain())
+                } ?: Resource.error(Exception("Category not found"), "Category not found")
+            } else {
+                Log.e(TAG, "Failed to get category with subjects: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get category with subjects: ${response.code()}"),
+                    "Failed to load category"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting category with subjects", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    // ==================== Subject Operations ====================
+
     override suspend fun getSubjects(includeInactive: Boolean): Resource<List<Subject>> {
         return try {
             val response = api.getSubjects(includeInactive)
@@ -33,6 +119,26 @@ class ExamRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error getting subjects", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun getSubjectsByCategory(categoryId: String, includeInactive: Boolean): Resource<List<Subject>> {
+        return try {
+            val response = api.getSubjectsByCategory(categoryId, includeInactive)
+
+            if (response.isSuccessful) {
+                val subjects = response.body()?.map { it.toDomain() } ?: emptyList()
+                Resource.success(subjects)
+            } else {
+                Log.e(TAG, "Failed to get subjects by category: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get subjects by category: ${response.code()}"),
+                    "Failed to load subjects"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting subjects by category", e)
             Resource.error(e, e.message)
         }
     }
@@ -58,6 +164,72 @@ class ExamRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getSubjectWithChapters(subjectId: String): Resource<SubjectWithChapters> {
+        return try {
+            val response = api.getSubjectWithChapters(subjectId)
+
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(dto.toDomain())
+                } ?: Resource.error(Exception("Subject not found"), "Subject not found")
+            } else {
+                Log.e(TAG, "Failed to get subject with chapters: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get subject with chapters: ${response.code()}"),
+                    "Failed to load subject"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting subject with chapters", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    // ==================== Subject Chapter Operations ====================
+
+    override suspend fun getSubjectChapters(subjectId: String, includeInactive: Boolean): Resource<List<SubjectChapter>> {
+        return try {
+            val response = api.getSubjectChapters(subjectId, includeInactive)
+
+            if (response.isSuccessful) {
+                val chapters = response.body()?.map { it.toDomain() } ?: emptyList()
+                Resource.success(chapters)
+            } else {
+                Log.e(TAG, "Failed to get subject chapters: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get subject chapters: ${response.code()}"),
+                    "Failed to load chapters"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting subject chapters", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun getSubjectChapterById(chapterId: String): Resource<SubjectChapter> {
+        return try {
+            val response = api.getSubjectChapterById(chapterId)
+
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(dto.toDomain())
+                } ?: Resource.error(Exception("Chapter not found"), "Chapter not found")
+            } else {
+                Log.e(TAG, "Failed to get subject chapter: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get subject chapter: ${response.code()}"),
+                    "Failed to load chapter"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting subject chapter", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    // ==================== Question Operations ====================
+
     override suspend fun getAvailableQuestionCount(
         subjectId: String,
         difficulty: QuestionDifficulty?
@@ -80,6 +252,8 @@ class ExamRepositoryImpl @Inject constructor(
             Resource.error(e, e.message)
         }
     }
+
+    // ==================== Exam Operations ====================
 
     override suspend fun startExam(request: StartExamRequest): Resource<ExamQuestionSet> {
         return try {
@@ -113,7 +287,6 @@ class ExamRepositoryImpl @Inject constructor(
                     Resource.success(exam)
                 }
                 response.code() == 204 -> {
-                    // No exam in progress
                     Resource.success(null)
                 }
                 else -> {
@@ -227,4 +400,3 @@ class ExamRepositoryImpl @Inject constructor(
         }
     }
 }
-
