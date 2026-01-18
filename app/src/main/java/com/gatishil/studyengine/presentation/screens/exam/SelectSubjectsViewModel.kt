@@ -6,6 +6,8 @@ import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.domain.model.Category
 import com.gatishil.studyengine.domain.model.CategoryWithSubjects
 import com.gatishil.studyengine.domain.model.Subject
+import com.gatishil.studyengine.domain.model.SubjectChapter
+import com.gatishil.studyengine.domain.model.SubjectWithChapters
 import com.gatishil.studyengine.domain.repository.ExamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,15 +16,48 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class SubjectSelectionItem(
+    val subject: Subject,
+    val chapters: List<SubjectChapter> = emptyList(),
+    val selectedChapterIds: Set<String> = emptySet(),
+    val isExpanded: Boolean = false,
+    val isSelected: Boolean = false
+)
+
+data class CategorySelectionItem(
+    val category: CategoryWithSubjects,
+    val subjectItems: List<SubjectSelectionItem>,
+    val isExpanded: Boolean = true
+)
+
 data class SelectSubjectsUiState(
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
-    val categories: List<CategoryWithSubjects> = emptyList(),
-    val subjects: List<Subject> = emptyList(),
-    val selectedSubjectIds: Set<String> = emptySet(),
-    val expandedCategoryIds: Set<String> = emptySet(),
+    val categoryItems: List<CategorySelectionItem> = emptyList(),
+    val subjectItems: List<SubjectSelectionItem> = emptyList(), // For non-categorized subjects
     val error: String? = null
-)
+) {
+    // Convenience properties
+    val categories: List<CategoryWithSubjects>
+        get() = categoryItems.map { it.category }
+
+    val subjects: List<Subject>
+        get() = if (categoryItems.isNotEmpty()) {
+            categoryItems.flatMap { it.subjectItems.map { si -> si.subject } }
+        } else {
+            subjectItems.map { it.subject }
+        }
+
+    val selectedSubjectIds: Set<String>
+        get() = if (categoryItems.isNotEmpty()) {
+            categoryItems.flatMap { ci -> ci.subjectItems.filter { it.isSelected }.map { it.subject.id } }.toSet()
+        } else {
+            subjectItems.filter { it.isSelected }.map { it.subject.id }.toSet()
+        }
+
+    val expandedCategoryIds: Set<String>
+        get() = categoryItems.filter { it.isExpanded }.map { it.category.id }.toSet()
+}
 
 @HiltViewModel
 class SelectSubjectsViewModel @Inject constructor(
@@ -46,23 +81,63 @@ class SelectSubjectsViewModel @Inject constructor(
             val subjectsResult = examRepository.getSubjects()
 
             when {
-                categoriesResult is Resource.Success -> {
+                categoriesResult is Resource.Success && categoriesResult.data.isNotEmpty() -> {
                     val categories = categoriesResult.data
-                    // Expand all categories by default
-                    val expandedIds = categories.map { it.id }.toSet()
+
+                    // Load chapters for each subject
+                    val categoryItems = categories.map { category ->
+                        val subjectItems = category.subjects.map { subject ->
+                            // Try to load chapters for this subject
+                            val chaptersResult = examRepository.getSubjectChapters(subject.id)
+                            val chapters = if (chaptersResult is Resource.Success) {
+                                chaptersResult.data
+                            } else {
+                                emptyList()
+                            }
+
+                            SubjectSelectionItem(
+                                subject = subject,
+                                chapters = chapters,
+                                selectedChapterIds = emptySet(),
+                                isExpanded = false,
+                                isSelected = false
+                            )
+                        }
+
+                        CategorySelectionItem(
+                            category = category,
+                            subjectItems = subjectItems,
+                            isExpanded = true
+                        )
+                    }
 
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        categories = categories,
-                        subjects = subjectsResult.getOrNull() ?: emptyList(),
-                        expandedCategoryIds = expandedIds
+                        categoryItems = categoryItems
                     )
                 }
                 subjectsResult is Resource.Success -> {
+                    // Load chapters for each subject
+                    val subjectItems = subjectsResult.data.map { subject ->
+                        val chaptersResult = examRepository.getSubjectChapters(subject.id)
+                        val chapters = if (chaptersResult is Resource.Success) {
+                            chaptersResult.data
+                        } else {
+                            emptyList()
+                        }
+
+                        SubjectSelectionItem(
+                            subject = subject,
+                            chapters = chapters,
+                            selectedChapterIds = emptySet(),
+                            isExpanded = false,
+                            isSelected = false
+                        )
+                    }
+
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        categories = emptyList(),
-                        subjects = subjectsResult.data
+                        subjectItems = subjectItems
                     )
                 }
                 else -> {
@@ -86,82 +161,238 @@ class SelectSubjectsViewModel @Inject constructor(
     }
 
     fun toggleCategoryExpanded(categoryId: String) {
-        val currentExpanded = _uiState.value.expandedCategoryIds.toMutableSet()
-        if (currentExpanded.contains(categoryId)) {
-            currentExpanded.remove(categoryId)
-        } else {
-            currentExpanded.add(categoryId)
-        }
-        _uiState.value = _uiState.value.copy(expandedCategoryIds = currentExpanded)
+        _uiState.value = _uiState.value.copy(
+            categoryItems = _uiState.value.categoryItems.map { ci ->
+                if (ci.category.id == categoryId) {
+                    ci.copy(isExpanded = !ci.isExpanded)
+                } else ci
+            }
+        )
     }
 
     fun toggleSubjectSelection(subjectId: String) {
-        val currentSelection = _uiState.value.selectedSubjectIds.toMutableSet()
-        if (currentSelection.contains(subjectId)) {
-            currentSelection.remove(subjectId)
-        } else {
-            currentSelection.add(subjectId)
-        }
-        _uiState.value = _uiState.value.copy(selectedSubjectIds = currentSelection)
+        _uiState.value = _uiState.value.copy(
+            categoryItems = _uiState.value.categoryItems.map { ci ->
+                ci.copy(
+                    subjectItems = ci.subjectItems.map { si ->
+                        if (si.subject.id == subjectId) {
+                            si.copy(isSelected = !si.isSelected)
+                        } else si
+                    }
+                )
+            },
+            subjectItems = _uiState.value.subjectItems.map { si ->
+                if (si.subject.id == subjectId) {
+                    si.copy(isSelected = !si.isSelected)
+                } else si
+            }
+        )
+    }
+
+    fun toggleSubjectExpanded(subjectId: String) {
+        _uiState.value = _uiState.value.copy(
+            categoryItems = _uiState.value.categoryItems.map { ci ->
+                ci.copy(
+                    subjectItems = ci.subjectItems.map { si ->
+                        if (si.subject.id == subjectId) {
+                            si.copy(isExpanded = !si.isExpanded)
+                        } else si
+                    }
+                )
+            },
+            subjectItems = _uiState.value.subjectItems.map { si ->
+                if (si.subject.id == subjectId) {
+                    si.copy(isExpanded = !si.isExpanded)
+                } else si
+            }
+        )
+    }
+
+    fun toggleChapterSelection(subjectId: String, chapterId: String) {
+        _uiState.value = _uiState.value.copy(
+            categoryItems = _uiState.value.categoryItems.map { ci ->
+                ci.copy(
+                    subjectItems = ci.subjectItems.map { si ->
+                        if (si.subject.id == subjectId) {
+                            val newSelection = si.selectedChapterIds.toMutableSet()
+                            if (newSelection.contains(chapterId)) {
+                                newSelection.remove(chapterId)
+                            } else {
+                                newSelection.add(chapterId)
+                            }
+                            si.copy(selectedChapterIds = newSelection)
+                        } else si
+                    }
+                )
+            },
+            subjectItems = _uiState.value.subjectItems.map { si ->
+                if (si.subject.id == subjectId) {
+                    val newSelection = si.selectedChapterIds.toMutableSet()
+                    if (newSelection.contains(chapterId)) {
+                        newSelection.remove(chapterId)
+                    } else {
+                        newSelection.add(chapterId)
+                    }
+                    si.copy(selectedChapterIds = newSelection)
+                } else si
+            }
+        )
+    }
+
+    fun selectAllChapters(subjectId: String) {
+        _uiState.value = _uiState.value.copy(
+            categoryItems = _uiState.value.categoryItems.map { ci ->
+                ci.copy(
+                    subjectItems = ci.subjectItems.map { si ->
+                        if (si.subject.id == subjectId) {
+                            si.copy(selectedChapterIds = si.chapters.map { it.id }.toSet())
+                        } else si
+                    }
+                )
+            },
+            subjectItems = _uiState.value.subjectItems.map { si ->
+                if (si.subject.id == subjectId) {
+                    si.copy(selectedChapterIds = si.chapters.map { it.id }.toSet())
+                } else si
+            }
+        )
+    }
+
+    fun deselectAllChapters(subjectId: String) {
+        _uiState.value = _uiState.value.copy(
+            categoryItems = _uiState.value.categoryItems.map { ci ->
+                ci.copy(
+                    subjectItems = ci.subjectItems.map { si ->
+                        if (si.subject.id == subjectId) {
+                            si.copy(selectedChapterIds = emptySet())
+                        } else si
+                    }
+                )
+            },
+            subjectItems = _uiState.value.subjectItems.map { si ->
+                if (si.subject.id == subjectId) {
+                    si.copy(selectedChapterIds = emptySet())
+                } else si
+            }
+        )
     }
 
     fun selectAllSubjectsInCategory(categoryId: String) {
-        val category = _uiState.value.categories.find { it.id == categoryId }
-        if (category != null) {
-            val currentSelection = _uiState.value.selectedSubjectIds.toMutableSet()
-            currentSelection.addAll(category.subjects.map { it.id })
-            _uiState.value = _uiState.value.copy(selectedSubjectIds = currentSelection)
-        }
+        _uiState.value = _uiState.value.copy(
+            categoryItems = _uiState.value.categoryItems.map { ci ->
+                if (ci.category.id == categoryId) {
+                    ci.copy(
+                        subjectItems = ci.subjectItems.map { si ->
+                            si.copy(isSelected = true)
+                        }
+                    )
+                } else ci
+            }
+        )
     }
 
     fun deselectAllSubjectsInCategory(categoryId: String) {
-        val category = _uiState.value.categories.find { it.id == categoryId }
-        if (category != null) {
-            val currentSelection = _uiState.value.selectedSubjectIds.toMutableSet()
-            currentSelection.removeAll(category.subjects.map { it.id }.toSet())
-            _uiState.value = _uiState.value.copy(selectedSubjectIds = currentSelection)
-        }
+        _uiState.value = _uiState.value.copy(
+            categoryItems = _uiState.value.categoryItems.map { ci ->
+                if (ci.category.id == categoryId) {
+                    ci.copy(
+                        subjectItems = ci.subjectItems.map { si ->
+                            si.copy(isSelected = false)
+                        }
+                    )
+                } else ci
+            }
+        )
     }
 
     fun selectAllSubjects() {
-        val allSubjectIds = if (_uiState.value.categories.isNotEmpty()) {
-            _uiState.value.categories.flatMap { it.subjects }.map { it.id }.toSet()
-        } else {
-            _uiState.value.subjects.map { it.id }.toSet()
-        }
-        _uiState.value = _uiState.value.copy(selectedSubjectIds = allSubjectIds)
+        _uiState.value = _uiState.value.copy(
+            categoryItems = _uiState.value.categoryItems.map { ci ->
+                ci.copy(
+                    subjectItems = ci.subjectItems.map { si ->
+                        si.copy(isSelected = true)
+                    }
+                )
+            },
+            subjectItems = _uiState.value.subjectItems.map { si ->
+                si.copy(isSelected = true)
+            }
+        )
     }
 
     fun clearSelection() {
-        _uiState.value = _uiState.value.copy(selectedSubjectIds = emptySet())
+        _uiState.value = _uiState.value.copy(
+            categoryItems = _uiState.value.categoryItems.map { ci ->
+                ci.copy(
+                    subjectItems = ci.subjectItems.map { si ->
+                        si.copy(isSelected = false, selectedChapterIds = emptySet())
+                    }
+                )
+            },
+            subjectItems = _uiState.value.subjectItems.map { si ->
+                si.copy(isSelected = false, selectedChapterIds = emptySet())
+            }
+        )
     }
 
     fun getSelectedSubjectIds(): List<String> {
         return _uiState.value.selectedSubjectIds.toList()
     }
 
-    fun getTotalQuestionCount(): Int {
-        val selectedIds = _uiState.value.selectedSubjectIds
-        return if (_uiState.value.categories.isNotEmpty()) {
-            _uiState.value.categories
-                .flatMap { it.subjects }
-                .filter { it.id in selectedIds }
-                .sumOf { it.questionCount }
+    fun getSelectedSubjectsWithChapters(): List<Pair<String, List<String>?>> {
+        val result = mutableListOf<Pair<String, List<String>?>>()
+
+        if (_uiState.value.categoryItems.isNotEmpty()) {
+            _uiState.value.categoryItems.forEach { ci ->
+                ci.subjectItems.filter { it.isSelected }.forEach { si ->
+                    val chapterIds = if (si.selectedChapterIds.isEmpty()) null else si.selectedChapterIds.toList()
+                    result.add(Pair(si.subject.id, chapterIds))
+                }
+            }
         } else {
-            _uiState.value.subjects
-                .filter { it.id in selectedIds }
-                .sumOf { it.questionCount }
+            _uiState.value.subjectItems.filter { it.isSelected }.forEach { si ->
+                val chapterIds = if (si.selectedChapterIds.isEmpty()) null else si.selectedChapterIds.toList()
+                result.add(Pair(si.subject.id, chapterIds))
+            }
         }
+
+        return result
+    }
+
+    fun getTotalQuestionCount(): Int {
+        var total = 0
+
+        if (_uiState.value.categoryItems.isNotEmpty()) {
+            _uiState.value.categoryItems.forEach { ci ->
+                ci.subjectItems.filter { it.isSelected }.forEach { si ->
+                    total += if (si.selectedChapterIds.isEmpty()) {
+                        si.subject.questionCount
+                    } else {
+                        si.chapters.filter { it.id in si.selectedChapterIds }.sumOf { it.questionCount }
+                    }
+                }
+            }
+        } else {
+            _uiState.value.subjectItems.filter { it.isSelected }.forEach { si ->
+                total += if (si.selectedChapterIds.isEmpty()) {
+                    si.subject.questionCount
+                } else {
+                    si.chapters.filter { it.id in si.selectedChapterIds }.sumOf { it.questionCount }
+                }
+            }
+        }
+
+        return total
     }
 
     fun isAllSelectedInCategory(categoryId: String): Boolean {
-        val category = _uiState.value.categories.find { it.id == categoryId }
-        return category?.subjects?.all { it.id in _uiState.value.selectedSubjectIds } ?: false
+        val category = _uiState.value.categoryItems.find { it.category.id == categoryId }
+        return category?.subjectItems?.all { it.isSelected } ?: false
     }
 
     fun getSelectedCountInCategory(categoryId: String): Int {
-        val category = _uiState.value.categories.find { it.id == categoryId }
-        return category?.subjects?.count { it.id in _uiState.value.selectedSubjectIds } ?: 0
+        val category = _uiState.value.categoryItems.find { it.category.id == categoryId }
+        return category?.subjectItems?.count { it.isSelected } ?: 0
     }
 
     fun clearError() {

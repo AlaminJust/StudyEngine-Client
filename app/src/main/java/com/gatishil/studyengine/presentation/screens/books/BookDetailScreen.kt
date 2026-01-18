@@ -449,8 +449,14 @@ private fun StudyPlanCard(
             )
 
             book.studyPlan?.let { plan ->
+                val statusText = when (plan.status) {
+                    com.gatishil.studyengine.domain.model.StudyPlanStatus.ACTIVE -> stringResource(R.string.status_active)
+                    com.gatishil.studyengine.domain.model.StudyPlanStatus.PAUSED -> stringResource(R.string.status_paused)
+                    com.gatishil.studyengine.domain.model.StudyPlanStatus.COMPLETED -> stringResource(R.string.status_completed)
+                    com.gatishil.studyengine.domain.model.StudyPlanStatus.CANCELLED -> stringResource(R.string.status_cancelled)
+                }
                 StatusChip(
-                    text = plan.status.name,
+                    text = statusText,
                     color = when (plan.status) {
                         com.gatishil.studyengine.domain.model.StudyPlanStatus.ACTIVE -> StudyEngineTheme.extendedColors.success
                         com.gatishil.studyengine.domain.model.StudyPlanStatus.PAUSED -> MaterialTheme.colorScheme.tertiary

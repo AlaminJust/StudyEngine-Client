@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -90,7 +91,43 @@ fun StartExamScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Chapter Selection Section (if subjects have chapters)
+                if (uiState.subjectsWithChapters.any { it.chapters.isNotEmpty() }) {
+                    Text(
+                        text = stringResource(R.string.exam_select_chapters),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = stringResource(R.string.exam_select_chapters_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    uiState.subjectsWithChapters.forEach { swc ->
+                        if (swc.chapters.isNotEmpty()) {
+                            SubjectChapterSelector(
+                                subjectWithChapterSelection = swc,
+                                onToggleExpanded = { viewModel.toggleSubjectExpanded(swc.subject.id) },
+                                onToggleChapter = { chapterId -> viewModel.toggleChapterSelection(swc.subject.id, chapterId) },
+                                onSelectAll = { viewModel.selectAllChapters(swc.subject.id) },
+                                onDeselectAll = { viewModel.deselectAllChapters(swc.subject.id) },
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
 
                 // Configuration Section
                 Text(
@@ -572,16 +609,23 @@ private fun ExamSummaryCard(
                     label = stringResource(R.string.exam_summary_questions)
                 )
 
+                val difficultyText = when (difficulty) {
+                    QuestionDifficulty.EASY -> stringResource(R.string.exam_difficulty_easy)
+                    QuestionDifficulty.MEDIUM -> stringResource(R.string.exam_difficulty_medium)
+                    QuestionDifficulty.HARD -> stringResource(R.string.exam_difficulty_hard)
+                    QuestionDifficulty.EXPERT -> stringResource(R.string.exam_difficulty_expert)
+                    null -> stringResource(R.string.exam_difficulty_all)
+                }
                 SummaryItem(
                     icon = Icons.Outlined.Speed,
-                    value = difficulty?.name?.lowercase()?.replaceFirstChar { it.uppercase() }
-                           ?: stringResource(R.string.exam_difficulty_all),
+                    value = difficultyText,
                     label = stringResource(R.string.exam_summary_difficulty)
                 )
 
                 SummaryItem(
                     icon = Icons.Outlined.Timer,
-                    value = timeLimit?.let { "${it}m" } ?: "∞",
+                    value = timeLimit?.let { stringResource(R.string.exam_time_minutes, it) }
+                           ?: stringResource(R.string.exam_time_no_limit),
                     label = stringResource(R.string.exam_summary_time)
                 )
             }
@@ -613,6 +657,141 @@ private fun SummaryItem(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+private fun SubjectChapterSelector(
+    subjectWithChapterSelection: SubjectWithChapterSelection,
+    onToggleExpanded: () -> Unit,
+    onToggleChapter: (String) -> Unit,
+    onSelectAll: () -> Unit,
+    onDeselectAll: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val swc = subjectWithChapterSelection
+    val selectedCount = swc.selectedChapterIds.size
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column {
+            // Subject Header (clickable to expand)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onToggleExpanded)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Subject Icon
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.MenuBook,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // Subject Info
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = swc.subject.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = if (selectedCount == 0) {
+                            stringResource(R.string.exam_all_chapters, swc.chapters.size)
+                        } else {
+                            stringResource(R.string.exam_chapters_selected, selectedCount, swc.chapters.size)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
+
+                // Expand/Collapse Icon
+                Icon(
+                    imageVector = if (swc.isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = if (swc.isExpanded) "Collapse" else "Expand",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Chapter List (animated)
+            AnimatedVisibility(
+                visible = swc.isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    // Select All / Deselect All buttons
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = onSelectAll) {
+                            Text(stringResource(R.string.select_all))
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TextButton(onClick = onDeselectAll) {
+                            Text(stringResource(R.string.clear))
+                        }
+                    }
+
+                    // Chapters
+                    swc.chapters.forEach { chapter ->
+                        val isSelected = chapter.id in swc.selectedChapterIds
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onToggleChapter(chapter.id) }
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = isSelected,
+                                onCheckedChange = { onToggleChapter(chapter.id) }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = chapter.name,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+                                )
+                                Text(
+                                    text = stringResource(R.string.exam_question_count, chapter.questionCount),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
     }
 }
 

@@ -74,9 +74,19 @@ sealed class Screen(val route: String) {
     // Exams
     data object Exams : Screen("exams")
     data object SelectSubjects : Screen("exams/select-subjects")
-    data object StartExam : Screen("exams/start?subjectIds={subjectIds}") {
-        fun createRoute(subjectIds: List<String>) = "exams/start?subjectIds=${subjectIds.joinToString(",")}"
-        fun createRoute(subjectId: String) = "exams/start?subjectIds=$subjectId"
+    data object StartExam : Screen("exams/start?subjectIds={subjectIds}&chapterSelections={chapterSelections}") {
+        fun createRoute(subjectIds: List<String>) = "exams/start?subjectIds=${subjectIds.joinToString(",")}&chapterSelections="
+        fun createRoute(subjectId: String) = "exams/start?subjectIds=$subjectId&chapterSelections="
+        // Format: subjectId1:chapterId1,chapterId2|subjectId2:chapterId3,chapterId4
+        fun createRouteWithChapters(subjectsWithChapters: List<Pair<String, List<String>?>>) : String {
+            val subjectIds = subjectsWithChapters.map { it.first }.joinToString(",")
+            val chapterSelections = subjectsWithChapters.mapNotNull { (subjectId, chapterIds) ->
+                if (chapterIds != null && chapterIds.isNotEmpty()) {
+                    "$subjectId:${chapterIds.joinToString(",")}"
+                } else null
+            }.joinToString("|")
+            return "exams/start?subjectIds=$subjectIds&chapterSelections=${java.net.URLEncoder.encode(chapterSelections, "UTF-8")}"
+        }
     }
     data object TakeExam : Screen("exams/take")
     data object ExamResult : Screen("exams/result/{examAttemptId}") {

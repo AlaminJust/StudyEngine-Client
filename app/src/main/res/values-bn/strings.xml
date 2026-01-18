@@ -239,6 +239,10 @@
     <string name="resume_study_plan_consequence_4">🔔 আসন্ন সেশনের জন্য রিমাইন্ডার পাবেন</string>
     <string name="resume_plan">পুনরায় শুরু</string>
 
+    <!-- Study Plan Status -->
+    <string name="status_active">সক্রিয়</string>
+    <string name="status_paused">বিরতি</string>
+
     <string name="delete_study_plan">পড়ার পরিকল্পনা মুছুন</string>
     <string name="delete_study_plan_message">আপনি কি এই পড়ার পরিকল্পনা মুছে ফেলতে চান?</string>
     <string name="delete_study_plan_consequence_1">⚠️ এই কাজ পূর্বাবস্থায় ফেরানো যাবে না</string>
@@ -614,6 +618,12 @@
     <string name="exam_multi_subject_title">মাল্টি-সাবজেক্ট পরীক্ষা</string>
     <string name="exam_multi_subject_desc">একাধিক বিষয় থেকে প্রশ্ন একত্রিত করুন</string>
     <string name="exam_subject_count">%1$d বিষয়</string>
+
+    <!-- Chapter Selection -->
+    <string name="exam_select_chapters">অধ্যায় নির্বাচন করুন (ঐচ্ছিক)</string>
+    <string name="exam_select_chapters_hint">সব অধ্যায় অন্তর্ভুক্ত করতে খালি রাখুন, অথবা নির্দিষ্ট অধ্যায় নির্বাচন করুন</string>
+    <string name="exam_all_chapters">সব %1$d অধ্যায়</string>
+    <string name="exam_chapters_selected">%2$d এর মধ্যে %1$d অধ্যায় নির্বাচিত</string>
 </resources>
 
 

@@ -41,7 +41,7 @@ import com.gatishil.studyengine.presentation.common.components.LoadingScreen
 @Composable
 fun SelectSubjectsScreen(
     onNavigateBack: () -> Unit,
-    onSubjectsSelected: (List<String>) -> Unit,
+    onSubjectsSelected: (List<Pair<String, List<String>?>>) -> Unit,
     viewModel: SelectSubjectsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -130,7 +130,7 @@ fun SelectSubjectsScreen(
                     // Continue Button
                     Button(
                         onClick = {
-                            onSubjectsSelected(viewModel.getSelectedSubjectIds())
+                            onSubjectsSelected(viewModel.getSelectedSubjectsWithChapters())
                         },
                         enabled = uiState.selectedSubjectIds.isNotEmpty(),
                         modifier = Modifier
@@ -161,9 +161,9 @@ fun SelectSubjectsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (uiState.isLoading && uiState.subjects.isEmpty() && uiState.categories.isEmpty()) {
+            if (uiState.isLoading && uiState.subjects.isEmpty() && uiState.categoryItems.isEmpty()) {
                 LoadingScreen()
-            } else if (uiState.subjects.isEmpty() && uiState.categories.isEmpty()) {
+            } else if (uiState.subjects.isEmpty() && uiState.categoryItems.isEmpty()) {
                 EmptySubjectsMessage(
                     modifier = Modifier
                         .fillMaxSize()
@@ -181,30 +181,33 @@ fun SelectSubjectsScreen(
                     }
 
                     // Display categories with subjects
-                    if (uiState.categories.isNotEmpty()) {
-                        uiState.categories.forEach { category ->
-                            if (category.subjects.isNotEmpty()) {
-                                item(key = "category_${category.id}") {
+                    if (uiState.categoryItems.isNotEmpty()) {
+                        uiState.categoryItems.forEach { categoryItem ->
+                            if (categoryItem.subjectItems.isNotEmpty()) {
+                                item(key = "category_${categoryItem.category.id}") {
                                     CategorySection(
-                                        category = category,
-                                        isExpanded = category.id in uiState.expandedCategoryIds,
-                                        onToggleExpand = { viewModel.toggleCategoryExpanded(category.id) },
-                                        selectedCount = viewModel.getSelectedCountInCategory(category.id),
-                                        isAllSelected = viewModel.isAllSelectedInCategory(category.id),
-                                        onSelectAll = { viewModel.selectAllSubjectsInCategory(category.id) },
-                                        onDeselectAll = { viewModel.deselectAllSubjectsInCategory(category.id) }
+                                        category = categoryItem.category,
+                                        isExpanded = categoryItem.isExpanded,
+                                        onToggleExpand = { viewModel.toggleCategoryExpanded(categoryItem.category.id) },
+                                        selectedCount = viewModel.getSelectedCountInCategory(categoryItem.category.id),
+                                        isAllSelected = viewModel.isAllSelectedInCategory(categoryItem.category.id),
+                                        onSelectAll = { viewModel.selectAllSubjectsInCategory(categoryItem.category.id) },
+                                        onDeselectAll = { viewModel.deselectAllSubjectsInCategory(categoryItem.category.id) }
                                     )
                                 }
 
-                                if (category.id in uiState.expandedCategoryIds) {
+                                if (categoryItem.isExpanded) {
                                     items(
-                                        items = category.subjects,
-                                        key = { "subject_${it.id}" }
-                                    ) { subject ->
-                                        SelectableSubjectCard(
-                                            subject = subject,
-                                            isSelected = subject.id in uiState.selectedSubjectIds,
-                                            onClick = { viewModel.toggleSubjectSelection(subject.id) },
+                                        items = categoryItem.subjectItems,
+                                        key = { "subject_${it.subject.id}" }
+                                    ) { subjectItem ->
+                                        SelectableSubjectWithChaptersCard(
+                                            subjectItem = subjectItem,
+                                            onToggleSelection = { viewModel.toggleSubjectSelection(subjectItem.subject.id) },
+                                            onToggleExpanded = { viewModel.toggleSubjectExpanded(subjectItem.subject.id) },
+                                            onToggleChapter = { chapterId -> viewModel.toggleChapterSelection(subjectItem.subject.id, chapterId) },
+                                            onSelectAllChapters = { viewModel.selectAllChapters(subjectItem.subject.id) },
+                                            onDeselectAllChapters = { viewModel.deselectAllChapters(subjectItem.subject.id) },
                                             modifier = Modifier.padding(start = 16.dp)
                                         )
                                     }
@@ -213,11 +216,17 @@ fun SelectSubjectsScreen(
                         }
                     } else {
                         // Fallback: show subjects without categories
-                        items(uiState.subjects) { subject ->
-                            SelectableSubjectCard(
-                                subject = subject,
-                                isSelected = subject.id in uiState.selectedSubjectIds,
-                                onClick = { viewModel.toggleSubjectSelection(subject.id) }
+                        items(
+                            items = uiState.subjectItems,
+                            key = { "subject_${it.subject.id}" }
+                        ) { subjectItem ->
+                            SelectableSubjectWithChaptersCard(
+                                subjectItem = subjectItem,
+                                onToggleSelection = { viewModel.toggleSubjectSelection(subjectItem.subject.id) },
+                                onToggleExpanded = { viewModel.toggleSubjectExpanded(subjectItem.subject.id) },
+                                onToggleChapter = { chapterId -> viewModel.toggleChapterSelection(subjectItem.subject.id, chapterId) },
+                                onSelectAllChapters = { viewModel.selectAllChapters(subjectItem.subject.id) },
+                                onDeselectAllChapters = { viewModel.deselectAllChapters(subjectItem.subject.id) }
                             )
                         }
                     }
@@ -282,141 +291,6 @@ private fun SelectSubjectsHeader() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun SelectableSubjectCard(
-    subject: Subject,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val containerColor = if (isSelected) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerLow
-    }
-
-    val borderColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        Color.Transparent
-    }
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(
-                if (isSelected) {
-                    Modifier.border(
-                        width = 2.dp,
-                        color = borderColor,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                } else Modifier
-            ),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        shape = RoundedCornerShape(12.dp),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Subject Icon
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (isSelected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                        }
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.MenuBook,
-                    contentDescription = null,
-                    tint = if (isSelected) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Subject Info
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = subject.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    }
-                )
-
-                subject.description?.let { desc ->
-                    Text(
-                        text = desc,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Outlined.Quiz,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = if (isSelected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.exam_question_count, subject.questionCount),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-                }
-            }
-
-            // Checkbox
-            Checkbox(
-                checked = isSelected,
-                onCheckedChange = { onClick() },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = MaterialTheme.colorScheme.primary,
-                    uncheckedColor = MaterialTheme.colorScheme.outline
-                )
-            )
         }
     }
 }
@@ -580,6 +454,247 @@ private fun getCategoryIcon(categoryName: String): ImageVector {
         name.contains("job") -> Icons.Outlined.Work
         name.contains("bank") -> Icons.Outlined.AccountBalance
         else -> Icons.Outlined.Category
+    }
+}
+
+@Composable
+private fun SelectableSubjectWithChaptersCard(
+    subjectItem: SubjectSelectionItem,
+    onToggleSelection: () -> Unit,
+    onToggleExpanded: () -> Unit,
+    onToggleChapter: (String) -> Unit,
+    onSelectAllChapters: () -> Unit,
+    onDeselectAllChapters: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val containerColor = if (subjectItem.isSelected) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerLow
+    }
+
+    val borderColor = if (subjectItem.isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        Color.Transparent
+    }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (subjectItem.isSelected) {
+                    Modifier.border(
+                        width = 2.dp,
+                        color = borderColor,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                } else Modifier
+            ),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column {
+            // Subject Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onToggleSelection)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Checkbox
+                Checkbox(
+                    checked = subjectItem.isSelected,
+                    onCheckedChange = { onToggleSelection() },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = MaterialTheme.colorScheme.outline
+                    )
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Subject Icon
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (subjectItem.isSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.MenuBook,
+                        contentDescription = null,
+                        tint = if (subjectItem.isSelected) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // Subject Info
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = subjectItem.subject.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (subjectItem.isSelected) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    // Question count
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Outlined.Quiz,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.exam_question_count, subjectItem.subject.questionCount),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1
+                        )
+                    }
+
+                    // Chapter count (on separate line to prevent breaking)
+                    if (subjectItem.chapters.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Outlined.Bookmark,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (subjectItem.selectedChapterIds.isEmpty()) {
+                                    stringResource(R.string.exam_all_chapters, subjectItem.chapters.size)
+                                } else {
+                                    stringResource(R.string.exam_chapters_selected, subjectItem.selectedChapterIds.size, subjectItem.chapters.size)
+                                },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.secondary,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                }
+
+                // Expand chapters button (only if has chapters and is selected)
+                if (subjectItem.chapters.isNotEmpty() && subjectItem.isSelected) {
+                    IconButton(onClick = onToggleExpanded) {
+                        Icon(
+                            imageVector = if (subjectItem.isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                            contentDescription = if (subjectItem.isExpanded) "Collapse" else "Expand chapters",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+
+            // Chapter List (animated)
+            AnimatedVisibility(
+                visible = subjectItem.isExpanded && subjectItem.isSelected && subjectItem.chapters.isNotEmpty(),
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                ) {
+                    // Chapter selection header
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.exam_select_chapters),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Row {
+                            TextButton(
+                                onClick = onSelectAllChapters,
+                                contentPadding = PaddingValues(horizontal = 8.dp)
+                            ) {
+                                Text(
+                                    stringResource(R.string.select_all),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                            TextButton(
+                                onClick = onDeselectAllChapters,
+                                contentPadding = PaddingValues(horizontal = 8.dp)
+                            ) {
+                                Text(
+                                    stringResource(R.string.clear),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                        }
+                    }
+
+                    // Chapters
+                    subjectItem.chapters.forEach { chapter ->
+                        val isChapterSelected = chapter.id in subjectItem.selectedChapterIds
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onToggleChapter(chapter.id) }
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = isChapterSelected,
+                                onCheckedChange = { onToggleChapter(chapter.id) },
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = chapter.name,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = if (isChapterSelected) FontWeight.Medium else FontWeight.Normal,
+                                    color = if (isChapterSelected) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface
+                                    }
+                                )
+                                Text(
+                                    text = stringResource(R.string.exam_question_count, chapter.questionCount),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -164,8 +164,8 @@ fun StudyEngineNavGraph(
         composable(route = Screen.SelectSubjects.route) {
             com.gatishil.studyengine.presentation.screens.exam.SelectSubjectsScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onSubjectsSelected = { subjectIds ->
-                    navController.navigate(Screen.StartExam.createRoute(subjectIds)) {
+                onSubjectsSelected = { subjectsWithChapters ->
+                    navController.navigate(Screen.StartExam.createRouteWithChapters(subjectsWithChapters)) {
                         popUpTo(Screen.SelectSubjects.route) { inclusive = true }
                     }
                 }
@@ -176,6 +176,10 @@ fun StudyEngineNavGraph(
             route = Screen.StartExam.route,
             arguments = listOf(
                 navArgument("subjectIds") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+                navArgument("chapterSelections") {
                     type = NavType.StringType
                     defaultValue = ""
                 }
