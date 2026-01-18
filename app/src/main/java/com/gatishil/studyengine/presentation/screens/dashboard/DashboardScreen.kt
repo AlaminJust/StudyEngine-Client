@@ -283,22 +283,30 @@ private fun DashboardHeader(
     onProfileClick: () -> Unit = {}
 ) {
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(140.dp + statusBarHeight)
     ) {
-        // Gradient background
+        // Gradient background - use brighter colors in dark mode
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.tertiary
-                        )
+                        colors = if (isDarkTheme) {
+                            listOf(
+                                Color(0xFF6B4EFF), // Brighter purple for dark mode
+                                Color(0xFF9C27B0)  // Brighter magenta for dark mode
+                            )
+                        } else {
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        }
                     )
                 )
         )
@@ -310,7 +318,7 @@ private fun DashboardHeader(
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.1f),
+                            Color.White.copy(alpha = 0.15f),
                             Color.Transparent
                         )
                     )

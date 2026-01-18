@@ -402,5 +402,48 @@ class BookRepositoryImpl @Inject constructor(
             Resource.error(e, e.message)
         }
     }
+
+    override suspend fun refreshBookById(bookId: String): Resource<Book> {
+        return try {
+            val response = api.getBookById(bookId)
+
+            if (response.isSuccessful) {
+                response.body()?.let { bookDto ->
+                    // Update local database with fresh data
+                    bookDao.insertBook(with(BookMapper) { bookDto.toEntity() })
+
+                    // Update chapters
+                    bookDto.chapters.forEach { chapterDto ->
+                        chapterDao.insertChapter(with(ChapterMapper) { chapterDto.toEntity() })
+                    }
+
+                    // Update study plan - first delete old one if exists
+                    studyPlanDao.getStudyPlanByBookId(bookId)?.let { oldPlan ->
+                        recurrenceRuleDao.deleteRecurrenceRuleByStudyPlanId(oldPlan.id)
+                        studyPlanDao.deleteStudyPlanByBookId(bookId)
+                    }
+
+                    // Insert new study plan if exists
+                    bookDto.studyPlan?.let { studyPlanDto ->
+                        studyPlanDao.insertStudyPlan(with(StudyPlanMapper) { studyPlanDto.toEntity() })
+                        studyPlanDto.recurrenceRule?.let { ruleDto ->
+                            recurrenceRuleDao.insertRecurrenceRule(
+                                with(RecurrenceRuleMapper) { ruleDto.toEntity() }
+                            )
+                        }
+                    }
+
+                    Resource.success(with(BookMapper) { bookDto.toDomain() })
+                } ?: Resource.error(Exception("Empty response body"))
+            } else {
+                Resource.error(
+                    Exception("Refresh book failed: ${response.code()}"),
+                    response.message()
+                )
+            }
+        } catch (e: Exception) {
+            Resource.error(e, e.message)
+        }
+    }
 }
 

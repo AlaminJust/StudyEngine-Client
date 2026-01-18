@@ -62,7 +62,7 @@ data class RecurrenceRuleDto(
     @SerialName("interval")
     val interval: Int,
     @SerialName("daysOfWeek")
-    val daysOfWeek: List<Int>
+    val daysOfWeek: List<String> // Backend returns enum names like "Monday", "Tuesday"
 )
 
 /**
@@ -75,6 +75,6 @@ data class CreateRecurrenceRuleRequestDto(
     @SerialName("Interval")
     val interval: Int = 1,
     @SerialName("DaysOfWeek")
-    val daysOfWeek: List<Int>? = null
+    val daysOfWeek: List<Int>? = null // We send as integers to backend
 )
 

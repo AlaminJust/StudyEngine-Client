@@ -229,9 +229,12 @@ class BookDetailViewModel @Inject constructor(
             try {
                 val response = api.activateStudyPlan(studyPlanId)
                 if (response.isSuccessful) {
-                    _uiState.update { it.copy(successMessageResId = R.string.study_plan_resumed_success) }
-                    // Reload book to get updated study plan
-                    _uiState.value.book?.let { loadBook(it.id) }
+                    // Force refresh from server to get updated data
+                    _uiState.value.book?.let { book ->
+                        bookRepository.refreshBookById(book.id)
+                        loadBook(book.id)
+                    }
+                    _uiState.update { it.copy(isLoading = false, successMessageResId = R.string.study_plan_resumed_success) }
                 } else {
                     _uiState.update { it.copy(isLoading = false, error = "Failed to activate plan") }
                 }
@@ -247,8 +250,12 @@ class BookDetailViewModel @Inject constructor(
             try {
                 val response = api.pauseStudyPlan(studyPlanId)
                 if (response.isSuccessful) {
-                    _uiState.update { it.copy(successMessageResId = R.string.study_plan_paused_success) }
-                    _uiState.value.book?.let { loadBook(it.id) }
+                    // Force refresh from server to get updated data
+                    _uiState.value.book?.let { book ->
+                        bookRepository.refreshBookById(book.id)
+                        loadBook(book.id)
+                    }
+                    _uiState.update { it.copy(isLoading = false, successMessageResId = R.string.study_plan_paused_success) }
                 } else {
                     _uiState.update { it.copy(isLoading = false, error = "Failed to pause plan") }
                 }
@@ -264,8 +271,12 @@ class BookDetailViewModel @Inject constructor(
             try {
                 val response = api.completeStudyPlan(studyPlanId)
                 if (response.isSuccessful) {
-                    _uiState.update { it.copy(successMessageResId = R.string.study_plan_completed_success) }
-                    _uiState.value.book?.let { loadBook(it.id) }
+                    // Force refresh from server to get updated data
+                    _uiState.value.book?.let { book ->
+                        bookRepository.refreshBookById(book.id)
+                        loadBook(book.id)
+                    }
+                    _uiState.update { it.copy(isLoading = false, successMessageResId = R.string.study_plan_completed_success) }
                 } else {
                     _uiState.update { it.copy(isLoading = false, error = "Failed to complete plan") }
                 }
@@ -281,8 +292,12 @@ class BookDetailViewModel @Inject constructor(
             try {
                 val response = api.deleteStudyPlan(studyPlanId)
                 if (response.isSuccessful) {
-                    _uiState.update { it.copy(successMessageResId = R.string.study_plan_deleted_success) }
-                    _uiState.value.book?.let { loadBook(it.id) }
+                    // Force refresh from server to get updated data
+                    _uiState.value.book?.let { book ->
+                        bookRepository.refreshBookById(book.id)
+                        loadBook(book.id)
+                    }
+                    _uiState.update { it.copy(isLoading = false, successMessageResId = R.string.study_plan_deleted_success) }
                 } else {
                     _uiState.update { it.copy(isLoading = false, error = "Failed to delete plan") }
                 }
@@ -357,8 +372,12 @@ class BookDetailViewModel @Inject constructor(
                 )
                 val response = api.updateStudyPlan(studyPlanId, request)
                 if (response.isSuccessful) {
-                    _uiState.update { it.copy(successMessageResId = R.string.study_plan_updated_success) }
-                    _uiState.value.book?.let { loadBook(it.id) }
+                    // Force refresh from server to get updated data
+                    _uiState.value.book?.let { book ->
+                        bookRepository.refreshBookById(book.id)
+                        loadBook(book.id)
+                    }
+                    _uiState.update { it.copy(isLoading = false, successMessageResId = R.string.study_plan_updated_success) }
                 } else {
                     val errorBody = response.errorBody()?.string() ?: response.message()
                     _uiState.update { it.copy(isLoading = false, error = "Failed to update plan: $errorBody") }

@@ -94,5 +94,10 @@ interface BookRepository {
      * Refresh books from remote
      */
     suspend fun refreshBooks(): Resource<List<Book>>
+
+    /**
+     * Refresh a specific book from remote server
+     */
+    suspend fun refreshBookById(bookId: String): Resource<Book>
 }
 

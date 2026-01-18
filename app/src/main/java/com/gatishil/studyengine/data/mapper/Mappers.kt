@@ -277,12 +277,26 @@ object StudyPlanMapper {
  * Mapper functions for RecurrenceRule
  */
 object RecurrenceRuleMapper {
+    // Map C# DayOfWeek enum names to Java DayOfWeek
+    private fun parseDayOfWeekName(name: String): DayOfWeek {
+        return when (name.uppercase()) {
+            "SUNDAY" -> DayOfWeek.SUNDAY
+            "MONDAY" -> DayOfWeek.MONDAY
+            "TUESDAY" -> DayOfWeek.TUESDAY
+            "WEDNESDAY" -> DayOfWeek.WEDNESDAY
+            "THURSDAY" -> DayOfWeek.THURSDAY
+            "FRIDAY" -> DayOfWeek.FRIDAY
+            "SATURDAY" -> DayOfWeek.SATURDAY
+            else -> DayOfWeek.MONDAY // Default fallback
+        }
+    }
+
     fun RecurrenceRuleDto.toDomain(): RecurrenceRule = RecurrenceRule(
         id = id,
         studyPlanId = studyPlanId,
         type = RecurrenceType.fromString(type),
         interval = interval,
-        daysOfWeek = daysOfWeek.map { DayOfWeek.of(if (it == 0) 7 else it) }
+        daysOfWeek = daysOfWeek.map { parseDayOfWeekName(it) }
     )
 
     fun RecurrenceRuleDto.toEntity(): RecurrenceRuleEntity = RecurrenceRuleEntity(
@@ -290,7 +304,7 @@ object RecurrenceRuleMapper {
         studyPlanId = studyPlanId,
         type = type,
         interval = interval,
-        daysOfWeek = daysOfWeek.joinToString(",")
+        daysOfWeek = daysOfWeek.joinToString(",") // Store as string names
     )
 
     fun RecurrenceRuleEntity.toDomain(): RecurrenceRule = RecurrenceRule(
@@ -298,10 +312,7 @@ object RecurrenceRuleMapper {
         studyPlanId = studyPlanId,
         type = RecurrenceType.fromString(type),
         interval = interval,
-        daysOfWeek = daysOfWeek.split(",").filter { it.isNotEmpty() }.map {
-            val dayValue = it.toInt()
-            DayOfWeek.of(if (dayValue == 0) 7 else dayValue)
-        }
+        daysOfWeek = daysOfWeek.split(",").filter { it.isNotEmpty() }.map { parseDayOfWeekName(it) }
     )
 
     fun CreateRecurrenceRuleRequest.toDto(): CreateRecurrenceRuleRequestDto = CreateRecurrenceRuleRequestDto(

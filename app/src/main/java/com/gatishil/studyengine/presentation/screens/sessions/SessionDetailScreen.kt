@@ -200,6 +200,30 @@ private fun SessionHeroCard(
     statusLabel: String,
     dateFormatter: DateTimeFormatter
 ) {
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+
+    // In dark mode, we want to use darker versions of the status colors for better contrast
+    // so that white text remains visible
+    val backgroundStartColor = if (isDarkTheme) {
+        // Darken the pastel colors for dark mode backgrounds
+        when (statusColor) {
+            StudyEngineTheme.extendedColors.sessionCompleted -> Color(0xFF1B5E20) // Dark green
+            StudyEngineTheme.extendedColors.sessionInProgress -> Color(0xFFE65100) // Dark orange
+            StudyEngineTheme.extendedColors.sessionMissed -> Color(0xFFB71C1C) // Dark red
+            StudyEngineTheme.extendedColors.sessionCancelled -> Color(0xFF424242) // Dark grey
+            else -> Color(0xFF0D47A1) // Dark blue for planned
+        }
+    } else {
+        statusColor
+    }
+
+    val backgroundEndColor = backgroundStartColor.copy(alpha = 0.7f)
+
+    // Always use white content on these backgrounds
+    val contentColor = Color.White
+    val contentColorSecondary = Color.White.copy(alpha = 0.85f)
+    val badgeColor = Color.White.copy(alpha = 0.2f)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -213,8 +237,8 @@ private fun SessionHeroCard(
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            statusColor.copy(alpha = 0.9f),
-                            statusColor.copy(alpha = 0.6f)
+                            backgroundStartColor,
+                            backgroundEndColor
                         )
                     )
                 )
@@ -224,7 +248,7 @@ private fun SessionHeroCard(
                 // Status Badge
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color.White.copy(alpha = 0.2f)
+                    color = badgeColor
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -234,14 +258,14 @@ private fun SessionHeroCard(
                         Icon(
                             imageVector = statusIcon,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = contentColor,
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
                             text = statusLabel,
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Medium,
-                            color = Color.White
+                            color = contentColor
                         )
                     }
                 }
@@ -253,14 +277,14 @@ private fun SessionHeroCard(
                     text = session.bookTitle ?: "Book",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = contentColor
                 )
 
                 session.chapterTitle?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = contentColorSecondary
                     )
                 }
 
@@ -278,14 +302,14 @@ private fun SessionHeroCard(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = Color.White.copy(alpha = 0.2f),
+                            color = badgeColor,
                             modifier = Modifier.size(36.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.CalendarToday,
                                     contentDescription = null,
-                                    tint = Color.White,
+                                    tint = contentColor,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -294,13 +318,13 @@ private fun SessionHeroCard(
                             Text(
                                 text = stringResource(R.string.date),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.7f)
+                                color = contentColor.copy(alpha = 0.7f)
                             )
                             Text(
                                 text = session.sessionDate.format(dateFormatter),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
-                                color = Color.White
+                                color = contentColor
                             )
                         }
                     }
@@ -312,14 +336,14 @@ private fun SessionHeroCard(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = Color.White.copy(alpha = 0.2f),
+                            color = badgeColor,
                             modifier = Modifier.size(36.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.Schedule,
                                     contentDescription = null,
-                                    tint = Color.White,
+                                    tint = contentColor,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -328,7 +352,7 @@ private fun SessionHeroCard(
                             Text(
                                 text = stringResource(R.string.time),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.7f)
+                                color = contentColor.copy(alpha = 0.7f)
                             )
                             val startTime = "${session.startTime}".let { if (it.length >= 5) it.substring(0, 5) else it }
                             val endTime = "${session.endTime}".let { if (it.length >= 5) it.substring(0, 5) else it }
@@ -336,7 +360,7 @@ private fun SessionHeroCard(
                                 text = "$startTime - $endTime",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
-                                color = Color.White
+                                color = contentColor
                             )
                         }
                     }
@@ -593,11 +617,16 @@ private fun PlannedSessionActions(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = StudyEngineTheme.extendedColors.sessionMissed
-                )
+                ),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
             ) {
-                Icon(Icons.Default.ErrorOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.ErrorOutline, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(stringResource(R.string.mark_as_missed))
+                Text(
+                    text = stringResource(R.string.mark_as_missed),
+                    maxLines = 1,
+                    style = MaterialTheme.typography.labelMedium
+                )
             }
 
             OutlinedButton(
@@ -606,11 +635,16 @@ private fun PlannedSessionActions(
                     .weight(1f)
                     .height(48.dp),
                 enabled = !isProcessing,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
             ) {
-                Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(stringResource(R.string.cancel_session))
+                Text(
+                    text = stringResource(R.string.cancel_session),
+                    maxLines = 1,
+                    style = MaterialTheme.typography.labelMedium
+                )
             }
         }
     }
