@@ -8,7 +8,6 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 
 object ExamMapper {
 
@@ -25,7 +24,7 @@ object ExamMapper {
 
             val instant = if (cleanedString.endsWith("Z")) {
                 Instant.parse(cleanedString)
-            } else if (cleanedString.contains("+") || cleanedString.contains("-", startIndex = 10)) {
+            } else if (cleanedString.contains("+") || hasTimezoneOffset(cleanedString)) {
                 // Has timezone offset
                 ZonedDateTime.parse(cleanedString, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant()
             } else {
@@ -43,6 +42,22 @@ object ExamMapper {
                 LocalDateTime.now()
             }
         }
+    }
+
+    /**
+     * Check if the datetime string has a timezone offset like "-05:00"
+     * We need to check for "-" after the "T" separator to avoid matching the date part
+     */
+    private fun hasTimezoneOffset(dateString: String): Boolean {
+        val tIndex = dateString.indexOf('T')
+        if (tIndex == -1) return false
+
+        // Look for "-" after the time part (after index 10, e.g., "2026-01-18T10:30:00-05:00")
+        val timePartIndex = tIndex + 1
+        val afterTime = dateString.substring(timePartIndex)
+
+        // Check if there's a "-" that's part of timezone offset (typically at position 8+ after T)
+        return afterTime.length > 8 && afterTime.substring(8).contains("-")
     }
 
     // Subject mapping
