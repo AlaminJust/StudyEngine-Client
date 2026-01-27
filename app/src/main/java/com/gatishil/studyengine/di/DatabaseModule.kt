@@ -25,7 +25,6 @@ object DatabaseModule {
             StudyEngineDatabase::class.java,
             StudyEngineDatabase.DATABASE_NAME
         )
-            .addMigrations(StudyEngineDatabase.MIGRATION_1_2)
             .fallbackToDestructiveMigration()
             .build()
     }

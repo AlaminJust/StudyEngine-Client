@@ -22,7 +22,7 @@ import com.gatishil.studyengine.data.local.entity.*
         ScheduleOverrideEntity::class,
         ScheduleContextEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 abstract class StudyEngineDatabase : RoomDatabase() {
