@@ -2,6 +2,8 @@ package com.gatishil.studyengine.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.gatishil.studyengine.data.local.dao.*
 import com.gatishil.studyengine.data.local.entity.*
 
@@ -20,7 +22,7 @@ import com.gatishil.studyengine.data.local.entity.*
         ScheduleOverrideEntity::class,
         ScheduleContextEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class StudyEngineDatabase : RoomDatabase() {
@@ -37,6 +39,18 @@ abstract class StudyEngineDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "study_engine_db"
+
+        /**
+         * Migration from version 1 to 2:
+         * - Added completedPages, remainingPages, progressPercentage columns to books table
+         */
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE books ADD COLUMN completedPages INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE books ADD COLUMN remainingPages INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE books ADD COLUMN progressPercentage REAL NOT NULL DEFAULT 0.0")
+            }
+        }
     }
 }
 

@@ -24,7 +24,10 @@ object DatabaseModule {
             context,
             StudyEngineDatabase::class.java,
             StudyEngineDatabase.DATABASE_NAME
-        ).build()
+        )
+            .addMigrations(StudyEngineDatabase.MIGRATION_1_2)
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
