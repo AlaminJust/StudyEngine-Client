@@ -334,12 +334,10 @@ private fun ActiveBookCard(
     book: Book,
     onClick: () -> Unit
 ) {
-    // Calculate progress based on study plan dates if available
-    val progress = book.studyPlan?.let { plan ->
-        val totalDays = java.time.temporal.ChronoUnit.DAYS.between(plan.startDate, plan.endDate).toFloat()
-        val elapsedDays = java.time.temporal.ChronoUnit.DAYS.between(plan.startDate, java.time.LocalDate.now()).toFloat()
-        if (totalDays > 0) (elapsedDays / totalDays).coerceIn(0f, 1f) else 0f
-    } ?: 0f
+    // Use actual progress from API
+    val progressPercentage = book.progressPercentage
+    val progress = (progressPercentage / 100).toFloat().coerceIn(0f, 1f)
+    val isCompleted = progressPercentage >= 100
 
     Card(
         onClick = onClick,
@@ -374,7 +372,10 @@ private fun ActiveBookCard(
                 // Status badge
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = StudyEngineTheme.extendedColors.success.copy(alpha = 0.15f)
+                    color = if (isCompleted)
+                        StudyEngineTheme.extendedColors.success.copy(alpha = 0.15f)
+                    else
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -382,15 +383,24 @@ private fun ActiveBookCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.PlayCircle,
+                            imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.Default.PlayCircle,
                             contentDescription = null,
-                            tint = StudyEngineTheme.extendedColors.success,
+                            tint = if (isCompleted)
+                                StudyEngineTheme.extendedColors.success
+                            else
+                                MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(12.dp)
                         )
                         Text(
-                            text = stringResource(R.string.active),
+                            text = if (isCompleted)
+                                stringResource(R.string.status_completed)
+                            else
+                                stringResource(R.string.active),
                             style = MaterialTheme.typography.labelSmall,
-                            color = StudyEngineTheme.extendedColors.success
+                            color = if (isCompleted)
+                                StudyEngineTheme.extendedColors.success
+                            else
+                                MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -412,7 +422,16 @@ private fun ActiveBookCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Pages completed info
+            Text(
+                text = "${book.completedPages}/${book.effectiveTotalPages} ${stringResource(R.string.pages).lowercase()}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Progress
             Column {
@@ -426,10 +445,13 @@ private fun ActiveBookCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "${(progress * 100).toInt()}%",
+                        text = "${progressPercentage.toInt()}%",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = if (isCompleted)
+                            StudyEngineTheme.extendedColors.success
+                        else
+                            MaterialTheme.colorScheme.primary
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -439,7 +461,10 @@ private fun ActiveBookCard(
                         .fillMaxWidth()
                         .height(6.dp)
                         .clip(RoundedCornerShape(3.dp)),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = if (isCompleted)
+                        StudyEngineTheme.extendedColors.success
+                    else
+                        MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
@@ -499,13 +524,45 @@ private fun BookListCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Progress bar if book has progress
+                if (book.progressPercentage > 0 || book.studyPlan != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        LinearProgressIndicator(
+                            progress = { (book.progressPercentage / 100).toFloat().coerceIn(0f, 1f) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(2.dp)),
+                            color = if (book.progressPercentage >= 100)
+                                StudyEngineTheme.extendedColors.success
+                            else
+                                MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                        Text(
+                            text = "${book.progressPercentage.toInt()}%",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = if (book.progressPercentage >= 100)
+                                StudyEngineTheme.extendedColors.success
+                            else
+                                MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Pages
+                    // Pages info
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -517,7 +574,10 @@ private fun BookListCard(
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
-                            text = "${book.effectiveTotalPages}",
+                            text = if (book.completedPages > 0)
+                                "${book.completedPages}/${book.effectiveTotalPages}"
+                            else
+                                "${book.effectiveTotalPages}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

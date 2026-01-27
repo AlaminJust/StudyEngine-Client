@@ -59,6 +59,38 @@ class BookRepositoryImpl @Inject constructor(
 
     override suspend fun getBookById(bookId: String): Resource<Book> {
         return try {
+            // Try to fetch from API first to get accurate progress data
+            val response = api.getBookById(bookId)
+
+            if (response.isSuccessful) {
+                response.body()?.let { bookDto ->
+                    // Update local database with fresh data
+                    bookDao.insertBook(with(BookMapper) { bookDto.toEntity() })
+                    bookDto.chapters.forEach { chapterDto ->
+                        chapterDao.insertChapter(with(ChapterMapper) { chapterDto.toEntity() })
+                    }
+                    bookDto.studyPlan?.let { studyPlanDto ->
+                        studyPlanDao.insertStudyPlan(with(StudyPlanMapper) { studyPlanDto.toEntity() })
+                        studyPlanDto.recurrenceRule?.let { ruleDto ->
+                            recurrenceRuleDao.insertRecurrenceRule(
+                                with(RecurrenceRuleMapper) { ruleDto.toEntity() }
+                            )
+                        }
+                    }
+                    Resource.success(with(BookMapper) { bookDto.toDomain() })
+                } ?: Resource.error(Exception("Empty response body"))
+            } else {
+                // Fallback to local database if API fails
+                getBookFromLocalDb(bookId)
+            }
+        } catch (e: Exception) {
+            // Fallback to local database if network error
+            getBookFromLocalDb(bookId)
+        }
+    }
+
+    private suspend fun getBookFromLocalDb(bookId: String): Resource<Book> {
+        return try {
             val bookEntity = bookDao.getBookById(bookId)
                 ?: return Resource.error(Exception("Book not found"))
 

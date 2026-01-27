@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,6 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +42,7 @@ fun BookDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showEditBookDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(bookId) {
@@ -89,6 +92,12 @@ fun BookDetailScreen(
                 ),
                 windowInsets = WindowInsets(0.dp),
                 actions = {
+                    IconButton(onClick = { showEditBookDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(R.string.edit)
+                        )
+                    }
                     IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -188,6 +197,26 @@ fun BookDetailScreen(
                     Text(stringResource(R.string.cancel))
                 }
             }
+        )
+    }
+
+    // Edit book dialog
+    if (showEditBookDialog && uiState.book != null) {
+        EditBookDialog(
+            book = uiState.book!!,
+            onConfirm = { title, subject, totalPages, difficulty, priority, targetEndDate ->
+                viewModel.updateBook(
+                    bookId = bookId,
+                    title = title,
+                    subject = subject,
+                    totalPages = totalPages,
+                    difficulty = difficulty,
+                    priority = priority,
+                    targetEndDate = targetEndDate
+                )
+                showEditBookDialog = false
+            },
+            onDismiss = { showEditBookDialog = false }
         )
     }
 }
@@ -529,6 +558,98 @@ private fun StudyPlanCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            }
+
+            // Progress section
+            plan.progress?.let { progress ->
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Progress bar
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.progress),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "${progress.progressPercentage.toInt()}%",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = if (progress.progressPercentage >= 100)
+                                StudyEngineTheme.extendedColors.success
+                            else
+                                MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    LinearProgressIndicator(
+                        progress = { (progress.progressPercentage / 100).toFloat().coerceIn(0f, 1f) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        color = if (progress.progressPercentage >= 100)
+                            StudyEngineTheme.extendedColors.success
+                        else
+                            MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Stats grid
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    ProgressStatItem(
+                        label = stringResource(R.string.pages),
+                        value = "${progress.completedPages}/${progress.totalPages}",
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    ProgressStatItem(
+                        label = stringResource(R.string.completed),
+                        value = progress.completedSessions.toString(),
+                        color = StudyEngineTheme.extendedColors.success
+                    )
+                    ProgressStatItem(
+                        label = stringResource(R.string.missed),
+                        value = progress.missedSessions.toString(),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    ProgressStatItem(
+                        label = stringResource(R.string.planned),
+                        value = progress.plannedSessions.toString(),
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+
+                // Estimated completion
+                progress.estimatedCompletionDate?.let { estimatedDate ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "${stringResource(R.string.estimated_completion)}: ${estimatedDate.format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy"))}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 
@@ -1505,3 +1626,240 @@ private fun EditChapterDialog(
     )
 }
 
+@Composable
+private fun ProgressStatItem(
+    label: String,
+    value: String,
+    color: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditBookDialog(
+    book: Book,
+    onConfirm: (title: String, subject: String, totalPages: Int, difficulty: Int, priority: Int, targetEndDate: String?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var bookTitle by remember { mutableStateOf(book.title) }
+    var bookSubject by remember { mutableStateOf(book.subject) }
+    var bookTotalPages by remember { mutableStateOf(book.totalPages.toString()) }
+    var bookDifficulty by remember { mutableIntStateOf(book.difficulty) }
+    var bookPriority by remember { mutableIntStateOf(book.priority) }
+    var bookTargetEndDate by remember { mutableStateOf(book.targetEndDate) }
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy")
+    val isoFormatter = java.time.format.DateTimeFormatter.ISO_DATE
+
+    val isValid = bookTitle.isNotBlank() &&
+                  bookSubject.isNotBlank() &&
+                  (bookTotalPages.toIntOrNull() ?: 0) > 0
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
+        },
+        title = {
+            Text(
+                text = stringResource(R.string.edit_book),
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Title
+                OutlinedTextField(
+                    value = bookTitle,
+                    onValueChange = { bookTitle = it },
+                    label = { Text(stringResource(R.string.title)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                // Subject
+                OutlinedTextField(
+                    value = bookSubject,
+                    onValueChange = { bookSubject = it },
+                    label = { Text(stringResource(R.string.subject)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                // Total Pages
+                OutlinedTextField(
+                    value = bookTotalPages,
+                    onValueChange = { bookTotalPages = it.filter { c -> c.isDigit() } },
+                    label = { Text(stringResource(R.string.total_pages)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                    )
+                )
+
+                // Difficulty
+                Column {
+                    Text(
+                        text = stringResource(R.string.difficulty),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(1 to "Easy", 2 to "Medium", 3 to "Hard").forEach { (value, label) ->
+                            FilterChip(
+                                selected = bookDifficulty == value,
+                                onClick = { bookDifficulty = value },
+                                label = { Text(label) }
+                            )
+                        }
+                    }
+                }
+
+                // Priority
+                Column {
+                    Text(
+                        text = stringResource(R.string.priority),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf(1 to "Low", 2 to "Medium", 3 to "High").forEach { (value, label) ->
+                            FilterChip(
+                                selected = bookPriority == value,
+                                onClick = { bookPriority = value },
+                                label = { Text(label) }
+                            )
+                        }
+                    }
+                }
+
+                // Target End Date
+                OutlinedCard(
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = stringResource(R.string.target_date),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = bookTargetEndDate?.format(dateFormatter) ?: "Not set",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            if (bookTargetEndDate != null) {
+                                IconButton(onClick = { bookTargetEndDate = null }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Clear",
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                            Icon(
+                                imageVector = Icons.Default.CalendarMonth,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+
+                if (!isValid) {
+                    Text(
+                        text = "Please fill in all required fields",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm(
+                        bookTitle,
+                        bookSubject,
+                        bookTotalPages.toIntOrNull() ?: book.totalPages,
+                        bookDifficulty,
+                        bookPriority,
+                        bookTargetEndDate?.format(isoFormatter)
+                    )
+                },
+                enabled = isValid
+            ) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+
+    // Date Picker
+    if (showDatePicker) {
+        val initialDate = bookTargetEndDate ?: java.time.LocalDate.now().plusMonths(1)
+        val state = rememberDatePickerState(
+            initialSelectedDateMillis = initialDate.toEpochDay() * 24 * 60 * 60 * 1000
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    state.selectedDateMillis?.let {
+                        bookTargetEndDate = java.time.LocalDate.ofEpochDay(it / (24 * 60 * 60 * 1000))
+                    }
+                    showDatePicker = false
+                }) { Text(stringResource(R.string.ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        ) { DatePicker(state = state) }
+    }
+}

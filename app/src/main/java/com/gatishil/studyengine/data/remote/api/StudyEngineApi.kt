@@ -74,6 +74,15 @@ interface StudyEngineApi {
         @Path("id") id: String
     ): Response<Unit>
 
+    /**
+     * Bulk update all user availabilities.
+     * This replaces all existing availabilities with the provided list.
+     */
+    @PUT("users/me/availabilities")
+    suspend fun bulkUpdateAvailabilities(
+        @Body request: BulkUpdateUserAvailabilityRequestDto
+    ): Response<List<UserAvailabilityDto>>
+
     // ==================== Schedule Overrides ====================
 
     @GET("users/me/schedule-overrides")

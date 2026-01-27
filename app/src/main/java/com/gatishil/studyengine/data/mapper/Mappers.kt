@@ -93,6 +93,9 @@ object BookMapper {
         targetEndDate = targetEndDate?.let { parseDate(it) },
         createdAt = parseDateTime(createdAt),
         ignoredChapterCount = ignoredChapterCount,
+        completedPages = completedPages,
+        remainingPages = remainingPages,
+        progressPercentage = progressPercentage,
         studyPlan = studyPlan?.let { with(StudyPlanMapper) { it.toDomain() } },
         chapters = chapters.map { with(ChapterMapper) { it.toDomain() } }
     )
@@ -108,7 +111,10 @@ object BookMapper {
         priority = priority,
         targetEndDate = targetEndDate,
         createdAt = createdAt,
-        ignoredChapterCount = ignoredChapterCount
+        ignoredChapterCount = ignoredChapterCount,
+        completedPages = completedPages,
+        remainingPages = remainingPages,
+        progressPercentage = progressPercentage
     )
 
     fun BookEntity.toDomain(
@@ -126,6 +132,9 @@ object BookMapper {
         targetEndDate = targetEndDate?.let { parseDate(it) },
         createdAt = parseDateTime(createdAt),
         ignoredChapterCount = ignoredChapterCount,
+        completedPages = completedPages,
+        remainingPages = remainingPages,
+        progressPercentage = progressPercentage,
         studyPlan = studyPlan,
         chapters = chapters
     )
@@ -232,8 +241,23 @@ object StudyPlanMapper {
         startDate = parseDate(startDate),
         endDate = parseDate(endDate),
         status = StudyPlanStatus.fromString(status),
-        recurrenceRule = recurrenceRule?.let { with(RecurrenceRuleMapper) { it.toDomain() } }
+        recurrenceRule = recurrenceRule?.let { with(RecurrenceRuleMapper) { it.toDomain() } },
+        progress = progress?.let { mapProgress(it) }
     )
+
+    private fun mapProgress(dto: com.gatishil.studyengine.data.remote.dto.StudyPlanProgressDto): StudyPlanProgress {
+        return StudyPlanProgress(
+            totalPages = dto.totalPages,
+            completedPages = dto.completedPages,
+            remainingPages = dto.remainingPages,
+            progressPercentage = dto.progressPercentage,
+            totalSessions = dto.totalSessions,
+            completedSessions = dto.completedSessions,
+            missedSessions = dto.missedSessions,
+            plannedSessions = dto.plannedSessions,
+            estimatedCompletionDate = dto.estimatedCompletionDate?.let { parseDate(it) }
+        )
+    }
 
     fun StudyPlanDto.toEntity(): StudyPlanEntity = StudyPlanEntity(
         id = id,
@@ -249,7 +273,8 @@ object StudyPlanMapper {
         startDate = parseDate(startDate),
         endDate = parseDate(endDate),
         status = StudyPlanStatus.fromString(status),
-        recurrenceRule = recurrenceRule
+        recurrenceRule = recurrenceRule,
+        progress = null // Progress is not stored locally, only fetched from API
     )
 
     fun CreateStudyPlanRequest.toDto(): CreateStudyPlanRequestDto = CreateStudyPlanRequestDto(

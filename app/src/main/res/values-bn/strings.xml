@@ -97,6 +97,7 @@
     <string name="plan_active">সক্রিয়</string>
     <string name="plan_paused">বিরতি</string>
     <string name="plan_completed">সম্পন্ন</string>
+    <string name="estimated_completion">আনুমানিক সম্পন্ন</string>
 
     <!-- Sessions -->
     <string name="sessions">সেশন</string>
@@ -194,8 +195,9 @@
     <string name="status_planned">পরিকল্পিত</string>
     <string name="status_in_progress">চলমান</string>
     <string name="status_completed">সম্পন্ন</string>
-    <string name="status_missed">মিস হয়েছে</string>
+    <string name="status_missed">মিস</string>
     <string name="status_cancelled">বাতিল</string>
+    <string name="completed">সম্পন্ন</string>
 
     <!-- Schedule -->
     <string name="schedule">সময়সূচী</string>
@@ -209,6 +211,18 @@
     <string name="schedule_management">সময়সূচী ব্যবস্থাপনা</string>
     <string name="study_availability">পড়ার সময়</string>
     <string name="study_availability_desc">আপনার সাপ্তাহিক পড়ার সময় সেট করুন</string>
+    <string name="availability_description">প্রতি সপ্তাহে আপনি কখন পড়তে পারবেন তা নির্ধারণ করুন</string>
+    <string name="total_slots">স্লট</string>
+    <string name="active_days">দিন</string>
+    <string name="weekly_hours">ঘন্টা</string>
+    <string name="add_time_slot">সময় স্লট যোগ করুন</string>
+    <string name="delete_time_slot">সময় স্লট মুছুন</string>
+    <string name="delete_time_slot_message">আপনি কি এই সময় স্লটটি মুছতে চান?</string>
+    <string name="add_availability_hint">ব্যক্তিগতকৃত সময়সূচী পেতে আপনার পড়ার সময় যোগ করুন</string>
+    <string name="select_day">দিন নির্বাচন</string>
+    <string name="start">শুরু</string>
+    <string name="end">শেষ</string>
+    <string name="duration">সময়কাল</string>
     <string name="schedule_overrides">সময়সূচী পরিবর্তন</string>
     <string name="schedule_overrides_desc">ছুটির দিন বা কাস্টম পড়ার সময় যোগ করুন</string>
     <string name="schedule_contexts">সময়সূচী প্রসঙ্গ</string>
@@ -262,7 +276,9 @@
     <string name="study_plan_completed_success">🎉 অভিনন্দন! পড়ার পরিকল্পনা সফলভাবে সম্পন্ন হয়েছে!</string>
     <string name="study_plan_deleted_success">পড়ার পরিকল্পনা মুছে ফেলা হয়েছে।</string>
     <string name="study_plan_updated_success">পড়ার পরিকল্পনা সফলভাবে আপডেট হয়েছে!</string>
+    <string name="book_updated_success">বই সফলভাবে আপডেট হয়েছে!</string>
     <string name="recurrence_type">পুনরাবৃত্তির ধরন</string>
+    <string name="edit_book">বই সম্পাদনা করুন</string>
 
     <!-- Days of Week -->
     <string name="sunday">রবিবার</string>
@@ -319,6 +335,7 @@
     <string name="cancel">বাতিল</string>
     <string name="delete">মুছুন</string>
     <string name="edit">সম্পাদনা</string>
+    <string name="add">যোগ করুন</string>
     <string name="confirm">নিশ্চিত করুন</string>
     <string name="ok">ঠিক আছে</string>
     <string name="loading">লোড হচ্ছে…</string>
@@ -334,6 +351,8 @@
     <string name="from">থেকে</string>
     <string name="to">পর্যন্ত</string>
     <string name="search">অনুসন্ধান</string>
+    <string name="title">শিরোনাম</string>
+    <string name="subject">বিষয়</string>
     <string name="filter">ফিল্টার</string>
     <string name="sort">সাজান</string>
     <string name="refresh">রিফ্রেশ</string>

@@ -12,7 +12,23 @@ data class StudyPlan(
     val startDate: LocalDate,
     val endDate: LocalDate,
     val status: StudyPlanStatus,
-    val recurrenceRule: RecurrenceRule?
+    val recurrenceRule: RecurrenceRule?,
+    val progress: StudyPlanProgress? = null
+)
+
+/**
+ * Progress information for a study plan within its active period.
+ */
+data class StudyPlanProgress(
+    val totalPages: Int,
+    val completedPages: Int,
+    val remainingPages: Int,
+    val progressPercentage: Double,
+    val totalSessions: Int,
+    val completedSessions: Int,
+    val missedSessions: Int,
+    val plannedSessions: Int,
+    val estimatedCompletionDate: LocalDate? = null
 )
 
 /**

@@ -30,6 +30,12 @@ data class BookDto(
     val createdAt: String,
     @SerialName("ignoredChapterCount")
     val ignoredChapterCount: Int,
+    @SerialName("completedPages")
+    val completedPages: Int = 0,
+    @SerialName("remainingPages")
+    val remainingPages: Int = 0,
+    @SerialName("progressPercentage")
+    val progressPercentage: Double = 0.0,
     @SerialName("studyPlan")
     val studyPlan: StudyPlanDto?,
     @SerialName("chapters")

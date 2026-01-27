@@ -18,15 +18,12 @@ data class Book(
     val targetEndDate: LocalDate?,
     val createdAt: LocalDateTime,
     val ignoredChapterCount: Int,
+    val completedPages: Int = 0,
+    val remainingPages: Int = 0,
+    val progressPercentage: Double = 0.0,
     val studyPlan: StudyPlan?,
     val chapters: List<Chapter>
-) {
-    val progressPercentage: Float
-        get() = if (effectiveTotalPages > 0) {
-            // Calculate based on completed pages in study sessions
-            0f // This will be calculated from sessions
-        } else 0f
-}
+)
 
 /**
  * Domain model for Chapter

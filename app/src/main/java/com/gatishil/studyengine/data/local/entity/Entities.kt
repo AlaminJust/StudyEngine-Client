@@ -35,6 +35,9 @@ data class BookEntity(
     val targetEndDate: String?,
     val createdAt: String,
     val ignoredChapterCount: Int,
+    val completedPages: Int = 0,
+    val remainingPages: Int = 0,
+    val progressPercentage: Double = 0.0,
     val lastUpdated: Long = System.currentTimeMillis(),
     val syncStatus: Int = SyncStatus.SYNCED
 )

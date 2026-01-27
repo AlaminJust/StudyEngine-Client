@@ -1,23 +1,29 @@
 package com.gatishil.studyengine.presentation.screens.schedule
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gatishil.studyengine.R
 import com.gatishil.studyengine.data.remote.dto.UserAvailabilityDto
+import com.gatishil.studyengine.ui.theme.StudyEngineTheme
 import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.TextStyle
@@ -58,13 +64,6 @@ fun AvailabilityScreen(
                 windowInsets = WindowInsets(0.dp)
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = viewModel::showAddDialog
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add availability")
-            }
-        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Box(
@@ -78,15 +77,12 @@ fun AvailabilityScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
-                uiState.availabilities.isEmpty() -> {
-                    EmptyAvailabilityState(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
                 else -> {
-                    AvailabilityList(
+                    AvailabilityContent(
                         availabilities = uiState.availabilities,
-                        onDelete = viewModel::deleteAvailability
+                        onAddClick = viewModel::showAddDialog,
+                        onDelete = viewModel::deleteAvailability,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }
@@ -110,106 +106,443 @@ fun AvailabilityScreen(
 }
 
 @Composable
-private fun EmptyAvailabilityState(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+private fun AvailabilityContent(
+    availabilities: List<UserAvailabilityDto>,
+    onAddClick: () -> Unit,
+    onDelete: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Icon(
-            imageVector = Icons.Default.Schedule,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "No availability set",
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            text = "Add your study time slots to get personalized schedules",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        // Header Card
+        item {
+            AvailabilityHeaderCard()
+        }
+
+        // Summary Stats
+        item {
+            AvailabilityStatsRow(availabilities)
+        }
+
+        // Add Button
+        item {
+            AddAvailabilityButton(onClick = onAddClick)
+        }
+
+        // Availability by Day
+        if (availabilities.isEmpty()) {
+            item {
+                EmptyAvailabilityState()
+            }
+        } else {
+            // Group by day of week
+            val groupedByDay = availabilities.groupBy { it.getDayOfWeekInt() }
+            val orderedDays = listOf(1, 2, 3, 4, 5, 6, 0) // Monday to Sunday
+
+            orderedDays.forEach { dayValue ->
+                val dayAvailabilities = groupedByDay[dayValue]
+                if (dayAvailabilities != null) {
+                    item(key = "day_$dayValue") {
+                        DayAvailabilityCard(
+                            dayValue = dayValue,
+                            availabilities = dayAvailabilities,
+                            onDelete = onDelete
+                        )
+                    }
+                }
+            }
+        }
+
+        // Bottom spacing
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
 
 @Composable
-private fun AvailabilityList(
-    availabilities: List<UserAvailabilityDto>,
-    onDelete: (String) -> Unit
-) {
-    // Group by day of week (using getDayOfWeekInt to handle string enum from backend)
-    val groupedByDay = availabilities.groupBy { it.getDayOfWeekInt() }
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+private fun AvailabilityHeaderCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
-        // Show days in order
-        val orderedDays = listOf(0, 1, 2, 3, 4, 5, 6) // Sunday to Saturday (C# format)
-
-        orderedDays.forEach { dayValue ->
-            val dayAvailabilities = groupedByDay[dayValue] ?: return@forEach
-
-            item {
-                Text(
-                    text = getDayName(dayValue),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(vertical = 8.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.tertiary
+                        )
+                    )
                 )
-            }
-
-            items(dayAvailabilities, key = { it.id }) { availability ->
-                AvailabilityCard(
-                    availability = availability,
-                    onDelete = { onDelete(availability.id) }
-                )
+                .padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.study_availability),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.availability_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.85f)
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.White.copy(alpha = 0.2f),
+                    modifier = Modifier.size(56.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun AvailabilityCard(
-    availability: UserAvailabilityDto,
-    onDelete: () -> Unit
-) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
+private fun AvailabilityStatsRow(availabilities: List<UserAvailabilityDto>) {
+    val totalSlots = availabilities.size
+    val daysWithSlots = availabilities.groupBy { it.getDayOfWeekInt() }.size
+    val totalHours = availabilities.sumOf { availability ->
+        try {
+            val start = parseTimeString(availability.startTime)
+            val end = parseTimeString(availability.endTime)
+            java.time.Duration.between(start, end).toMinutes() / 60.0
+        } catch (e: Exception) {
+            0.0
+        }
+    }
 
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        StatCard(
+            title = stringResource(R.string.total_slots),
+            value = totalSlots.toString(),
+            icon = Icons.Default.EventNote,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f)
+        )
+        StatCard(
+            title = stringResource(R.string.active_days),
+            value = "$daysWithSlots/7",
+            icon = Icons.Default.CalendarMonth,
+            color = StudyEngineTheme.extendedColors.success,
+            modifier = Modifier.weight(1f)
+        )
+        StatCard(
+            title = stringResource(R.string.weekly_hours),
+            value = String.format("%.1f", totalHours),
+            icon = Icons.Default.AccessTime,
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun StatCard(
+    title: String,
+    value: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = color.copy(alpha = 0.1f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun AddAvailabilityButton(onClick: () -> Unit) {
+    OutlinedCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            width = 2.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = stringResource(R.string.add_time_slot),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyAvailabilityState() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.EventBusy,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(R.string.no_availability),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = stringResource(R.string.add_availability_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun DayAvailabilityCard(
+    dayValue: Int,
+    availabilities: List<UserAvailabilityDto>,
+    onDelete: (String) -> Unit
+) {
+    val dayColor = getDayColor(dayValue)
+    val dayName = getDayName(dayValue)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = dayColor.copy(alpha = 0.08f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Day Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = dayColor,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = dayName.take(2),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                    Column {
+                        Text(
+                            text = dayName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "${availabilities.size} slot${if (availabilities.size > 1) "s" else ""}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Time Slots
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                availabilities.forEach { availability ->
+                    TimeSlotItem(
+                        availability = availability,
+                        dayColor = dayColor,
+                        onDelete = { onDelete(availability.id) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimeSlotItem(
+    availability: UserAvailabilityDto,
+    dayColor: Color,
+    onDelete: () -> Unit
+) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Schedule,
+                    contentDescription = null,
+                    tint = dayColor,
+                    modifier = Modifier.size(20.dp)
+                )
                 Text(
                     text = "${formatTime(availability.startTime)} - ${formatTime(availability.endTime)}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium
                 )
-                if (!availability.isActive) {
-                    Text(
-                        text = "Inactive",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
+            }
+
+            // Duration badge
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val durationText = try {
+                    val start = parseTimeString(availability.startTime)
+                    val end = parseTimeString(availability.endTime)
+                    val minutes = java.time.Duration.between(start, end).toMinutes()
+                    val hours = minutes / 60
+                    val remainingMins = minutes % 60
+                    if (hours > 0 && remainingMins > 0) "${hours}h ${remainingMins}m"
+                    else if (hours > 0) "${hours}h"
+                    else "${remainingMins}m"
+                } catch (e: Exception) { "" }
+
+                if (durationText.isNotEmpty()) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = dayColor.copy(alpha = 0.15f)
+                    ) {
+                        Text(
+                            text = durationText,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = dayColor,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                IconButton(
+                    onClick = { showDeleteDialog = true },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
-            }
-            IconButton(onClick = { showDeleteDialog = true }) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error
-                )
             }
         }
     }
@@ -217,21 +550,31 @@ private fun AvailabilityCard(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Availability") },
-            text = { Text("Are you sure you want to delete this time slot?") },
+            icon = {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
+            title = { Text(stringResource(R.string.delete_time_slot)) },
+            text = { Text(stringResource(R.string.delete_time_slot_message)) },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         onDelete()
                         showDeleteDialog = false
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -256,11 +599,22 @@ private fun AddAvailabilityDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Availability") },
+        icon = {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        title = { Text(stringResource(R.string.add_time_slot)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // Day of Week Selector
-                Text("Day of Week", style = MaterialTheme.typography.labelMedium)
+                Text(
+                    text = stringResource(R.string.select_day),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     DayOfWeek.entries.take(7).forEachIndexed { index, day ->
                         SegmentedButton(
@@ -274,6 +628,11 @@ private fun AddAvailabilityDialog(
                 }
 
                 // Time Selectors
+                Text(
+                    text = stringResource(R.string.select_time),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -282,9 +641,27 @@ private fun AddAvailabilityDialog(
                         onClick = { showStartTimePicker = true },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text("Start", style = MaterialTheme.typography.labelSmall)
-                            Text(startTime.toString(), style = MaterialTheme.typography.bodyLarge)
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(R.string.start),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = startTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
 
@@ -292,9 +669,56 @@ private fun AddAvailabilityDialog(
                         onClick = { showEndTimePicker = true },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text("End", style = MaterialTheme.typography.labelSmall)
-                            Text(endTime.toString(), style = MaterialTheme.typography.bodyLarge)
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.Stop,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(R.string.end),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = endTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // Duration preview
+                val durationMinutes = java.time.Duration.between(startTime, endTime).toMinutes()
+                if (durationMinutes > 0) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = StudyEngineTheme.extendedColors.success.copy(alpha = 0.1f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Timer,
+                                contentDescription = null,
+                                tint = StudyEngineTheme.extendedColors.success,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "${durationMinutes / 60}h ${durationMinutes % 60}m ${stringResource(R.string.duration)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = StudyEngineTheme.extendedColors.success
+                            )
                         }
                     }
                 }
@@ -303,21 +727,22 @@ private fun AddAvailabilityDialog(
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                enabled = !isLoading
+                enabled = !isLoading && endTime > startTime
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Add")
+                    Text(stringResource(R.string.add))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -360,9 +785,14 @@ private fun TimePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Time") },
+        title = { Text(stringResource(R.string.select_time)) },
         text = {
-            TimePicker(state = timePickerState)
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                TimePicker(state = timePickerState)
+            }
         },
         confirmButton = {
             TextButton(
@@ -370,12 +800,12 @@ private fun TimePickerDialog(
                     onTimeSelected(LocalTime.of(timePickerState.hour, timePickerState.minute))
                 }
             ) {
-                Text("OK")
+                Text(stringResource(R.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -394,31 +824,36 @@ private fun getDayName(dayValue: Int): String {
     }
 }
 
+private fun getDayColor(dayValue: Int): Color {
+    return when (dayValue) {
+        0 -> Color(0xFFE91E63) // Sunday - Pink
+        1 -> Color(0xFF2196F3) // Monday - Blue
+        2 -> Color(0xFF4CAF50) // Tuesday - Green
+        3 -> Color(0xFFFF9800) // Wednesday - Orange
+        4 -> Color(0xFF9C27B0) // Thursday - Purple
+        5 -> Color(0xFF00BCD4) // Friday - Cyan
+        6 -> Color(0xFF795548) // Saturday - Brown
+        else -> Color.Gray
+    }
+}
+
 private fun formatTime(timeString: String): String {
     return try {
-        // Handle various time formats from backend
-        val cleanedTime = timeString.trim()
-
-        // Try parsing different formats
-        val time = when {
-            // Format: "HH:mm:ss.fffffff" (TimeOnly with microseconds)
-            cleanedTime.contains(".") -> {
-                val parts = cleanedTime.split(".")
-                LocalTime.parse(parts[0])
-            }
-            // Standard formats
-            else -> LocalTime.parse(cleanedTime)
-        }
-
-        // Return in readable format
+        val time = parseTimeString(timeString)
         time.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
     } catch (e: Exception) {
-        // Fallback: just return first 5 characters (HH:mm) if possible
-        if (timeString.length >= 5) {
-            timeString.substring(0, 5)
-        } else {
-            timeString
+        if (timeString.length >= 5) timeString.substring(0, 5) else timeString
+    }
+}
+
+private fun parseTimeString(timeString: String): LocalTime {
+    val cleanedTime = timeString.trim()
+    return when {
+        cleanedTime.contains(".") -> {
+            val parts = cleanedTime.split(".")
+            LocalTime.parse(parts[0])
         }
+        else -> LocalTime.parse(cleanedTime)
     }
 }
 

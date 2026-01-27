@@ -425,5 +425,40 @@ class BookDetailViewModel @Inject constructor(
     fun clearSuccessMessage() {
         _uiState.update { it.copy(successMessageResId = null) }
     }
+
+    fun updateBook(
+        bookId: String,
+        title: String,
+        subject: String,
+        totalPages: Int,
+        difficulty: Int,
+        priority: Int,
+        targetEndDate: String? = null
+    ) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val request = com.gatishil.studyengine.data.remote.dto.UpdateBookRequestDto(
+                    title = title,
+                    subject = subject,
+                    totalPages = totalPages,
+                    difficulty = difficulty,
+                    priority = priority,
+                    targetEndDate = targetEndDate
+                )
+                val response = api.updateBook(bookId, request)
+                if (response.isSuccessful) {
+                    bookRepository.refreshBookById(bookId)
+                    loadBook(bookId)
+                    _uiState.update { it.copy(isLoading = false, successMessageResId = R.string.book_updated_success) }
+                } else {
+                    val errorBody = response.errorBody()?.string() ?: response.message()
+                    _uiState.update { it.copy(isLoading = false, error = "Failed to update book: $errorBody") }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
 }
 

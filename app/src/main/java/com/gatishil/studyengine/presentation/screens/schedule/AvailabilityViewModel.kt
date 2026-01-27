@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.data.remote.api.StudyEngineApi
+import com.gatishil.studyengine.data.remote.dto.BulkUpdateUserAvailabilityRequestDto
 import com.gatishil.studyengine.data.remote.dto.CreateUserAvailabilityRequestDto
 import com.gatishil.studyengine.data.remote.dto.UserAvailabilityDto
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -203,5 +204,96 @@ class AvailabilityViewModel @Inject constructor(
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }
+
+    /**
+     * Bulk update all availabilities at once.
+     * This replaces all existing availabilities with the provided list.
+     */
+    fun bulkUpdateAvailabilities(availabilities: List<AvailabilitySlot>) {
+        // Validate no overlapping slots on the same day
+        val hasOverlaps = hasOverlappingSlots(availabilities)
+        if (hasOverlaps) {
+            _uiState.update { it.copy(error = "Time slots cannot overlap on the same day") }
+            return
+        }
+
+        // Validate each slot
+        for (slot in availabilities) {
+            if (slot.endTime <= slot.startTime) {
+                _uiState.update { it.copy(error = "End time must be after start time for ${slot.dayOfWeek.name}") }
+                return
+            }
+            val durationMinutes = java.time.Duration.between(slot.startTime, slot.endTime).toMinutes()
+            if (durationMinutes < 15) {
+                _uiState.update { it.copy(error = "Availability slot must be at least 15 minutes long") }
+                return
+            }
+            if (durationMinutes > 480) { // 8 hours
+                _uiState.update { it.copy(error = "Availability slot cannot exceed 8 hours") }
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            try {
+                val requests = availabilities.map { slot ->
+                    val dayOfWeekValue = when (slot.dayOfWeek.value) {
+                        7 -> 0  // Sunday
+                        else -> slot.dayOfWeek.value
+                    }
+                    CreateUserAvailabilityRequestDto(
+                        dayOfWeek = dayOfWeekValue,
+                        startTime = slot.startTime.format(timeFormatter),
+                        endTime = slot.endTime.format(timeFormatter)
+                    )
+                }
+
+                val request = BulkUpdateUserAvailabilityRequestDto(availabilities = requests)
+                val response = api.bulkUpdateAvailabilities(request)
+
+                if (response.isSuccessful) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            availabilities = response.body() ?: emptyList()
+                        )
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string() ?: response.message()
+                    _uiState.update {
+                        it.copy(isLoading = false, error = "Failed to update: $errorBody")
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(isLoading = false, error = e.message ?: "Unknown error")
+                }
+            }
+        }
+    }
+
+    private fun hasOverlappingSlots(availabilities: List<AvailabilitySlot>): Boolean {
+        val groupedByDay = availabilities.groupBy { it.dayOfWeek }
+        for ((_, slots) in groupedByDay) {
+            if (slots.size < 2) continue
+            val sortedSlots = slots.sortedBy { it.startTime }
+            for (i in 0 until sortedSlots.size - 1) {
+                if (sortedSlots[i].endTime > sortedSlots[i + 1].startTime) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
 }
+
+/**
+ * Data class representing an availability slot for bulk updates
+ */
+data class AvailabilitySlot(
+    val dayOfWeek: DayOfWeek,
+    val startTime: LocalTime,
+    val endTime: LocalTime
+)
 

@@ -96,6 +96,7 @@
     <string name="plan_active">Active</string>
     <string name="plan_paused">Paused</string>
     <string name="plan_completed">Completed</string>
+    <string name="estimated_completion">Est. completion</string>
 
     <!-- Sessions -->
     <string name="sessions">Sessions</string>
@@ -195,6 +196,7 @@
     <string name="status_completed">Completed</string>
     <string name="status_missed">Missed</string>
     <string name="status_cancelled">Cancelled</string>
+    <string name="completed">Completed</string>
 
     <!-- Schedule -->
     <string name="schedule">Schedule</string>
@@ -208,6 +210,18 @@
     <string name="schedule_management">Schedule Management</string>
     <string name="study_availability">Study Availability</string>
     <string name="study_availability_desc">Set your weekly study time slots</string>
+    <string name="availability_description">Define when you\'re available to study each week</string>
+    <string name="total_slots">Slots</string>
+    <string name="active_days">Days</string>
+    <string name="weekly_hours">Hours</string>
+    <string name="add_time_slot">Add Time Slot</string>
+    <string name="delete_time_slot">Delete Time Slot</string>
+    <string name="delete_time_slot_message">Are you sure you want to delete this time slot?</string>
+    <string name="add_availability_hint">Add your available study times to get personalized schedules</string>
+    <string name="select_day">Select Day</string>
+    <string name="start">Start</string>
+    <string name="end">End</string>
+    <string name="duration">duration</string>
     <string name="schedule_overrides">Schedule Overrides</string>
     <string name="schedule_overrides_desc">Add days off or custom study hours</string>
     <string name="schedule_contexts">Schedule Contexts</string>
@@ -261,7 +275,9 @@
     <string name="study_plan_completed_success">🎉 Congratulations! Study plan completed successfully!</string>
     <string name="study_plan_deleted_success">Study plan deleted.</string>
     <string name="study_plan_updated_success">Study plan updated successfully!</string>
+    <string name="book_updated_success">Book updated successfully!</string>
     <string name="recurrence_type">Recurrence Type</string>
+    <string name="edit_book">Edit Book</string>
 
     <!-- Days of Week -->
     <string name="sunday">Sunday</string>
@@ -317,6 +333,7 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
+    <string name="add">Add</string>
     <string name="confirm">Confirm</string>
     <string name="ok">OK</string>
     <string name="loading">Loading…</string>
@@ -332,6 +349,8 @@
     <string name="from">From</string>
     <string name="to">To</string>
     <string name="search">Search</string>
+    <string name="title">Title</string>
+    <string name="subject">Subject</string>
     <string name="filter">Filter</string>
     <string name="sort">Sort</string>
     <string name="refresh">Refresh</string>

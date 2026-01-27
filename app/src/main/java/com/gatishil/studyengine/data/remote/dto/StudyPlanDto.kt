@@ -19,7 +19,34 @@ data class StudyPlanDto(
     @SerialName("status")
     val status: String,
     @SerialName("recurrenceRule")
-    val recurrenceRule: RecurrenceRuleDto?
+    val recurrenceRule: RecurrenceRuleDto?,
+    @SerialName("progress")
+    val progress: StudyPlanProgressDto? = null
+)
+
+/**
+ * Progress information for a study plan within its active period.
+ */
+@Serializable
+data class StudyPlanProgressDto(
+    @SerialName("totalPages")
+    val totalPages: Int,
+    @SerialName("completedPages")
+    val completedPages: Int,
+    @SerialName("remainingPages")
+    val remainingPages: Int,
+    @SerialName("progressPercentage")
+    val progressPercentage: Double,
+    @SerialName("totalSessions")
+    val totalSessions: Int,
+    @SerialName("completedSessions")
+    val completedSessions: Int,
+    @SerialName("missedSessions")
+    val missedSessions: Int,
+    @SerialName("plannedSessions")
+    val plannedSessions: Int,
+    @SerialName("estimatedCompletionDate")
+    val estimatedCompletionDate: String? = null
 )
 
 /**

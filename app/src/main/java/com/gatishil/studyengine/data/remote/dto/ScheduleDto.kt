@@ -56,6 +56,16 @@ data class CreateUserAvailabilityRequestDto(
 )
 
 /**
+ * Request DTO for bulk updating all user availabilities.
+ * This replaces all existing availabilities with the provided list.
+ */
+@Serializable
+data class BulkUpdateUserAvailabilityRequestDto(
+    @SerialName("Availabilities")
+    val availabilities: List<CreateUserAvailabilityRequestDto>
+)
+
+/**
  * Schedule Override DTO
  */
 @Serializable
