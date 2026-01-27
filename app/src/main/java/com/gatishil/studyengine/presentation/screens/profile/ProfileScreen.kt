@@ -1,7 +1,9 @@
 package com.gatishil.studyengine.presentation.screens.profile
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -289,21 +291,30 @@ private fun ProfileHeader(
     profile: UserProfile,
     onEditName: () -> Unit
 ) {
+    val isDarkTheme = isSystemInDarkTheme()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)
+            .height(220.dp)
     ) {
-        // Gradient background
+        // Professional gradient background
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.primaryContainer
-                        )
+                        colors = if (isDarkTheme) {
+                            listOf(
+                                Color(0xFF1E3A5F),
+                                Color(0xFF0D1B2A)
+                            )
+                        } else {
+                            listOf(
+                                Color(0xFF4A90D9),
+                                Color(0xFF2E5A8C)
+                            )
+                        }
                     )
                 )
         )
@@ -315,8 +326,15 @@ private fun ProfileHeader(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Profile Picture
-            Box(modifier = Modifier.size(80.dp), contentAlignment = Alignment.Center) {
+            // Profile Picture with border
+            Box(
+                modifier = Modifier
+                    .size(90.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.15f))
+                    .padding(3.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 if (profile.profilePictureUrl != null) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
@@ -331,7 +349,7 @@ private fun ProfileHeader(
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         shape = CircleShape,
-                        color = Color.White.copy(alpha = 0.2f)
+                        color = Color(0xFF3A7BD5)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
@@ -345,7 +363,7 @@ private fun ProfileHeader(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Name with edit button
             Row(
@@ -358,35 +376,49 @@ private fun ProfileHeader(
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
-                IconButton(onClick = onEditName, modifier = Modifier.size(24.dp)) {
+                IconButton(onClick = onEditName, modifier = Modifier.size(28.dp)) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit name",
-                        tint = Color.White.copy(alpha = 0.8f),
-                        modifier = Modifier.size(16.dp)
+                        tint = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
 
+            // Email
             Text(
                 text = profile.email,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.8f)
+                color = Color.White.copy(alpha = 0.85f)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Member since badge
+            // Member since badge with modern style
             Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = Color.White.copy(alpha = 0.2f)
+                shape = RoundedCornerShape(20.dp),
+                color = Color.White.copy(alpha = 0.12f),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
             ) {
-                Text(
-                    text = "${profile.daysSinceJoined} ${stringResource(R.string.days)} ${stringResource(R.string.member_since)}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.White,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.EmojiEvents,
+                        contentDescription = null,
+                        tint = Color(0xFFFFD700),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "${profile.daysSinceJoined} ${stringResource(R.string.days)} ${stringResource(R.string.member_since)}",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                }
             }
         }
     }

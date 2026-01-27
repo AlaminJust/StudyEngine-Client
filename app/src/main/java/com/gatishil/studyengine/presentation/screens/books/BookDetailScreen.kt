@@ -2,11 +2,16 @@ package com.gatishil.studyengine.presentation.screens.books
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -131,9 +136,14 @@ fun BookDetailScreen(
                             viewModel.deleteStudyPlan(plan.id)
                         }
                     },
-                    onEditStudyPlan = { startDate, endDate ->
+                    onEditStudyPlan = { startDate, endDate, recurrenceType, daysOfWeek ->
                         uiState.book?.studyPlan?.let { plan ->
-                            viewModel.updateStudyPlan(plan.id, startDate, endDate)
+                            val recurrenceRule = com.gatishil.studyengine.data.remote.dto.CreateRecurrenceRuleRequestDto(
+                                type = recurrenceType,
+                                interval = 1,
+                                daysOfWeek = daysOfWeek
+                            )
+                            viewModel.updateStudyPlan(plan.id, startDate, endDate, recurrenceRule)
                         }
                     },
                     onEditChapter = { chapter, title, startPage, endPage, orderIndex ->
@@ -191,7 +201,7 @@ private fun BookDetailContent(
     onPauseStudyPlan: () -> Unit = {},
     onCompleteStudyPlan: () -> Unit = {},
     onDeleteStudyPlan: () -> Unit = {},
-    onEditStudyPlan: (startDate: String, endDate: String) -> Unit = { _, _ -> },
+    onEditStudyPlan: (startDate: String, endDate: String, recurrenceType: String, daysOfWeek: List<Int>) -> Unit = { _, _, _, _ -> },
     onEditChapter: (Chapter, title: String, startPage: Int, endPage: Int, orderIndex: Int) -> Unit = { _, _, _, _, _ -> },
     onDeleteChapter: (Chapter) -> Unit = {},
     onIgnoreChapter: (Chapter) -> Unit = {},
@@ -429,7 +439,7 @@ private fun StudyPlanCard(
     onPause: () -> Unit = {},
     onComplete: () -> Unit = {},
     onDelete: () -> Unit = {},
-    onEdit: (startDate: String, endDate: String) -> Unit = { _, _ -> }
+    onEdit: (startDate: String, endDate: String, recurrenceType: String, daysOfWeek: List<Int>) -> Unit = { _, _, _, _ -> }
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showPauseDialog by remember { mutableStateOf(false) }
@@ -756,8 +766,10 @@ private fun StudyPlanCard(
         EditStudyPlanDialog(
             currentStartDate = book.studyPlan.startDate,
             currentEndDate = book.studyPlan.endDate,
-            onConfirm = { startDate, endDate ->
-                onEdit(startDate, endDate)
+            currentRecurrenceType = book.studyPlan.recurrenceRule?.type?.name?.lowercase()?.replaceFirstChar { it.uppercase() },
+            currentDaysOfWeek = book.studyPlan.recurrenceRule?.daysOfWeek ?: emptyList(),
+            onConfirm = { startDate, endDate, recurrenceType, daysOfWeek ->
+                onEdit(startDate, endDate, recurrenceType, daysOfWeek)
                 showEditDialog = false
             },
             onDismiss = { showEditDialog = false }
@@ -843,20 +855,36 @@ private fun StudyPlanActionDialog(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun EditStudyPlanDialog(
     currentStartDate: java.time.LocalDate,
     currentEndDate: java.time.LocalDate,
-    onConfirm: (startDate: String, endDate: String) -> Unit,
+    currentRecurrenceType: String?,
+    currentDaysOfWeek: List<java.time.DayOfWeek>,
+    onConfirm: (startDate: String, endDate: String, recurrenceType: String, daysOfWeek: List<Int>) -> Unit,
     onDismiss: () -> Unit
 ) {
     var startDate by remember { mutableStateOf(currentStartDate) }
     var endDate by remember { mutableStateOf(currentEndDate) }
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
+    var recurrenceType by remember { mutableStateOf(currentRecurrenceType ?: "Daily") }
+    var selectedDaysOfWeek by remember { mutableStateOf(currentDaysOfWeek.map { it.value }.toSet()) }
+    var expanded by remember { mutableStateOf(false) }
 
     val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy")
+
+    val recurrenceOptions = listOf("Daily", "Weekly", "Custom")
+    val daysOfWeekOptions = listOf(
+        1 to stringResource(R.string.monday),
+        2 to stringResource(R.string.tuesday),
+        3 to stringResource(R.string.wednesday),
+        4 to stringResource(R.string.thursday),
+        5 to stringResource(R.string.friday),
+        6 to stringResource(R.string.saturday),
+        7 to stringResource(R.string.sunday)
+    )
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -876,6 +904,7 @@ private fun EditStudyPlanDialog(
         },
         text = {
             Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Start Date
@@ -940,6 +969,70 @@ private fun EditStudyPlanDialog(
                     }
                 }
 
+                // Recurrence Type
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = recurrenceType,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.recurrence_type)) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        recurrenceOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    recurrenceType = option
+                                    expanded = false
+                                    // Reset days selection when switching recurrence type
+                                    if (option == "Daily") {
+                                        selectedDaysOfWeek = (1..7).toSet()
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Days of Week selection (only for Weekly or Custom)
+                if (recurrenceType == "Weekly" || recurrenceType == "Custom") {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = stringResource(R.string.select_days),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            daysOfWeekOptions.forEach { (dayValue, dayName) ->
+                                FilterChip(
+                                    selected = selectedDaysOfWeek.contains(dayValue),
+                                    onClick = {
+                                        selectedDaysOfWeek = if (selectedDaysOfWeek.contains(dayValue)) {
+                                            selectedDaysOfWeek - dayValue
+                                        } else {
+                                            selectedDaysOfWeek + dayValue
+                                        }
+                                    },
+                                    label = { Text(dayName.take(3)) }
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // Validation message
                 if (endDate <= startDate) {
                     Text(
@@ -953,12 +1046,19 @@ private fun EditStudyPlanDialog(
         confirmButton = {
             Button(
                 onClick = {
+                    val daysToSend = if (recurrenceType == "Daily") {
+                        (1..7).toList()
+                    } else {
+                        selectedDaysOfWeek.toList().sorted()
+                    }
                     onConfirm(
                         startDate.format(java.time.format.DateTimeFormatter.ISO_DATE),
-                        endDate.format(java.time.format.DateTimeFormatter.ISO_DATE)
+                        endDate.format(java.time.format.DateTimeFormatter.ISO_DATE),
+                        recurrenceType,
+                        daysToSend
                     )
                 },
-                enabled = endDate > startDate
+                enabled = endDate > startDate && (recurrenceType == "Daily" || selectedDaysOfWeek.isNotEmpty())
             ) {
                 Text(stringResource(R.string.update_plan))
             }

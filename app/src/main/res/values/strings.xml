@@ -261,6 +261,7 @@
     <string name="study_plan_completed_success">🎉 Congratulations! Study plan completed successfully!</string>
     <string name="study_plan_deleted_success">Study plan deleted.</string>
     <string name="study_plan_updated_success">Study plan updated successfully!</string>
+    <string name="recurrence_type">Recurrence Type</string>
 
     <!-- Days of Week -->
     <string name="sunday">Sunday</string>

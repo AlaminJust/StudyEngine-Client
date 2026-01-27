@@ -968,7 +968,8 @@ private fun RelatedProfileCard(
     Card(
         onClick = onClick,
         modifier = Modifier
-            .width(160.dp),
+            .width(160.dp)
+            .heightIn(min = 180.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -978,6 +979,7 @@ private fun RelatedProfileCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .defaultMinSize(minHeight = 180.dp)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
