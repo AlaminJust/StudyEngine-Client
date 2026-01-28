@@ -130,6 +130,9 @@ class MainActivity : AppCompatActivity() {
         // Note: We don't use enableEdgeToEdge() to have better control over status bar
         // Status bar colors are set in Theme.kt
 
+        // Handle notification intent when app is launched from killed state
+        handleNotificationIntent(intent)
+
         setContent {
             val themeMode by settingsPreferences.getThemeMode()
                 .collectAsStateWithLifecycle(initialValue = SettingsPreferences.THEME_SYSTEM)
@@ -286,16 +289,42 @@ class MainActivity : AppCompatActivity() {
         // Handle notification click when app is already running
         // Set the new intent so that the activity processes it
         setIntent(intent)
+        handleNotificationIntent(intent)
+    }
 
-        // Process notification data if present
+    /**
+     * Handle notification intent - called both from onCreate (app was killed)
+     * and onNewIntent (app was running)
+     */
+    private fun handleNotificationIntent(intent: Intent?) {
+        if (intent == null) return
+
+        // Check if this is a notification click
+        val isNotificationClick = intent.action == "com.gatishil.studyengine.NOTIFICATION_CLICK" ||
+                                  intent.hasExtra("notification_type") ||
+                                  intent.hasExtra("sessionId") ||
+                                  intent.hasExtra("type")
+
+        if (!isNotificationClick) return
+
         intent.extras?.let { extras ->
-            val type = extras.getString("type")
+            val type = extras.getString("notification_type") ?: extras.getString("type")
             val sessionId = extras.getString("sessionId")
             val bookId = extras.getString("bookId")
 
             // Log notification data for debugging
             android.util.Log.d("MainActivity", "Notification clicked - type: $type, sessionId: $sessionId, bookId: $bookId")
+
+            // TODO: Navigate to appropriate screen based on notification type
+            // This can be done by storing the pending navigation in a shared state
+            // and having the navigation component pick it up
         }
+
+        // Clear the intent extras after processing to prevent re-processing
+        intent.removeExtra("notification_type")
+        intent.removeExtra("type")
+        intent.removeExtra("sessionId")
+        intent.removeExtra("bookId")
     }
 
     override fun onDestroy() {
