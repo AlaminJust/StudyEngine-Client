@@ -516,7 +516,7 @@ private fun ProfileSettingsCard(onNavigateToProfile: () -> Unit) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = stringResource(R.string.tap_to_manage),
+                                contentDescription = null,
                                 tint = Color.White,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -532,26 +532,6 @@ private fun ProfileSettingsCard(onNavigateToProfile: () -> Unit) {
                     ProfileFeatureTag(text = stringResource(R.string.study_goals))
                     ProfileFeatureTag(text = stringResource(R.string.reading_speed))
                     ProfileFeatureTag(text = stringResource(R.string.notifications))
-                }
-
-                // Tap to manage hint
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.TouchApp,
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.tap_to_manage),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.7f)
-                    )
                 }
             }
         }
@@ -742,4 +722,3 @@ private fun ThemeOption(text: String, selected: Boolean, onClick: () -> Unit) {
         RadioButton(selected = selected, onClick = onClick)
     }
 }
-
