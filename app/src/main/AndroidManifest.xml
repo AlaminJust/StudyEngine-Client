@@ -20,6 +20,7 @@
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="34">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -30,7 +31,16 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Handle FCM notification clicks -->
+        </activity>
+
+        <!-- Trampoline entry point for notification clicks (works reliably even in killed state) -->
+        <activity
+            android:name=".NotificationClickActivity"
+            android:exported="true"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.StudyEngine.Splash">
             <intent-filter>
                 <action android:name="com.gatishil.studyengine.NOTIFICATION_CLICK" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -60,6 +70,11 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/primary" />
+
+        <!-- FCM Default Click Action - used when notification is clicked and app was killed -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_click_action"
+            android:value="com.gatishil.studyengine.NOTIFICATION_CLICK" />
     </application>
 
 </manifest>

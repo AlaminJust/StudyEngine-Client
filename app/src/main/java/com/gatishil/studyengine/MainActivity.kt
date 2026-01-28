@@ -88,6 +88,9 @@ class MainActivity : AppCompatActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
+        // Explicitly set the app theme to valid unintended Compat/Material issues
+        setTheme(R.style.Theme_StudyEngine)
+
         // Add splash screen exit animation
         splashScreen.setOnExitAnimationListener { splashScreenView ->
             // Create fade out animation
@@ -299,32 +302,36 @@ class MainActivity : AppCompatActivity() {
     private fun handleNotificationIntent(intent: Intent?) {
         if (intent == null) return
 
-        // Check if this is a notification click
-        val isNotificationClick = intent.action == "com.gatishil.studyengine.NOTIFICATION_CLICK" ||
-                                  intent.hasExtra("notification_type") ||
-                                  intent.hasExtra("sessionId") ||
-                                  intent.hasExtra("type")
+        try {
+            val isNotificationClick = intent.action == "com.gatishil.studyengine.NOTIFICATION_CLICK" ||
+                intent.action == NotificationClickActivity.ACTION_NOTIFICATION_OPEN ||
+                intent.hasExtra("google.message_id") ||
+                intent.hasExtra("notification_type") ||
+                intent.hasExtra("sessionId") ||
+                intent.hasExtra("type")
 
-        if (!isNotificationClick) return
+            if (!isNotificationClick) return
 
-        intent.extras?.let { extras ->
-            val type = extras.getString("notification_type") ?: extras.getString("type")
+            val extras = intent.extras ?: return
+
+            val type = extras.getString("notification_type")
+                ?: extras.getString("type")
+                ?: extras.getString("gcm.notification.type")
             val sessionId = extras.getString("sessionId")
+                ?: extras.getString("gcm.notification.sessionId")
             val bookId = extras.getString("bookId")
+                ?: extras.getString("gcm.notification.bookId")
 
-            // Log notification data for debugging
-            android.util.Log.d("MainActivity", "Notification clicked - type: $type, sessionId: $sessionId, bookId: $bookId")
+            android.util.Log.d(
+                "MainActivity",
+                "Notification open - type=$type sessionId=$sessionId bookId=$bookId action=${intent.action}"
+            )
 
-            // TODO: Navigate to appropriate screen based on notification type
-            // This can be done by storing the pending navigation in a shared state
-            // and having the navigation component pick it up
+            // NOTE: actual navigation should be handled inside Compose after NavController is ready.
+            // If you later want deep-links, we can store this in a SharedFlow and consume in StudyEngineApp.
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error handling notification intent", e)
         }
-
-        // Clear the intent extras after processing to prevent re-processing
-        intent.removeExtra("notification_type")
-        intent.removeExtra("type")
-        intent.removeExtra("sessionId")
-        intent.removeExtra("bookId")
     }
 
     override fun onDestroy() {

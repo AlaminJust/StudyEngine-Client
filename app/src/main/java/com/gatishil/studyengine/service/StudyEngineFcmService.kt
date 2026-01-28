@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.gatishil.studyengine.MainActivity
+import com.gatishil.studyengine.NotificationClickActivity
 import com.gatishil.studyengine.R
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -50,21 +50,20 @@ class StudyEngineFcmService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        // Handle notification payload
+        // With backend sending DATA-ONLY pushes, always build notification from message.data
+        if (message.data.isNotEmpty()) {
+            val title = message.data["title"] ?: getString(R.string.app_name)
+            val body = message.data["body"] ?: ""
+            val type = message.data["type"] ?: "general"
+            showNotification(title, body, type, message.data)
+            return
+        }
+
+        // Fallback (shouldn't happen with our backend, but safe)
         message.notification?.let { notification ->
             val title = notification.title ?: getString(R.string.app_name)
             val body = notification.body ?: ""
             val type = message.data["type"] ?: "general"
-
-            showNotification(title, body, type, message.data)
-        }
-
-        // Handle data-only payload
-        if (message.notification == null && message.data.isNotEmpty()) {
-            val title = message.data["title"] ?: getString(R.string.app_name)
-            val body = message.data["body"] ?: ""
-            val type = message.data["type"] ?: "general"
-
             showNotification(title, body, type, message.data)
         }
     }
@@ -73,30 +72,26 @@ class StudyEngineFcmService : FirebaseMessagingService() {
         title: String,
         body: String,
         type: String,
-        data: Map<String, String>
+        payload: Map<String, String>
     ) {
         val channelId = getChannelId(type)
-        val notificationId = generateNotificationId(type, data)
 
-        // Create intent to open app - works whether app is running or killed
-        val intent = Intent(this, MainActivity::class.java).apply {
-            // FLAG_ACTIVITY_NEW_TASK: Required when starting activity from non-activity context
-            // FLAG_ACTIVITY_CLEAR_TOP: Clear activities on top if MainActivity already exists
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        val requestCode = System.currentTimeMillis().toInt()
+        val notificationId = generateNotificationId(type, payload)
 
-            // Add action to distinguish notification clicks from normal launches
+        val intent = Intent(this, NotificationClickActivity::class.java).apply {
             action = "com.gatishil.studyengine.NOTIFICATION_CLICK"
 
-            // Pass notification data as extras
             putExtra("notification_type", type)
-            data.forEach { (key, value) ->
-                putExtra(key, value)
-            }
+            payload.forEach { (key, value) -> putExtra(key, value) }
+
+            // Make each PendingIntent unique
+            this.data = android.net.Uri.parse("studyengine://notif/$requestCode")
         }
 
         val pendingIntent = PendingIntent.getActivity(
             this,
-            notificationId,
+            requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -124,8 +119,8 @@ class StudyEngineFcmService : FirebaseMessagingService() {
         }
     }
 
-    private fun generateNotificationId(type: String, data: Map<String, String>): Int {
-        val sessionId = data["sessionId"]
+    private fun generateNotificationId(type: String, payload: Map<String, String>): Int {
+        val sessionId = payload["sessionId"]
         return if (sessionId != null) {
             sessionId.hashCode()
         } else {
@@ -180,4 +175,3 @@ class StudyEngineFcmService : FirebaseMessagingService() {
         }
     }
 }
-
