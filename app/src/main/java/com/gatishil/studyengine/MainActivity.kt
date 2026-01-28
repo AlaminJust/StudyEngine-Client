@@ -6,15 +6,24 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
@@ -25,6 +34,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
@@ -336,62 +346,18 @@ fun StudyEngineApp(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    tonalElevation = 8.dp
-                ) {
-                    BottomNavItem.entries.forEach { navItem ->
-                        // Simple route matching - check if current route matches nav item route
-                        val selected = currentDestination?.route == navItem.route
-
-                        NavigationBarItem(
-                            icon = {
-                                Icon(
-                                    imageVector = when (navItem) {
-                                        BottomNavItem.HOME -> if (selected) Icons.Filled.Home else Icons.Outlined.Home
-                                        BottomNavItem.BOOKS -> if (selected) Icons.AutoMirrored.Filled.MenuBook else Icons.AutoMirrored.Outlined.MenuBook
-                                        BottomNavItem.SESSIONS -> if (selected) Icons.Filled.CalendarToday else Icons.Outlined.CalendarToday
-                                        BottomNavItem.EXAMS -> if (selected) Icons.Filled.Quiz else Icons.Outlined.Quiz
-                                        BottomNavItem.SETTINGS -> if (selected) Icons.Filled.Settings else Icons.Outlined.Settings
-                                    },
-                                    contentDescription = stringResource(navItem.titleResId),
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = stringResource(navItem.titleResId),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = if (selected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
-                                )
-                            },
-                            selected = selected,
-                            onClick = {
-                                if (currentDestination?.route != navItem.route) {
-                                    navController.navigate(navItem.route) {
-                                        // Pop up to the start destination of the graph to
-                                        // avoid building up a large stack of destinations
-                                        popUpTo(Screen.Dashboard.route) {
-                                            saveState = true
-                                        }
-                                        // Avoid multiple copies of the same destination
-                                        launchSingleTop = true
-                                        // Restore state when reselecting a previously selected item
-                                        restoreState = true
-                                    }
-                                }
-                            },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        )
+                StudyEngineBottomNavBar(
+                    currentRoute = currentDestination?.route,
+                    onNavigate = { route ->
+                        navController.navigate(route) {
+                            popUpTo(Screen.Dashboard.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = false // Disable restore state to prevent wrong navigation
+                        }
                     }
-                }
+                )
             }
         }
     ) { innerPadding ->
@@ -399,6 +365,162 @@ fun StudyEngineApp(
             navController = navController,
             startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
+
+@Composable
+private fun StudyEngineBottomNavBar(
+    currentRoute: String?,
+    onNavigate: (String) -> Unit
+) {
+    Box(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Main navigation bar
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter),
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 8.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BottomNavItem.entries.forEach { navItem ->
+                    val selected = currentRoute == navItem.route
+
+                    if (navItem.isCenter) {
+                        // Spacer for center item (will be overlaid)
+                        Spacer(modifier = Modifier.width(64.dp))
+                    } else {
+                        // Regular nav item
+                        BottomNavItemView(
+                            navItem = navItem,
+                            selected = selected,
+                            onClick = { onNavigate(navItem.route) }
+                        )
+                    }
+                }
+            }
+        }
+
+        // Center Home button - elevated circular design
+        val homeSelected = currentRoute == BottomNavItem.HOME.route
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = (-20).dp)
+        ) {
+            // Outer decorative ring
+            Surface(
+                modifier = Modifier.size(72.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 12.dp
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Inner gradient button
+                    Surface(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clickable { onNavigate(BottomNavItem.HOME.route) },
+                        shape = CircleShape,
+                        color = if (homeSelected)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Icon(
+                                imageVector = if (homeSelected) Icons.Filled.Home else Icons.Outlined.Home,
+                                contentDescription = stringResource(R.string.nav_home),
+                                tint = if (homeSelected)
+                                    MaterialTheme.colorScheme.onPrimary
+                                else
+                                    MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BottomNavItemView(
+    navItem: BottomNavItem,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Selection indicator
+        if (selected) {
+            Box(
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(3.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(2.dp)
+                    )
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+
+        Icon(
+            imageVector = when (navItem) {
+                BottomNavItem.BOOKS -> if (selected) Icons.AutoMirrored.Filled.MenuBook else Icons.AutoMirrored.Outlined.MenuBook
+                BottomNavItem.SESSIONS -> if (selected) Icons.Filled.CalendarToday else Icons.Outlined.CalendarToday
+                BottomNavItem.EXAMS -> if (selected) Icons.Filled.Quiz else Icons.Outlined.Quiz
+                BottomNavItem.SETTINGS -> if (selected) Icons.Filled.Settings else Icons.Outlined.Settings
+                BottomNavItem.HOME -> Icons.Filled.Home // Won't be used, handled separately
+            },
+            contentDescription = stringResource(navItem.titleResId),
+            tint = if (selected)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = stringResource(navItem.titleResId),
+            style = MaterialTheme.typography.labelSmall,
+            color = if (selected)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            maxLines = 1
         )
     }
 }

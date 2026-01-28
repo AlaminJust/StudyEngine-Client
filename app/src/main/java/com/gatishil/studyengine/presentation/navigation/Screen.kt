@@ -100,16 +100,17 @@ sealed class Screen(val route: String) {
 }
 
 /**
- * Bottom navigation items
+ * Bottom navigation items - Order: Books, Sessions, Home (center), Exams, Settings
  */
 enum class BottomNavItem(
     val route: String,
     val titleResId: Int,
-    val iconName: String
+    val iconName: String,
+    val isCenter: Boolean = false
 ) {
-    HOME("dashboard", com.gatishil.studyengine.R.string.nav_home, "home"),
     BOOKS("books", com.gatishil.studyengine.R.string.nav_books, "book"),
     SESSIONS("sessions/today", com.gatishil.studyengine.R.string.nav_sessions, "calendar_today"),
+    HOME("dashboard", com.gatishil.studyengine.R.string.nav_home, "home", isCenter = true),
     EXAMS("exams", com.gatishil.studyengine.R.string.nav_exams, "quiz"),
     SETTINGS("settings", com.gatishil.studyengine.R.string.nav_settings, "settings")
 }
