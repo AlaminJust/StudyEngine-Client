@@ -4,8 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -92,11 +94,14 @@ fun AvailabilityScreen(
     // Add Availability Dialog
     if (uiState.showAddDialog) {
         AddAvailabilityDialog(
-            selectedDay = uiState.selectedDayOfWeek,
+            selectedDays = uiState.selectedDaysOfWeek,
             startTime = uiState.startTime,
             endTime = uiState.endTime,
             isLoading = uiState.isAddingNew,
-            onDaySelected = viewModel::updateSelectedDay,
+            onDayToggled = viewModel::toggleDaySelection,
+            onSelectAllDays = viewModel::selectAllDays,
+            onSelectWeekdays = viewModel::selectWeekdays,
+            onSelectWeekends = viewModel::selectWeekends,
             onStartTimeSelected = viewModel::updateStartTime,
             onEndTimeSelected = viewModel::updateEndTime,
             onConfirm = viewModel::addAvailability,
@@ -581,14 +586,17 @@ private fun TimeSlotItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun AddAvailabilityDialog(
-    selectedDay: DayOfWeek,
+    selectedDays: Set<DayOfWeek>,
     startTime: LocalTime,
     endTime: LocalTime,
     isLoading: Boolean,
-    onDaySelected: (DayOfWeek) -> Unit,
+    onDayToggled: (DayOfWeek) -> Unit,
+    onSelectAllDays: () -> Unit,
+    onSelectWeekdays: () -> Unit,
+    onSelectWeekends: () -> Unit,
     onStartTimeSelected: (LocalTime) -> Unit,
     onEndTimeSelected: (LocalTime) -> Unit,
     onConfirm: () -> Unit,
@@ -601,124 +609,288 @@ private fun AddAvailabilityDialog(
         onDismissRequest = onDismiss,
         icon = {
             Icon(
-                Icons.Default.Add,
+                Icons.Default.Schedule,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(28.dp)
             )
         },
-        title = { Text(stringResource(R.string.add_time_slot)) },
+        title = {
+            Text(
+                text = stringResource(R.string.add_time_slot),
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                // Day of Week Selector
-                Text(
-                    text = stringResource(R.string.select_day),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    DayOfWeek.entries.take(7).forEachIndexed { index, day ->
-                        SegmentedButton(
-                            shape = SegmentedButtonDefaults.itemShape(index = index, count = 7),
-                            onClick = { onDaySelected(day) },
-                            selected = selectedDay == day
-                        ) {
-                            Text(day.getDisplayName(TextStyle.NARROW, Locale.getDefault()))
-                        }
-                    }
-                }
-
-                // Time Selectors
-                Text(
-                    text = stringResource(R.string.select_time),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                // Day of Week Multi-Selector Section
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    OutlinedCard(
-                        onClick = { showStartTimePicker = true },
-                        modifier = Modifier.weight(1f)
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        Text(
+                            text = stringResource(R.string.select_days),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        // Quick selection buttons - compact design
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Icon(
-                                Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
+                            SuggestionChip(
+                                onClick = onSelectAllDays,
+                                label = {
+                                    Text(
+                                        text = stringResource(R.string.all_days),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1
+                                    )
+                                },
+                                modifier = Modifier.weight(1f)
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.start),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            SuggestionChip(
+                                onClick = onSelectWeekdays,
+                                label = {
+                                    Text(
+                                        text = stringResource(R.string.weekdays),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1
+                                    )
+                                },
+                                modifier = Modifier.weight(1f)
                             )
-                            Text(
-                                text = startTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                            SuggestionChip(
+                                onClick = onSelectWeekends,
+                                label = {
+                                    Text(
+                                        text = stringResource(R.string.weekends),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1
+                                    )
+                                },
+                                modifier = Modifier.weight(1f)
                             )
                         }
-                    }
 
-                    OutlinedCard(
-                        onClick = { showEndTimePicker = true },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        // Day chips with multi-select - Two rows
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            // First row: Mon-Thu
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                listOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY).forEach { day ->
+                                    val isSelected = selectedDays.contains(day)
+                                    FilterChip(
+                                        selected = isSelected,
+                                        onClick = { onDayToggled(day) },
+                                        label = {
+                                            Text(
+                                                text = day.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        },
+                                        leadingIcon = if (isSelected) {
+                                            {
+                                                Icon(
+                                                    Icons.Default.Check,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(14.dp)
+                                                )
+                                            }
+                                        } else null,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                            // Second row: Fri-Sun
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                listOf(DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).forEach { day ->
+                                    val isSelected = selectedDays.contains(day)
+                                    FilterChip(
+                                        selected = isSelected,
+                                        onClick = { onDayToggled(day) },
+                                        label = {
+                                            Text(
+                                                text = day.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        },
+                                        leadingIcon = if (isSelected) {
+                                            {
+                                                Icon(
+                                                    Icons.Default.Check,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(14.dp)
+                                                )
+                                            }
+                                        } else null,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                // Spacer to balance the row
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+
+                        // Selected days count badge
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                         ) {
-                            Icon(
-                                Icons.Default.Stop,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = stringResource(R.string.end),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = endTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                text = stringResource(R.string.days_selected, selectedDays.size),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
                         }
                     }
                 }
 
-                // Duration preview
-                val durationMinutes = java.time.Duration.between(startTime, endTime).toMinutes()
-                if (durationMinutes > 0) {
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = StudyEngineTheme.extendedColors.success.copy(alpha = 0.1f),
-                        modifier = Modifier.fillMaxWidth()
+                // Time Selection Section
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        Text(
+                            text = stringResource(R.string.select_time),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
                         Row(
-                            modifier = Modifier.padding(12.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Icon(
-                                Icons.Default.Timer,
-                                contentDescription = null,
-                                tint = StudyEngineTheme.extendedColors.success,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "${durationMinutes / 60}h ${durationMinutes % 60}m ${stringResource(R.string.duration)}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = StudyEngineTheme.extendedColors.success
-                            )
+                            // Start Time Card
+                            Card(
+                                onClick = { showStartTimePicker = true },
+                                modifier = Modifier.weight(1f),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        Icons.Default.PlayArrow,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.start),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = startTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+
+                            // End Time Card
+                            Card(
+                                onClick = { showEndTimePicker = true },
+                                modifier = Modifier.weight(1f),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        Icons.Default.Stop,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.end),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = endTime.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                        }
+
+                        // Duration preview
+                        val durationMinutes = java.time.Duration.between(startTime, endTime).toMinutes()
+                        if (durationMinutes > 0) {
+                            val hours = durationMinutes / 60
+                            val mins = durationMinutes % 60
+                            val durationText = when {
+                                hours > 0 && mins > 0 -> "${hours}h ${mins}m"
+                                hours > 0 -> "${hours}h"
+                                else -> "${mins}m"
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = StudyEngineTheme.extendedColors.success.copy(alpha = 0.1f),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(10.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Default.Timer,
+                                        contentDescription = null,
+                                        tint = StudyEngineTheme.extendedColors.success,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.duration_format, durationText),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium,
+                                        color = StudyEngineTheme.extendedColors.success
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -727,7 +899,7 @@ private fun AddAvailabilityDialog(
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                enabled = !isLoading && endTime > startTime
+                enabled = !isLoading && endTime > startTime && selectedDays.isNotEmpty()
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(

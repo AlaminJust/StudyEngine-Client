@@ -23,7 +23,7 @@ data class AvailabilityUiState(
     val availabilities: List<UserAvailabilityDto> = emptyList(),
     val error: String? = null,
     val showAddDialog: Boolean = false,
-    val selectedDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
+    val selectedDaysOfWeek: Set<DayOfWeek> = setOf(DayOfWeek.MONDAY),
     val startTime: LocalTime = LocalTime.of(9, 0),
     val endTime: LocalTime = LocalTime.of(17, 0),
     val isAddingNew: Boolean = false
@@ -79,15 +79,46 @@ class AvailabilityViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 showAddDialog = false,
-                selectedDayOfWeek = DayOfWeek.MONDAY,
+                selectedDaysOfWeek = setOf(DayOfWeek.MONDAY),
                 startTime = LocalTime.of(9, 0),
                 endTime = LocalTime.of(17, 0)
             )
         }
     }
 
-    fun updateSelectedDay(day: DayOfWeek) {
-        _uiState.update { it.copy(selectedDayOfWeek = day) }
+    fun toggleDaySelection(day: DayOfWeek) {
+        _uiState.update { state ->
+            val newSelection = if (state.selectedDaysOfWeek.contains(day)) {
+                // Don't allow deselecting the last day
+                if (state.selectedDaysOfWeek.size > 1) {
+                    state.selectedDaysOfWeek - day
+                } else {
+                    state.selectedDaysOfWeek
+                }
+            } else {
+                state.selectedDaysOfWeek + day
+            }
+            state.copy(selectedDaysOfWeek = newSelection)
+        }
+    }
+
+    fun selectAllDays() {
+        _uiState.update { it.copy(selectedDaysOfWeek = DayOfWeek.entries.toSet()) }
+    }
+
+    fun selectWeekdays() {
+        _uiState.update {
+            it.copy(selectedDaysOfWeek = setOf(
+                DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY
+            ))
+        }
+    }
+
+    fun selectWeekends() {
+        _uiState.update {
+            it.copy(selectedDaysOfWeek = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY))
+        }
     }
 
     fun updateStartTime(time: LocalTime) {
@@ -106,29 +137,56 @@ class AvailabilityViewModel @Inject constructor(
             return
         }
 
+        if (state.selectedDaysOfWeek.isEmpty()) {
+            _uiState.update { it.copy(error = "Please select at least one day") }
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isAddingNew = true, error = null) }
             try {
-                // Convert DayOfWeek to C# format (Sunday=0, Monday=1, etc.)
-                val dayOfWeekValue = when (state.selectedDayOfWeek.value) {
-                    7 -> 0  // Sunday
-                    else -> state.selectedDayOfWeek.value
+                // Create availability for each selected day
+                val requests = state.selectedDaysOfWeek.map { day ->
+                    // Convert DayOfWeek to C# format (Sunday=0, Monday=1, etc.)
+                    val dayOfWeekValue = when (day.value) {
+                        7 -> 0  // Sunday
+                        else -> day.value
+                    }
+                    CreateUserAvailabilityRequestDto(
+                        dayOfWeek = dayOfWeekValue,
+                        startTime = state.startTime.format(timeFormatter),
+                        endTime = state.endTime.format(timeFormatter)
+                    )
                 }
 
-                val request = CreateUserAvailabilityRequestDto(
-                    dayOfWeek = dayOfWeekValue,
-                    startTime = state.startTime.format(timeFormatter),
-                    endTime = state.endTime.format(timeFormatter)
-                )
+                var successCount = 0
+                var failCount = 0
 
-                val response = api.createAvailability(request)
-                if (response.isSuccessful) {
+                // Create each availability
+                for (request in requests) {
+                    try {
+                        val response = api.createAvailability(request)
+                        if (response.isSuccessful) {
+                            successCount++
+                        } else {
+                            failCount++
+                        }
+                    } catch (e: Exception) {
+                        failCount++
+                    }
+                }
+
+                if (successCount > 0) {
                     hideAddDialog()
                     loadAvailabilities()
+                    if (failCount > 0) {
+                        _uiState.update {
+                            it.copy(error = "Added $successCount slots, $failCount failed")
+                        }
+                    }
                 } else {
-                    val errorBody = response.errorBody()?.string() ?: response.message()
                     _uiState.update {
-                        it.copy(isAddingNew = false, error = "Failed to add: $errorBody")
+                        it.copy(isAddingNew = false, error = "Failed to add time slots")
                     }
                 }
             } catch (e: Exception) {

@@ -220,6 +220,11 @@
     <string name="delete_time_slot_message">আপনি কি এই সময় স্লটটি মুছতে চান?</string>
     <string name="add_availability_hint">ব্যক্তিগতকৃত সময়সূচী পেতে আপনার পড়ার সময় যোগ করুন</string>
     <string name="select_day">দিন নির্বাচন</string>
+    <string name="all_days">সব</string>
+    <string name="weekdays">সপ্তাহের দিন</string>
+    <string name="weekends">সাপ্তাহিক ছুটি</string>
+    <string name="days_selected">%d দিন নির্বাচিত</string>
+    <string name="duration_format">সময়কাল: %s</string>
     <string name="start">শুরু</string>
     <string name="end">শেষ</string>
     <string name="duration">সময়কাল</string>
@@ -365,11 +370,9 @@
     <string name="current_streak">বর্তমান ধারা</string>
     <string name="pages_read">পড়া পৃষ্ঠা</string>
     <string name="sessions_completed_label">সেশন</string>
-    <string name="study_goals">পড়াশোনার লক্ষ্য</string>
     <string name="daily_pages_goal">দৈনিক পৃষ্ঠা লক্ষ্য</string>
     <string name="daily_minutes_goal">দৈনিক মিনিট লক্ষ্য</string>
     <string name="weekly_study_days">সাপ্তাহিক পড়াশোনার দিন</string>
-    <string name="reading_speed">পড়ার গতি</string>
     <string name="account_info">অ্যাকাউন্ট তথ্য</string>
     <string name="email">ইমেইল</string>
     <string name="auth_provider">প্রমাণীকরণ প্রদানকারী</string>
@@ -395,6 +398,11 @@
     <string name="privacy_settings">গোপনীয়তা সেটিংস</string>
     <string name="show_profile_publicly">প্রোফাইল সর্বজনীন দেখান</string>
     <string name="show_stats_publicly">পরিসংখ্যান সর্বজনীন দেখান</string>
+    <string name="profile_and_goals">প্রোফাইল ও পড়ার লক্ষ্য</string>
+    <string name="profile_settings_desc">পড়ার গতি, পছন্দ ও বিজ্ঞপ্তি পরিচালনা করুন</string>
+    <string name="tap_to_manage">সেটিংস পরিচালনা করতে ট্যাপ করুন</string>
+    <string name="study_goals">লক্ষ্য</string>
+    <string name="reading_speed">গতি</string>
 
     <!-- Academic Profile -->
     <string name="academic">একাডেমিক</string>

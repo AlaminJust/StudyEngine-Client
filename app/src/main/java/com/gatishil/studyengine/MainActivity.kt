@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -334,7 +336,11 @@ fun StudyEngineApp(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    tonalElevation = 8.dp
+                ) {
                     BottomNavItem.entries.forEach { navItem ->
                         // Simple route matching - check if current route matches nav item route
                         val selected = currentDestination?.route == navItem.route
@@ -343,28 +349,46 @@ fun StudyEngineApp(
                             icon = {
                                 Icon(
                                     imageVector = when (navItem) {
-                                        BottomNavItem.HOME -> Icons.Default.Home
-                                        BottomNavItem.BOOKS -> Icons.AutoMirrored.Filled.MenuBook
-                                        BottomNavItem.SESSIONS -> Icons.Default.CalendarToday
-                                        BottomNavItem.EXAMS -> Icons.Default.Quiz
-                                        BottomNavItem.SETTINGS -> Icons.Default.Settings
+                                        BottomNavItem.HOME -> if (selected) Icons.Filled.Home else Icons.Outlined.Home
+                                        BottomNavItem.BOOKS -> if (selected) Icons.AutoMirrored.Filled.MenuBook else Icons.AutoMirrored.Outlined.MenuBook
+                                        BottomNavItem.SESSIONS -> if (selected) Icons.Filled.CalendarToday else Icons.Outlined.CalendarToday
+                                        BottomNavItem.EXAMS -> if (selected) Icons.Filled.Quiz else Icons.Outlined.Quiz
+                                        BottomNavItem.SETTINGS -> if (selected) Icons.Filled.Settings else Icons.Outlined.Settings
                                     },
-                                    contentDescription = stringResource(navItem.titleResId)
+                                    contentDescription = stringResource(navItem.titleResId),
+                                    modifier = Modifier.size(24.dp)
                                 )
                             },
-                            label = { Text(stringResource(navItem.titleResId)) },
+                            label = {
+                                Text(
+                                    text = stringResource(navItem.titleResId),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = if (selected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
+                                )
+                            },
                             selected = selected,
                             onClick = {
-                                if (!selected) {
+                                if (currentDestination?.route != navItem.route) {
                                     navController.navigate(navItem.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
+                                        // Pop up to the start destination of the graph to
+                                        // avoid building up a large stack of destinations
+                                        popUpTo(Screen.Dashboard.route) {
                                             saveState = true
                                         }
+                                        // Avoid multiple copies of the same destination
                                         launchSingleTop = true
+                                        // Restore state when reselecting a previously selected item
                                         restoreState = true
                                     }
                                 }
-                            }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
                     }
                 }

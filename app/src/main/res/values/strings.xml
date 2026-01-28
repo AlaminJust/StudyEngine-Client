@@ -219,6 +219,11 @@
     <string name="delete_time_slot_message">Are you sure you want to delete this time slot?</string>
     <string name="add_availability_hint">Add your available study times to get personalized schedules</string>
     <string name="select_day">Select Day</string>
+    <string name="all_days">All</string>
+    <string name="weekdays">Weekdays</string>
+    <string name="weekends">Weekends</string>
+    <string name="days_selected">%d day(s) selected</string>
+    <string name="duration_format">Duration: %s</string>
     <string name="start">Start</string>
     <string name="end">End</string>
     <string name="duration">duration</string>
@@ -363,11 +368,9 @@
     <string name="current_streak">Current Streak</string>
     <string name="pages_read">Pages Read</string>
     <string name="sessions_completed_label">Sessions</string>
-    <string name="study_goals">Study Goals</string>
     <string name="daily_pages_goal">Daily Pages Goal</string>
     <string name="daily_minutes_goal">Daily Minutes Goal</string>
     <string name="weekly_study_days">Weekly Study Days</string>
-    <string name="reading_speed">Reading Speed</string>
     <string name="account_info">Account Info</string>
     <string name="email">Email</string>
     <string name="auth_provider">Auth Provider</string>
@@ -393,6 +396,11 @@
     <string name="privacy_settings">Privacy Settings</string>
     <string name="show_profile_publicly">Show Profile Publicly</string>
     <string name="show_stats_publicly">Show Stats Publicly</string>
+    <string name="profile_and_goals">Profile &amp; Study Goals</string>
+    <string name="profile_settings_desc">Manage your reading speed, study preferences &amp; notifications</string>
+    <string name="tap_to_manage">Tap to manage your settings</string>
+    <string name="study_goals">Goals</string>
+    <string name="reading_speed">Speed</string>
 
     <!-- Academic Profile -->
     <string name="academic">Academic</string>
