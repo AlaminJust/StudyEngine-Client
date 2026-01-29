@@ -30,6 +30,7 @@ import com.gatishil.studyengine.domain.model.AnswerOptionDetail
 import com.gatishil.studyengine.domain.model.ExamAnswerResult
 import com.gatishil.studyengine.domain.model.ExamResult
 import com.gatishil.studyengine.presentation.common.components.LoadingScreen
+import com.gatishil.studyengine.ui.theme.StudyEngineTheme
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,13 +147,66 @@ fun ExamResultScreen(
 @Composable
 private fun ScoreHeader(result: ExamResult) {
     val grade = result.grade
-    val (gradeColor, gradeBg) = when {
-        result.scorePercentage >= 90 -> Color(0xFF4CAF50) to Color(0xFFE8F5E9)
-        result.scorePercentage >= 80 -> Color(0xFF8BC34A) to Color(0xFFF1F8E9)
-        result.scorePercentage >= 70 -> Color(0xFFFFB300) to Color(0xFFFFF8E1)
-        result.scorePercentage >= 60 -> Color(0xFFFF9800) to Color(0xFFFFF3E0)
-        result.scorePercentage >= 50 -> Color(0xFFFF5722) to Color(0xFFFBE9E7)
-        else -> Color(0xFFF44336) to Color(0xFFFFEBEE)
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+
+    val gradeColor: Color
+    val gradeBg: Color
+
+    if (isDarkTheme) {
+        // Dracula theme colors for dark mode
+        when {
+            result.scorePercentage >= 90 -> {
+                gradeColor = StudyEngineTheme.extendedColors.success
+                gradeBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            }
+            result.scorePercentage >= 80 -> {
+                gradeColor = StudyEngineTheme.extendedColors.success.copy(alpha = 0.8f)
+                gradeBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            }
+            result.scorePercentage >= 70 -> {
+                gradeColor = MaterialTheme.colorScheme.tertiary
+                gradeBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            }
+            result.scorePercentage >= 60 -> {
+                gradeColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.8f)
+                gradeBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            }
+            result.scorePercentage >= 50 -> {
+                gradeColor = StudyEngineTheme.extendedColors.warning
+                gradeBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            }
+            else -> {
+                gradeColor = StudyEngineTheme.extendedColors.priorityHigh
+                gradeBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+            }
+        }
+    } else {
+        when {
+            result.scorePercentage >= 90 -> {
+                gradeColor = Color(0xFF4CAF50)
+                gradeBg = Color(0xFFE8F5E9)
+            }
+            result.scorePercentage >= 80 -> {
+                gradeColor = Color(0xFF8BC34A)
+                gradeBg = Color(0xFFF1F8E9)
+            }
+            result.scorePercentage >= 70 -> {
+                gradeColor = Color(0xFFFFB300)
+                gradeBg = Color(0xFFFFF8E1)
+            }
+            result.scorePercentage >= 60 -> {
+                gradeColor = Color(0xFFFF9800)
+                gradeBg = Color(0xFFFFF3E0)
+            }
+            result.scorePercentage >= 50 -> {
+                gradeColor = Color(0xFFFF5722)
+                gradeBg = Color(0xFFFBE9E7)
+            }
+            else -> {
+                gradeColor = Color(0xFFF44336)
+                gradeBg = Color(0xFFFFEBEE)
+            }
+        }
     }
 
     Box(
@@ -244,21 +298,21 @@ private fun StatsSection(result: ExamResult) {
             icon = Icons.Outlined.CheckCircle,
             value = "${result.correctAnswers}/${result.totalQuestions}",
             label = stringResource(R.string.exam_stat_correct),
-            color = Color(0xFF4CAF50),
+            color = StudyEngineTheme.extendedColors.success,
             modifier = Modifier.weight(1f)
         )
         StatCard(
             icon = Icons.Outlined.Stars,
             value = "${result.earnedPoints}/${result.totalPoints}",
             label = stringResource(R.string.exam_stat_points),
-            color = Color(0xFFFFB300),
+            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.weight(1f)
         )
         StatCard(
             icon = Icons.Outlined.Timer,
             value = result.duration,
             label = stringResource(R.string.exam_stat_time),
-            color = Color(0xFF2196F3),
+            color = StudyEngineTheme.extendedColors.info,
             modifier = Modifier.weight(1f)
         )
     }
@@ -282,7 +336,7 @@ private fun StatsSection(result: ExamResult) {
             icon = Icons.Outlined.Cancel,
             value = (result.totalQuestions - result.correctAnswers).toString(),
             label = stringResource(R.string.exam_stat_wrong),
-            color = Color(0xFFF44336),
+            color = StudyEngineTheme.extendedColors.priorityHigh,
             modifier = Modifier.weight(1f)
         )
         StatCard(
@@ -389,8 +443,15 @@ private fun AnswerResultCard(
     modifier: Modifier = Modifier
 ) {
     val isCorrect = answerResult.isCorrect
-    val borderColor = if (isCorrect) Color(0xFF4CAF50) else Color(0xFFF44336)
-    val bgColor = if (isCorrect) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+
+    val borderColor = if (isCorrect) StudyEngineTheme.extendedColors.success else StudyEngineTheme.extendedColors.priorityHigh
+    val bgColor = if (isDarkTheme) {
+        if (isCorrect) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
+    } else {
+        if (isCorrect) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
+    }
 
     Card(
         modifier = modifier
@@ -419,14 +480,14 @@ private fun AnswerResultCard(
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = if (isDarkTheme) MaterialTheme.colorScheme.onPrimary else Color.White,
                                 modifier = Modifier.size(16.dp)
                             )
                         } else {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = if (isDarkTheme) MaterialTheme.colorScheme.onPrimary else Color.White,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -440,7 +501,7 @@ private fun AnswerResultCard(
                 }
 
                 Surface(
-                    color = if (isCorrect) Color(0xFF4CAF50) else Color(0xFFF44336),
+                    color = borderColor,
                     shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
@@ -515,21 +576,24 @@ private fun AnswerOptionItem(
     option: AnswerOptionDetail,
     optionLabel: String
 ) {
+    val successColor = StudyEngineTheme.extendedColors.success
+    val errorColor = StudyEngineTheme.extendedColors.priorityHigh
+
     val (bgColor, borderColor, iconColor) = when {
         option.isCorrect && option.wasSelected -> Triple(
-            Color(0xFF4CAF50).copy(alpha = 0.15f),
-            Color(0xFF4CAF50),
-            Color(0xFF4CAF50)
+            successColor.copy(alpha = 0.15f),
+            successColor,
+            successColor
         )
         option.isCorrect && !option.wasSelected -> Triple(
-            Color(0xFF4CAF50).copy(alpha = 0.1f),
-            Color(0xFF4CAF50).copy(alpha = 0.5f),
-            Color(0xFF4CAF50)
+            successColor.copy(alpha = 0.1f),
+            successColor.copy(alpha = 0.5f),
+            successColor
         )
         !option.isCorrect && option.wasSelected -> Triple(
-            Color(0xFFF44336).copy(alpha = 0.15f),
-            Color(0xFFF44336),
-            Color(0xFFF44336)
+            errorColor.copy(alpha = 0.15f),
+            errorColor,
+            errorColor
         )
         else -> Triple(
             MaterialTheme.colorScheme.surfaceContainerLow,

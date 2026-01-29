@@ -83,7 +83,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 /**
- * Extended colors for session status and priorities
+ * Extended colors for session status, priorities, and Dracula theme accents
  */
 data class ExtendedColors(
     val success: Color,
@@ -96,7 +96,15 @@ data class ExtendedColors(
     val sessionCancelled: Color,
     val priorityHigh: Color,
     val priorityMedium: Color,
-    val priorityLow: Color
+    val priorityLow: Color,
+    // Dracula theme accent colors (for custom UI elements)
+    val draculaCyan: Color = DraculaCyan,
+    val draculaGreen: Color = DraculaGreen,
+    val draculaOrange: Color = DraculaOrange,
+    val draculaPink: Color = DraculaPink,
+    val draculaPurple: Color = DraculaPurple,
+    val draculaRed: Color = DraculaRed,
+    val draculaYellow: Color = DraculaYellow
 )
 
 val LocalExtendedColors = compositionLocalOf {
@@ -168,16 +176,16 @@ fun StudyEngineTheme(
             // Ensure window draws behind system bars for proper control
             WindowCompat.setDecorFitsSystemWindows(window, true)
 
-            // Set status bar color - use primary for visibility
+            // Set status bar color - Dracula background for dark mode
             val statusBarColorValue = if (darkTheme) {
-                0xFF1E2128.toInt() // Dark blue-gray for dark mode
+                0xFF282A36.toInt() // Dracula background
             } else {
                 0xFFFFFFFF.toInt() // White for light mode
             }
 
-            // Set navigation bar color
+            // Set navigation bar color - Dracula background for dark mode
             val navBarColorValue = if (darkTheme) {
-                0xFF111318.toInt() // Match dark background
+                0xFF282A36.toInt() // Dracula background
             } else {
                 0xFFFFFFFF.toInt() // White for light mode
             }

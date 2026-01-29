@@ -306,8 +306,8 @@ private fun ProfileHeader(
                     brush = Brush.verticalGradient(
                         colors = if (isDarkTheme) {
                             listOf(
-                                Color(0xFF1E3A5F),
-                                Color(0xFF0D1B2A)
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                MaterialTheme.colorScheme.background
                             )
                         } else {
                             listOf(
@@ -331,7 +331,10 @@ private fun ProfileHeader(
                 modifier = Modifier
                     .size(90.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.15f))
+                    .background(
+                        if (isDarkTheme) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        else Color.White.copy(alpha = 0.15f)
+                    )
                     .padding(3.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -349,14 +352,14 @@ private fun ProfileHeader(
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         shape = CircleShape,
-                        color = Color(0xFF3A7BD5)
+                        color = if (isDarkTheme) MaterialTheme.colorScheme.primary else Color(0xFF3A7BD5)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
                                 text = profile.name.take(2).uppercase(),
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = if (isDarkTheme) MaterialTheme.colorScheme.onPrimary else Color.White
                             )
                         }
                     }
@@ -398,8 +401,8 @@ private fun ProfileHeader(
             // Member since badge with modern style
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = Color.White.copy(alpha = 0.12f),
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
+                color = if (isDarkTheme) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.12f),
+                border = BorderStroke(1.dp, if (isDarkTheme) MaterialTheme.colorScheme.outline.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.2f))
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -409,14 +412,14 @@ private fun ProfileHeader(
                     Icon(
                         imageVector = Icons.Default.EmojiEvents,
                         contentDescription = null,
-                        tint = Color(0xFFFFD700),
+                        tint = if (isDarkTheme) MaterialTheme.colorScheme.tertiary else Color(0xFFFFD700),
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
                         text = "${profile.daysSinceJoined} ${stringResource(R.string.days)} ${stringResource(R.string.member_since)}",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Medium,
-                        color = Color.White
+                        color = if (isDarkTheme) MaterialTheme.colorScheme.onBackground else Color.White
                     )
                 }
             }

@@ -32,6 +32,7 @@ import com.gatishil.studyengine.domain.model.ExamQuestion
 import com.gatishil.studyengine.domain.model.QuestionDifficulty
 import com.gatishil.studyengine.domain.model.QuestionOption
 import com.gatishil.studyengine.presentation.common.components.LoadingScreen
+import com.gatishil.studyengine.ui.theme.StudyEngineTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -435,10 +436,10 @@ private fun QuestionContent(
 @Composable
 private fun DifficultyBadge(difficulty: QuestionDifficulty) {
     val (text, color) = when (difficulty) {
-        QuestionDifficulty.EASY -> stringResource(R.string.exam_difficulty_easy) to Color(0xFF4CAF50)
-        QuestionDifficulty.MEDIUM -> stringResource(R.string.exam_difficulty_medium) to Color(0xFFFF9800)
-        QuestionDifficulty.HARD -> stringResource(R.string.exam_difficulty_hard) to Color(0xFFF44336)
-        QuestionDifficulty.EXPERT -> stringResource(R.string.exam_difficulty_expert) to Color(0xFF9C27B0)
+        QuestionDifficulty.EASY -> stringResource(R.string.exam_difficulty_easy) to StudyEngineTheme.extendedColors.success
+        QuestionDifficulty.MEDIUM -> stringResource(R.string.exam_difficulty_medium) to StudyEngineTheme.extendedColors.warning
+        QuestionDifficulty.HARD -> stringResource(R.string.exam_difficulty_hard) to StudyEngineTheme.extendedColors.priorityHigh
+        QuestionDifficulty.EXPERT -> stringResource(R.string.exam_difficulty_expert) to MaterialTheme.colorScheme.primary
     }
 
     Surface(

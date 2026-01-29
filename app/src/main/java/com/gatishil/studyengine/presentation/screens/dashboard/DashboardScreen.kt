@@ -290,7 +290,7 @@ private fun DashboardHeader(
             .fillMaxWidth()
             .height(140.dp + statusBarHeight)
     ) {
-        // Gradient background - use brighter colors in dark mode
+        // Gradient background - use Dracula colors for dark mode from centralized theme
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -298,8 +298,8 @@ private fun DashboardHeader(
                     brush = Brush.horizontalGradient(
                         colors = if (isDarkTheme) {
                             listOf(
-                                Color(0xFF6B4EFF), // Brighter purple for dark mode
-                                Color(0xFF9C27B0)  // Brighter magenta for dark mode
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.surfaceVariant
                             )
                         } else {
                             listOf(
@@ -311,16 +311,23 @@ private fun DashboardHeader(
                 )
         )
 
-        // Subtle pattern overlay
+        // Subtle pattern overlay with accent color
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     brush = Brush.radialGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.15f),
-                            Color.Transparent
-                        )
+                        colors = if (isDarkTheme) {
+                            listOf(
+                                MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                Color.Transparent
+                            )
+                        } else {
+                            listOf(
+                                Color.White.copy(alpha = 0.15f),
+                                Color.Transparent
+                            )
+                        }
                     )
                 )
         )
@@ -345,13 +352,21 @@ private fun DashboardHeader(
                         text = stringResource(R.string.welcome_back),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = if (isDarkTheme) {
+                            MaterialTheme.colorScheme.onBackground
+                        } else {
+                            Color.White
+                        }
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = stringResource(R.string.dashboard),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = if (isDarkTheme) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            Color.White.copy(alpha = 0.85f)
+                        }
                     )
                 }
 
@@ -359,14 +374,22 @@ private fun DashboardHeader(
                 Surface(
                     onClick = onProfileClick,
                     shape = RoundedCornerShape(12.dp),
-                    color = Color.White.copy(alpha = 0.15f),
+                    color = if (isDarkTheme) {
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                    } else {
+                        Color.White.copy(alpha = 0.15f)
+                    },
                     modifier = Modifier.size(44.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = stringResource(R.string.profile),
-                            tint = Color.White,
+                            tint = if (isDarkTheme) {
+                                MaterialTheme.colorScheme.secondary // Dracula cyan
+                            } else {
+                                Color.White
+                            },
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -383,7 +406,11 @@ private fun DashboardHeader(
                 Surface(
                     onClick = onStreakClick,
                     shape = RoundedCornerShape(20.dp),
-                    color = Color.White.copy(alpha = 0.2f),
+                    color = if (isDarkTheme) {
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                    } else {
+                        Color.White.copy(alpha = 0.2f)
+                    },
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(
@@ -394,7 +421,11 @@ private fun DashboardHeader(
                         Icon(
                             imageVector = Icons.Default.Bolt,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = if (isDarkTheme) {
+                                MaterialTheme.colorScheme.tertiary // Dracula orange
+                            } else {
+                                Color.White
+                            },
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -402,7 +433,11 @@ private fun DashboardHeader(
                             text = stringResource(R.string.study_streak),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Medium,
-                            color = Color.White
+                            color = if (isDarkTheme) {
+                                MaterialTheme.colorScheme.onBackground
+                            } else {
+                                Color.White
+                            }
                         )
                     }
                 }
@@ -410,7 +445,11 @@ private fun DashboardHeader(
                 Surface(
                     onClick = onAcademicClick,
                     shape = RoundedCornerShape(20.dp),
-                    color = Color.White.copy(alpha = 0.2f),
+                    color = if (isDarkTheme) {
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                    } else {
+                        Color.White.copy(alpha = 0.2f)
+                    },
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(
@@ -421,7 +460,11 @@ private fun DashboardHeader(
                         Icon(
                             imageVector = Icons.Default.School,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = if (isDarkTheme) {
+                                MaterialTheme.colorScheme.secondary // Dracula cyan
+                            } else {
+                                Color.White
+                            },
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -429,7 +472,11 @@ private fun DashboardHeader(
                             text = stringResource(R.string.academic),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Medium,
-                            color = Color.White
+                            color = if (isDarkTheme) {
+                                MaterialTheme.colorScheme.onBackground
+                            } else {
+                                Color.White
+                            }
                         )
                     }
                 }

@@ -1252,19 +1252,36 @@ private fun ChapterItem(
     var showIgnoreDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
 
-    // Colorful chapter colors based on index
-    val chapterColors = listOf(
-        Color(0xFF6366F1), // Indigo
-        Color(0xFF8B5CF6), // Violet
-        Color(0xFFEC4899), // Pink
-        Color(0xFFF97316), // Orange
-        Color(0xFF14B8A6), // Teal
-        Color(0xFF22C55E), // Green
-        Color(0xFF3B82F6), // Blue
-        Color(0xFFA855F7), // Purple
-        Color(0xFFEF4444), // Red
-        Color(0xFF06B6D4)  // Cyan
-    )
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+
+    // Colorful chapter colors - use Dracula colors for dark mode
+    val chapterColors = if (isDarkTheme) {
+        listOf(
+            MaterialTheme.colorScheme.primary,      // Dracula Purple
+            MaterialTheme.colorScheme.secondary,    // Dracula Cyan
+            MaterialTheme.colorScheme.tertiary,     // Dracula Orange
+            StudyEngineTheme.extendedColors.success, // Dracula Green
+            StudyEngineTheme.extendedColors.priorityHigh, // Dracula Red
+            StudyEngineTheme.extendedColors.draculaPink,
+            StudyEngineTheme.extendedColors.draculaYellow,
+            StudyEngineTheme.extendedColors.info,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+            MaterialTheme.colorScheme.secondary.copy(alpha = 0.8f)
+        )
+    } else {
+        listOf(
+            Color(0xFF6366F1), // Indigo
+            Color(0xFF8B5CF6), // Violet
+            Color(0xFFEC4899), // Pink
+            Color(0xFFF97316), // Orange
+            Color(0xFF14B8A6), // Teal
+            Color(0xFF22C55E), // Green
+            Color(0xFF3B82F6), // Blue
+            Color(0xFFA855F7), // Purple
+            Color(0xFFEF4444), // Red
+            Color(0xFF06B6D4)  // Cyan
+        )
+    }
     val chapterColor = chapterColors[index % chapterColors.size]
 
     Card(

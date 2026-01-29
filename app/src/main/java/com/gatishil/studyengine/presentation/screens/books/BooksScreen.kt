@@ -715,16 +715,31 @@ private fun StatusBadge(status: StudyPlanStatus) {
 
 @Composable
 private fun getBookColor(subject: String): Color {
-    val colors = listOf(
-        Color(0xFF6366F1), // Indigo
-        Color(0xFF8B5CF6), // Violet
-        Color(0xFFEC4899), // Pink
-        Color(0xFFF59E0B), // Amber
-        Color(0xFF10B981), // Emerald
-        Color(0xFF3B82F6), // Blue
-        Color(0xFFEF4444), // Red
-        Color(0xFF14B8A6)  // Teal
-    )
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+    val colors = if (isDarkTheme) {
+        // Dracula theme colors for dark mode
+        listOf(
+            MaterialTheme.colorScheme.primary,      // Purple
+            MaterialTheme.colorScheme.secondary,    // Cyan
+            MaterialTheme.colorScheme.tertiary,     // Orange
+            StudyEngineTheme.extendedColors.success, // Green
+            StudyEngineTheme.extendedColors.priorityHigh, // Red
+            StudyEngineTheme.extendedColors.info,   // Cyan variant
+            StudyEngineTheme.extendedColors.draculaPink,
+            StudyEngineTheme.extendedColors.draculaYellow
+        )
+    } else {
+        listOf(
+            Color(0xFF6366F1), // Indigo
+            Color(0xFF8B5CF6), // Violet
+            Color(0xFFEC4899), // Pink
+            Color(0xFFF59E0B), // Amber
+            Color(0xFF10B981), // Emerald
+            Color(0xFF3B82F6), // Blue
+            Color(0xFFEF4444), // Red
+            Color(0xFF14B8A6)  // Teal
+        )
+    }
     return colors[subject.hashCode().mod(colors.size).let { if (it < 0) it + colors.size else it }]
 }
 

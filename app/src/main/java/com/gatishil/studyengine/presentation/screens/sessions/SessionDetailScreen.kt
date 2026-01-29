@@ -202,27 +202,26 @@ private fun SessionHeroCard(
 ) {
     val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
 
-    // In dark mode, we want to use darker versions of the status colors for better contrast
-    // so that white text remains visible
+    // In dark mode, use Dracula theme colors with slight tinting based on status
     val backgroundStartColor = if (isDarkTheme) {
-        // Darken the pastel colors for dark mode backgrounds
+        // Use Dracula background with subtle status tinting
         when (statusColor) {
-            StudyEngineTheme.extendedColors.sessionCompleted -> Color(0xFF1B5E20) // Dark green
-            StudyEngineTheme.extendedColors.sessionInProgress -> Color(0xFFE65100) // Dark orange
-            StudyEngineTheme.extendedColors.sessionMissed -> Color(0xFFB71C1C) // Dark red
-            StudyEngineTheme.extendedColors.sessionCancelled -> Color(0xFF424242) // Dark grey
-            else -> Color(0xFF0D47A1) // Dark blue for planned
+            StudyEngineTheme.extendedColors.sessionCompleted -> MaterialTheme.colorScheme.background
+            StudyEngineTheme.extendedColors.sessionInProgress -> MaterialTheme.colorScheme.background
+            StudyEngineTheme.extendedColors.sessionMissed -> MaterialTheme.colorScheme.background
+            StudyEngineTheme.extendedColors.sessionCancelled -> MaterialTheme.colorScheme.background
+            else -> MaterialTheme.colorScheme.background
         }
     } else {
         statusColor
     }
 
-    val backgroundEndColor = backgroundStartColor.copy(alpha = 0.7f)
+    val backgroundEndColor = if (isDarkTheme) MaterialTheme.colorScheme.surfaceVariant else backgroundStartColor.copy(alpha = 0.7f)
 
-    // Always use white content on these backgrounds
-    val contentColor = Color.White
-    val contentColorSecondary = Color.White.copy(alpha = 0.85f)
-    val badgeColor = Color.White.copy(alpha = 0.2f)
+    // In dark mode, use theme colors; in light mode, use white
+    val contentColor = if (isDarkTheme) MaterialTheme.colorScheme.onBackground else Color.White
+    val contentColorSecondary = if (isDarkTheme) MaterialTheme.colorScheme.onSurfaceVariant else Color.White.copy(alpha = 0.85f)
+    val badgeColor = if (isDarkTheme) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.2f)
 
     Card(
         modifier = Modifier
