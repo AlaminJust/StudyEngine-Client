@@ -32,6 +32,7 @@ import com.gatishil.studyengine.domain.model.ExamQuestion
 import com.gatishil.studyengine.domain.model.QuestionDifficulty
 import com.gatishil.studyengine.domain.model.QuestionOption
 import com.gatishil.studyengine.presentation.common.components.LoadingScreen
+import com.gatishil.studyengine.presentation.common.components.LatexText
 import com.gatishil.studyengine.ui.theme.StudyEngineTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -368,10 +369,9 @@ private fun QuestionContent(
             )
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
+                LatexText(
                     text = question.questionText,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -508,9 +508,8 @@ private fun OptionCard(
             Spacer(modifier = Modifier.width(16.dp))
 
             // Option text
-            Text(
+            LatexText(
                 text = option.optionText,
-                style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
 

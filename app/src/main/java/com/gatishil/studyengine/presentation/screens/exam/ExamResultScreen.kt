@@ -30,6 +30,7 @@ import com.gatishil.studyengine.domain.model.AnswerOptionDetail
 import com.gatishil.studyengine.domain.model.ExamAnswerResult
 import com.gatishil.studyengine.domain.model.ExamResult
 import com.gatishil.studyengine.presentation.common.components.LoadingScreen
+import com.gatishil.studyengine.presentation.common.components.LatexText
 import com.gatishil.studyengine.ui.theme.StudyEngineTheme
 import java.time.format.DateTimeFormatter
 
@@ -516,10 +517,9 @@ private fun AnswerResultCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             // Question text
-            Text(
+            LatexText(
                 text = answerResult.questionText,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -559,10 +559,9 @@ private fun AnswerResultCard(
                             )
                         }
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
+                        LatexText(
                             text = explanation,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
@@ -645,11 +644,9 @@ private fun AnswerOptionItem(
             Spacer(modifier = Modifier.width(12.dp))
 
             // Option text
-            Text(
+            LatexText(
                 text = option.optionText,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f),
-                color = MaterialTheme.colorScheme.onSurface
+                modifier = Modifier.weight(1f)
             )
 
             // Status icon
