@@ -3,6 +3,7 @@ package com.gatishil.studyengine.di
 import com.gatishil.studyengine.data.repository.AuthRepositoryImpl
 import com.gatishil.studyengine.data.repository.BookRepositoryImpl
 import com.gatishil.studyengine.data.repository.ExamRepositoryImpl
+import com.gatishil.studyengine.data.repository.LiveExamRepositoryImpl
 import com.gatishil.studyengine.data.repository.NotificationRepositoryImpl
 import com.gatishil.studyengine.data.repository.ProfileRepositoryImpl
 import com.gatishil.studyengine.data.repository.ReminderRepositoryImpl
@@ -11,6 +12,7 @@ import com.gatishil.studyengine.data.repository.UserRepositoryImpl
 import com.gatishil.studyengine.domain.repository.AuthRepository
 import com.gatishil.studyengine.domain.repository.BookRepository
 import com.gatishil.studyengine.domain.repository.ExamRepository
+import com.gatishil.studyengine.domain.repository.LiveExamRepository
 import com.gatishil.studyengine.domain.repository.NotificationRepository
 import com.gatishil.studyengine.domain.repository.ProfileRepository
 import com.gatishil.studyengine.domain.repository.ReminderRepository
@@ -73,5 +75,11 @@ abstract class RepositoryModule {
     abstract fun bindExamRepository(
         examRepositoryImpl: ExamRepositoryImpl
     ): ExamRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLiveExamRepository(
+        liveExamRepositoryImpl: LiveExamRepositoryImpl
+    ): LiveExamRepository
 }
 

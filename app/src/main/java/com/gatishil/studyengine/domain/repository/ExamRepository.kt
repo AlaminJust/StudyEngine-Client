@@ -8,6 +8,18 @@ import com.gatishil.studyengine.domain.model.*
  */
 interface ExamRepository {
 
+    // ==================== Tag Operations ====================
+
+    /**
+     * Get all available tags
+     */
+    suspend fun getTags(): Resource<List<Tag>>
+
+    /**
+     * Get tags by category IDs
+     */
+    suspend fun getTagsByCategories(categoryIds: List<String>): Resource<List<Tag>>
+
     // ==================== Category Operations ====================
 
     /**

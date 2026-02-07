@@ -3,6 +3,32 @@ package com.gatishil.studyengine.data.remote.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// ==================== Tag DTOs ====================
+
+@Serializable
+data class TagListResponseDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("categoryId")
+    val categoryId: String? = null,
+    @SerialName("name")
+    val name: String,
+    @SerialName("usageCount")
+    val usageCount: Int,
+    @SerialName("isActive")
+    val isActive: Boolean
+)
+
+@Serializable
+data class TagSearchResponseDto(
+    @SerialName("id")
+    val id: String,
+    @SerialName("categoryId")
+    val categoryId: String? = null,
+    @SerialName("name")
+    val name: String
+)
+
 // ==================== Category DTOs ====================
 
 @Serializable
@@ -260,7 +286,9 @@ data class StartExamRequestDto(
     @SerialName("DifficultyFilter")
     val difficultyFilter: String? = null,
     @SerialName("TimeLimitMinutes")
-    val timeLimitMinutes: Int? = null
+    val timeLimitMinutes: Int? = null,
+    @SerialName("TagIds")
+    val tagIds: List<String>? = null
 )
 
 @Serializable

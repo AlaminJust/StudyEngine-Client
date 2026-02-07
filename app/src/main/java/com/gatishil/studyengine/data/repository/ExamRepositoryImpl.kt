@@ -17,6 +17,48 @@ class ExamRepositoryImpl @Inject constructor(
     private val api: StudyEngineApi
 ) : ExamRepository {
 
+    // ==================== Tag Operations ====================
+
+    override suspend fun getTags(): Resource<List<Tag>> {
+        return try {
+            val response = api.getTags()
+
+            if (response.isSuccessful) {
+                val tags = response.body()?.map { it.toDomain() } ?: emptyList()
+                Resource.success(tags)
+            } else {
+                Log.e(TAG, "Failed to get tags: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get tags: ${response.code()}"),
+                    "Failed to load tags"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting tags", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun getTagsByCategories(categoryIds: List<String>): Resource<List<Tag>> {
+        return try {
+            val response = api.getTagsByCategories(categoryIds)
+
+            if (response.isSuccessful) {
+                val tags = response.body()?.map { it.toDomain() } ?: emptyList()
+                Resource.success(tags)
+            } else {
+                Log.e(TAG, "Failed to get tags by categories: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get tags by categories: ${response.code()}"),
+                    "Failed to load tags"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting tags by categories", e)
+            Resource.error(e, e.message)
+        }
+    }
+
     // ==================== Category Operations ====================
 
     override suspend fun getCategories(includeInactive: Boolean): Resource<List<Category>> {

@@ -10,9 +10,12 @@ import com.gatishil.studyengine.domain.model.ExamAttemptSummary
 import com.gatishil.studyengine.domain.model.PublicProfileCard
 import com.gatishil.studyengine.domain.model.QuickStats
 import com.gatishil.studyengine.domain.model.StudySession
+import com.gatishil.studyengine.domain.model.LiveExam
+import com.gatishil.studyengine.domain.model.LiveExamStatus
 import com.gatishil.studyengine.domain.model.Subject
 import com.gatishil.studyengine.domain.repository.BookRepository
 import com.gatishil.studyengine.domain.repository.ExamRepository
+import com.gatishil.studyengine.domain.repository.LiveExamRepository
 import com.gatishil.studyengine.domain.repository.ProfileRepository
 import com.gatishil.studyengine.domain.repository.ReminderRepository
 import com.gatishil.studyengine.domain.repository.SessionRepository
@@ -36,6 +39,8 @@ data class DashboardUiState(
     val recentExamAttempts: List<ExamAttemptSummary> = emptyList(),
     val popularSubjects: List<Subject> = emptyList(),
     val hasInProgressExam: Boolean = false,
+    // Live exam data
+    val liveExams: List<LiveExam> = emptyList(),
     val error: String? = null
 )
 
@@ -46,6 +51,7 @@ class DashboardViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val reminderRepository: ReminderRepository,
     private val examRepository: ExamRepository,
+    private val liveExamRepository: LiveExamRepository,
     private val api: StudyEngineApi
 ) : ViewModel() {
 
@@ -161,6 +167,25 @@ class DashboardViewModel @Inject constructor(
             loadRelatedProfiles()
             loadUpcomingReminders()
             loadExamData()
+            loadLiveExams()
+        }
+    }
+
+    private fun loadLiveExams() {
+        viewModelScope.launch {
+            try {
+                val result = liveExamRepository.getLiveExams()
+                if (result is Resource.Success) {
+                    // Show active and scheduled exams, sorted: active first, then by start time
+                    val relevantExams = result.data
+                        .filter { it.status == LiveExamStatus.ACTIVE || it.status == LiveExamStatus.SCHEDULED }
+                        .sortedWith(compareBy<LiveExam> { it.status != LiveExamStatus.ACTIVE }.thenBy { it.scheduledStartTime })
+                        .take(3)
+                    _uiState.update { it.copy(liveExams = relevantExams) }
+                }
+            } catch (e: Exception) {
+                // Silently fail - not critical
+            }
         }
     }
 
@@ -274,6 +299,7 @@ class DashboardViewModel @Inject constructor(
             loadRelatedProfiles()
             loadUpcomingReminders()
             loadExamData()
+            loadLiveExams()
 
             _uiState.update { it.copy(isRefreshing = false) }
         }

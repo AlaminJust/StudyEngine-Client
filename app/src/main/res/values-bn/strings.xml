@@ -654,6 +654,33 @@
     <string name="exam_select_chapters_hint">সব অধ্যায় অন্তর্ভুক্ত করতে খালি রাখুন, অথবা নির্দিষ্ট অধ্যায় নির্বাচন করুন</string>
     <string name="exam_all_chapters">সব %1$d অধ্যায়</string>
     <string name="exam_chapters_selected">%2$d এর মধ্যে %1$d অধ্যায় নির্বাচিত</string>
+
+    <!-- Tag Selection -->
+    <string name="exam_tags_label">ট্যাগ দিয়ে ফিল্টার করুন (ঐচ্ছিক)</string>
+    <string name="exam_tags_hint">বিষয় অনুযায়ী প্রশ্ন ফিল্টার করতে ট্যাগ নির্বাচন করুন</string>
+    <string name="exam_tags_selected">%1$d ট্যাগ নির্বাচিত</string>
+    <string name="exam_tag_remove">%1$s ট্যাগ সরান</string>
+    <string name="exam_summary_tags">ট্যাগ</string>
+
+    <!-- Live Exams -->
+    <string name="live_exams">লাইভ পরীক্ষা</string>
+    <string name="live_exam_active">লাইভ চলছে</string>
+    <string name="live_exam_scheduled">আসন্ন</string>
+    <string name="live_exam_completed">শেষ হয়েছে</string>
+    <string name="live_exam_cancelled">বাতিল</string>
+    <string name="live_exam_join">পরীক্ষায় যোগ দিন</string>
+    <string name="live_exam_joined">ইতিমধ্যে যোগ দেওয়া হয়েছে</string>
+    <string name="live_exam_starts_in">শুরু হবে %1$s পরে</string>
+    <string name="live_exam_ends_in">শেষ হবে %1$s পরে</string>
+    <string name="live_exam_time_range">%1$s - %2$s</string>
+    <string name="live_exam_questions">%1$d টি প্রশ্ন</string>
+    <string name="live_exam_time_limit">%1$d মিনিট</string>
+    <string name="live_exam_no_time_limit">সময়সীমা নেই</string>
+    <string name="live_exam_none_available">কোন লাইভ পরীক্ষা নেই</string>
+    <string name="live_exam_none_available_desc">নির্ধারিত হলে লাইভ পরীক্ষা এখানে দেখা যাবে</string>
+    <string name="live_exam_join_confirm_title">লাইভ পরীক্ষায় যোগ দিতে চান?</string>
+    <string name="live_exam_join_confirm_message">আপনি \"%1$s\" এ যোগ দিতে যাচ্ছেন। শুরু করলে সময়সীমার মধ্যে পরীক্ষা শেষ করতে হবে।</string>
+    <string name="live_exam_view_all">সব দেখুন</string>
 </resources>
 
 

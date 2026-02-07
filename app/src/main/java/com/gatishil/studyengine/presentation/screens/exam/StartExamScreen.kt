@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gatishil.studyengine.R
 import com.gatishil.studyengine.domain.model.QuestionDifficulty
+import com.gatishil.studyengine.domain.model.Tag
 import com.gatishil.studyengine.presentation.common.components.LoadingScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -129,6 +130,21 @@ fun StartExamScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
+                // Tag Selection Section (if tags are available)
+                if (uiState.availableTags.isNotEmpty()) {
+                    TagSelector(
+                        availableTags = uiState.availableTags,
+                        selectedTagIds = uiState.selectedTagIds,
+                        isExpanded = uiState.isTagSectionExpanded,
+                        onToggleExpanded = { viewModel.toggleTagSectionExpanded() },
+                        onToggleTag = { tagId -> viewModel.toggleTagSelection(tagId) },
+                        onClearAll = { viewModel.clearAllTags() },
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
                 // Configuration Section
                 Text(
                     text = stringResource(R.string.exam_configure),
@@ -172,6 +188,7 @@ fun StartExamScreen(
                     questionCount = uiState.questionCount,
                     difficulty = uiState.selectedDifficulty,
                     timeLimit = uiState.timeLimitMinutes,
+                    selectedTagCount = uiState.selectedTagIds.size,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
 
@@ -582,6 +599,7 @@ private fun ExamSummaryCard(
     questionCount: Int,
     difficulty: QuestionDifficulty?,
     timeLimit: Int?,
+    selectedTagCount: Int = 0,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -628,6 +646,14 @@ private fun ExamSummaryCard(
                            ?: stringResource(R.string.exam_time_no_limit),
                     label = stringResource(R.string.exam_summary_time)
                 )
+
+                if (selectedTagCount > 0) {
+                    SummaryItem(
+                        icon = Icons.Outlined.Label,
+                        value = selectedTagCount.toString(),
+                        label = stringResource(R.string.exam_summary_tags)
+                    )
+                }
             }
         }
     }
@@ -657,6 +683,197 @@ private fun SummaryItem(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TagSelector(
+    availableTags: List<Tag>,
+    selectedTagIds: Set<String>,
+    isExpanded: Boolean,
+    onToggleExpanded: () -> Unit,
+    onToggleTag: (String) -> Unit,
+    onClearAll: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column {
+            // Header (clickable to expand)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onToggleExpanded)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Label,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.exam_tags_label),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = if (selectedTagIds.isEmpty()) {
+                            stringResource(R.string.exam_tags_hint)
+                        } else {
+                            stringResource(R.string.exam_tags_selected, selectedTagIds.size)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Selected tags preview (when collapsed and tags are selected)
+            if (!isExpanded && selectedTagIds.isNotEmpty()) {
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    availableTags.filter { it.id in selectedTagIds }.forEach { tag ->
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = tag.name,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = stringResource(R.string.exam_tag_remove, tag.name),
+                                    modifier = Modifier
+                                        .size(14.dp)
+                                        .clickable { onToggleTag(tag.id) },
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Expanded tag list
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    // Clear All button
+                    if (selectedTagIds.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(onClick = onClearAll) {
+                                Text(stringResource(R.string.clear))
+                            }
+                        }
+                    }
+
+                    // Tag chips in flow layout
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        availableTags.forEach { tag ->
+                            val isSelected = tag.id in selectedTagIds
+                            TagChip(
+                                tag = tag,
+                                isSelected = isSelected,
+                                onClick = { onToggleTag(tag.id) }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TagChip(
+    tag: Tag,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val tagColor = MaterialTheme.colorScheme.tertiary
+
+    Surface(
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick)
+            .then(
+                if (isSelected) Modifier.border(2.dp, tagColor, RoundedCornerShape(20.dp))
+                else Modifier
+            ),
+        color = if (isSelected) tagColor.copy(alpha = 0.15f)
+                else MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = tagColor
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+            Text(
+                text = tag.name,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (isSelected) tagColor else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (tag.usageCount > 0) {
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "(${tag.usageCount})",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
+        }
     }
 }
 

@@ -49,6 +49,25 @@ object ExamMapper {
         return afterTime.length > 8 && afterTime.substring(8).contains("-")
     }
 
+    // Tag mapping
+    fun TagListResponseDto.toDomain(): Tag {
+        return Tag(
+            id = id,
+            categoryId = categoryId,
+            name = name,
+            usageCount = usageCount,
+            isActive = isActive
+        )
+    }
+
+    fun TagSearchResponseDto.toDomain(): Tag {
+        return Tag(
+            id = id,
+            categoryId = categoryId,
+            name = name
+        )
+    }
+
     // Category mapping
     fun CategoryListDto.toDomain(): Category {
         return Category(
@@ -228,7 +247,8 @@ object ExamMapper {
             subjects = subjects.map { it.toDto() },
             questionCount = questionCount,
             difficultyFilter = difficultyFilter?.name,
-            timeLimitMinutes = timeLimitMinutes
+            timeLimitMinutes = timeLimitMinutes,
+            tagIds = tagIds
         )
     }
 

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.domain.model.*
 import com.gatishil.studyengine.domain.repository.ExamRepository
+import com.gatishil.studyengine.domain.repository.LiveExamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,12 +20,17 @@ data class ExamListUiState(
     val subjects: List<Subject> = emptyList(),
     val recentAttempts: List<ExamAttemptSummary> = emptyList(),
     val currentExam: ExamQuestionSet? = null,
+    val liveExams: List<LiveExam> = emptyList(),
+    val isJoiningLiveExam: Boolean = false,
+    val joinedExam: ExamQuestionSet? = null,
+    val joinError: String? = null,
     val error: String? = null
 )
 
 @HiltViewModel
 class ExamListViewModel @Inject constructor(
-    private val examRepository: ExamRepository
+    private val examRepository: ExamRepository,
+    private val liveExamRepository: LiveExamRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExamListUiState())
@@ -50,8 +56,16 @@ class ExamListViewModel @Inject constructor(
             // Check for in-progress exam
             val currentExamResult = examRepository.getCurrentExam()
 
+            // Load live exams
+            val liveExamsResult = liveExamRepository.getLiveExams()
+
             val categories = categoriesResult.getOrNull() ?: emptyList()
             val subjects = subjectsResult.getOrNull() ?: emptyList()
+
+            // Show active and scheduled live exams
+            val liveExams = (liveExamsResult.getOrNull() ?: emptyList())
+                .filter { it.status == LiveExamStatus.ACTIVE || it.status == LiveExamStatus.SCHEDULED }
+                .sortedWith(compareBy<LiveExam> { it.status != LiveExamStatus.ACTIVE }.thenBy { it.scheduledStartTime })
 
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
@@ -59,6 +73,7 @@ class ExamListViewModel @Inject constructor(
                 subjects = subjects,
                 recentAttempts = (historyResult as? Resource.Success)?.data?.items ?: emptyList(),
                 currentExam = currentExamResult.getOrNull(),
+                liveExams = liveExams,
                 error = when {
                     categoriesResult is Resource.Error -> categoriesResult.message ?: categoriesResult.exception.message
                     subjectsResult is Resource.Error -> subjectsResult.message ?: subjectsResult.exception.message
@@ -66,6 +81,36 @@ class ExamListViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    fun joinLiveExam(liveExamId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isJoiningLiveExam = true, joinError = null)
+
+            when (val result = liveExamRepository.joinLiveExam(liveExamId)) {
+                is Resource.Success -> {
+                    _uiState.value = _uiState.value.copy(
+                        isJoiningLiveExam = false,
+                        joinedExam = result.data
+                    )
+                }
+                is Resource.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        isJoiningLiveExam = false,
+                        joinError = result.message ?: "Failed to join live exam"
+                    )
+                }
+                else -> {}
+            }
+        }
+    }
+
+    fun clearJoinedExam() {
+        _uiState.value = _uiState.value.copy(joinedExam = null)
+    }
+
+    fun clearJoinError() {
+        _uiState.value = _uiState.value.copy(joinError = null)
     }
 
     fun refresh() {

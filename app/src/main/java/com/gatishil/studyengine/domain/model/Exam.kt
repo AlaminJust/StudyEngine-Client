@@ -123,6 +123,17 @@ data class SubjectChapter(
 )
 
 /**
+ * Tag for filtering questions in exams
+ */
+data class Tag(
+    val id: String,
+    val categoryId: String? = null,
+    val name: String,
+    val usageCount: Int = 0,
+    val isActive: Boolean = true
+)
+
+/**
  * Question option for exam
  */
 data class QuestionOption(
@@ -266,7 +277,8 @@ data class StartExamRequest(
     val subjects: List<ExamSubjectSelection>,
     val questionCount: Int = 10,
     val difficultyFilter: QuestionDifficulty? = null,
-    val timeLimitMinutes: Int? = null
+    val timeLimitMinutes: Int? = null,
+    val tagIds: List<String>? = null
 )
 
 /**

@@ -29,12 +29,18 @@ data class StartExamUiState(
     val selectedDifficulty: QuestionDifficulty? = null,
     val timeLimitMinutes: Int? = null,
     val totalAvailableQuestionCount: Int = 0,
+    val availableTags: List<Tag> = emptyList(),
+    val selectedTagIds: Set<String> = emptySet(),
+    val isTagSectionExpanded: Boolean = false,
     val error: String? = null,
     val examStarted: ExamQuestionSet? = null
 ) {
     // Convenience property for compatibility
     val subjects: List<Subject>
         get() = subjectsWithChapters.map { it.subject }
+
+    val selectedTags: List<Tag>
+        get() = availableTags.filter { it.id in selectedTagIds }
 }
 
 @HiltViewModel
@@ -75,6 +81,38 @@ class StartExamViewModel @Inject constructor(
 
     init {
         loadSubjectsWithChapters()
+    }
+
+    private fun loadTagsByCategories(categoryIds: List<String>) {
+        viewModelScope.launch {
+            if (categoryIds.isEmpty()) {
+                // No categories selected, show all tags
+                when (val result = examRepository.getTags()) {
+                    is Resource.Success -> {
+                        _uiState.value = _uiState.value.copy(
+                            availableTags = result.data.filter { it.isActive }
+                        )
+                    }
+                    is Resource.Error -> {
+                        // Tags are optional, don't show error
+                    }
+                    is Resource.Loading -> { /* Skip */ }
+                }
+            } else {
+                // Filter tags by selected categories
+                when (val result = examRepository.getTagsByCategories(categoryIds)) {
+                    is Resource.Success -> {
+                        _uiState.value = _uiState.value.copy(
+                            availableTags = result.data.filter { it.isActive }
+                        )
+                    }
+                    is Resource.Error -> {
+                        // Tags are optional, don't show error
+                    }
+                    is Resource.Loading -> { /* Skip */ }
+                }
+            }
+        }
     }
 
     private fun loadSubjectsWithChapters() {
@@ -158,6 +196,12 @@ class StartExamViewModel @Inject constructor(
                 totalAvailableQuestionCount = totalQuestions,
                 questionCount = minOf(10, maxOf(1, totalQuestions))
             )
+
+            // Load tags based on selected subjects' categories
+            val categoryIds = subjectsWithChaptersList
+                .mapNotNull { it.subject.categoryId }
+                .distinct()
+            loadTagsByCategories(categoryIds)
         }
     }
 
@@ -252,6 +296,26 @@ class StartExamViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(timeLimitMinutes = minutes)
     }
 
+    fun toggleTagSectionExpanded() {
+        _uiState.value = _uiState.value.copy(
+            isTagSectionExpanded = !_uiState.value.isTagSectionExpanded
+        )
+    }
+
+    fun toggleTagSelection(tagId: String) {
+        val newSelection = _uiState.value.selectedTagIds.toMutableSet()
+        if (newSelection.contains(tagId)) {
+            newSelection.remove(tagId)
+        } else {
+            newSelection.add(tagId)
+        }
+        _uiState.value = _uiState.value.copy(selectedTagIds = newSelection)
+    }
+
+    fun clearAllTags() {
+        _uiState.value = _uiState.value.copy(selectedTagIds = emptySet())
+    }
+
     fun startExam() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isStarting = true, error = null)
@@ -264,11 +328,14 @@ class StartExamViewModel @Inject constructor(
                 )
             }
 
+            val selectedTagIds = _uiState.value.selectedTagIds.toList()
+
             val request = StartExamRequest(
                 subjects = subjectSelections,
                 questionCount = _uiState.value.questionCount,
                 difficultyFilter = _uiState.value.selectedDifficulty,
-                timeLimitMinutes = _uiState.value.timeLimitMinutes
+                timeLimitMinutes = _uiState.value.timeLimitMinutes,
+                tagIds = if (selectedTagIds.isEmpty()) null else selectedTagIds
             )
 
             val result = examRepository.startExam(request)

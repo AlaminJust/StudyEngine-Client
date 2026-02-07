@@ -652,4 +652,31 @@
     <string name="exam_select_chapters_hint">Leave empty to include all chapters, or select specific chapters</string>
     <string name="exam_all_chapters">All %1$d chapters</string>
     <string name="exam_chapters_selected">%1$d of %2$d chapters selected</string>
+
+    <!-- Tag Selection -->
+    <string name="exam_tags_label">Filter by Tags (Optional)</string>
+    <string name="exam_tags_hint">Select tags to filter questions by topic</string>
+    <string name="exam_tags_selected">%1$d tags selected</string>
+    <string name="exam_tag_remove">Remove %1$s tag</string>
+    <string name="exam_summary_tags">Tags</string>
+
+    <!-- Live Exams -->
+    <string name="live_exams">Live Exams</string>
+    <string name="live_exam_active">LIVE NOW</string>
+    <string name="live_exam_scheduled">Upcoming</string>
+    <string name="live_exam_completed">Ended</string>
+    <string name="live_exam_cancelled">Cancelled</string>
+    <string name="live_exam_join">Join Exam</string>
+    <string name="live_exam_joined">Already Joined</string>
+    <string name="live_exam_starts_in">Starts in %1$s</string>
+    <string name="live_exam_ends_in">Ends in %1$s</string>
+    <string name="live_exam_time_range">%1$s - %2$s</string>
+    <string name="live_exam_questions">%1$d questions</string>
+    <string name="live_exam_time_limit">%1$d min</string>
+    <string name="live_exam_no_time_limit">No time limit</string>
+    <string name="live_exam_none_available">No live exams available</string>
+    <string name="live_exam_none_available_desc">Live exams will appear here when scheduled</string>
+    <string name="live_exam_join_confirm_title">Join Live Exam?</string>
+    <string name="live_exam_join_confirm_message">You are about to join \"%1$s\". Once started, you must complete the exam within the time limit.</string>
+    <string name="live_exam_view_all">View All</string>
 </resources>

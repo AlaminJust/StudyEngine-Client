@@ -32,6 +32,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.gatishil.studyengine.R
 import com.gatishil.studyengine.domain.model.*
 import com.gatishil.studyengine.presentation.common.components.LoadingScreen
+import com.gatishil.studyengine.ui.theme.StudyEngineTheme
+import java.time.Duration
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +48,56 @@ fun ExamListScreen(
     viewModel: ExamListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showJoinDialog by remember { mutableStateOf<LiveExam?>(null) }
+
+    // Navigate to take exam when live exam is joined
+    LaunchedEffect(uiState.joinedExam) {
+        if (uiState.joinedExam != null) {
+            viewModel.clearJoinedExam()
+            onNavigateToContinueExam()
+        }
+    }
+
+    // Join confirmation dialog
+    showJoinDialog?.let { liveExam ->
+        AlertDialog(
+            onDismissRequest = { showJoinDialog = null },
+            title = { Text(stringResource(R.string.live_exam_join_confirm_title)) },
+            text = {
+                Text(stringResource(R.string.live_exam_join_confirm_message, liveExam.title))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.joinLiveExam(liveExam.id)
+                        showJoinDialog = null
+                    },
+                    enabled = !uiState.isJoiningLiveExam
+                ) {
+                    if (uiState.isJoiningLiveExam) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(stringResource(R.string.live_exam_join))
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showJoinDialog = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    // Join error snackbar
+    uiState.joinError?.let { error ->
+        LaunchedEffect(error) {
+            viewModel.clearJoinError()
+        }
+    }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp)
@@ -75,6 +128,31 @@ fun ExamListScreen(
                             ContinueExamCard(
                                 exam = exam,
                                 onClick = onNavigateToContinueExam,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                        }
+                    }
+
+                    // Live Exams Section
+                    if (uiState.liveExams.isNotEmpty()) {
+                        item {
+                            SectionHeader(
+                                title = stringResource(R.string.live_exams),
+                                icon = Icons.Filled.Sensors
+                            )
+                        }
+
+                        items(uiState.liveExams) { liveExam ->
+                            LiveExamListCard(
+                                liveExam = liveExam,
+                                isJoining = uiState.isJoiningLiveExam,
+                                onJoin = {
+                                    if (liveExam.hasAttempted) {
+                                        onNavigateToContinueExam()
+                                    } else {
+                                        showJoinDialog = liveExam
+                                    }
+                                },
                                 modifier = Modifier.padding(horizontal = 16.dp)
                             )
                         }
@@ -897,6 +975,220 @@ private fun getSubjectIcon(subjectName: String): ImageVector {
         name.contains("computer") -> Icons.Outlined.Computer
         name.contains("economics") -> Icons.Outlined.Analytics
         else -> Icons.Outlined.School
+    }
+}
+
+@Composable
+private fun LiveExamListCard(
+    liveExam: LiveExam,
+    isJoining: Boolean,
+    onJoin: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isActive = liveExam.status == LiveExamStatus.ACTIVE
+    val now = LocalDateTime.now()
+
+    val statusColor = if (isActive) {
+        StudyEngineTheme.extendedColors.success
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
+
+    val timeText = if (isActive) {
+        val remaining = Duration.between(now, liveExam.scheduledEndTime)
+        val minutes = remaining.toMinutes()
+        if (minutes > 60) "${minutes / 60}h ${minutes % 60}m remaining" else "${minutes}m remaining"
+    } else {
+        val until = Duration.between(now, liveExam.scheduledStartTime)
+        val minutes = until.toMinutes()
+        when {
+            minutes < 0 -> ""
+            minutes < 60 -> "Starts in ${minutes}m"
+            minutes < 1440 -> "Starts in ${minutes / 60}h ${minutes % 60}m"
+            else -> "Starts in ${minutes / 1440}d"
+        }
+    }
+
+    val timeFormatter = DateTimeFormatter.ofPattern("MMM dd, hh:mm a")
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isActive) {
+                statusColor.copy(alpha = 0.08f)
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerLow
+            }
+        ),
+        border = if (isActive) {
+            androidx.compose.foundation.BorderStroke(1.dp, statusColor.copy(alpha = 0.3f))
+        } else null
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Top row: status + time remaining
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = statusColor.copy(alpha = 0.15f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (isActive) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(statusColor)
+                            )
+                        }
+                        Text(
+                            text = if (isActive) stringResource(R.string.live_exam_active)
+                            else stringResource(R.string.live_exam_scheduled),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = statusColor
+                        )
+                    }
+                }
+
+                if (timeText.isNotEmpty()) {
+                    Text(
+                        text = timeText,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isActive) statusColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = if (isActive) FontWeight.Medium else FontWeight.Normal
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Title
+            Text(
+                text = liveExam.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            liveExam.description?.let { desc ->
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = desc,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Info chips row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Quiz,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = stringResource(R.string.live_exam_questions, liveExam.questionCount),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                liveExam.timeLimitMinutes?.let { minutes ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Timer,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.live_exam_time_limit, minutes),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Schedule,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = liveExam.scheduledStartTime.format(timeFormatter),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Join button for active exams
+            if (isActive) {
+                Spacer(modifier = Modifier.height(14.dp))
+                Button(
+                    onClick = onJoin,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isJoining,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = statusColor
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    if (isJoining) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.surface
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Icon(
+                        imageVector = if (liveExam.hasAttempted) Icons.Default.PlayArrow else Icons.Default.Login,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (liveExam.hasAttempted) stringResource(R.string.exam_in_progress)
+                        else stringResource(R.string.live_exam_join),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
     }
 }
 

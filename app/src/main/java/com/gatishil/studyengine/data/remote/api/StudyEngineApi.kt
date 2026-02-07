@@ -534,6 +534,24 @@ interface StudyEngineApi {
         @Path("id") id: String
     ): Response<Unit>
 
+    // ==================== Tag Endpoints ====================
+
+    @GET("tags")
+    suspend fun getTags(
+        @Query("includeInactive") includeInactive: Boolean = false
+    ): Response<List<TagListResponseDto>>
+
+    @GET("tags/search")
+    suspend fun searchTags(
+        @Query("q") query: String
+    ): Response<List<TagSearchResponseDto>>
+
+    @GET("tags/by-categories")
+    suspend fun getTagsByCategories(
+        @Query("categoryIds") categoryIds: List<String>,
+        @Query("includeInactive") includeInactive: Boolean = false
+    ): Response<List<TagListResponseDto>>
+
     // ==================== Category Endpoints ====================
 
     @GET("categories")
@@ -632,5 +650,20 @@ interface StudyEngineApi {
     suspend fun cancelExam(
         @Path("examAttemptId") examAttemptId: String
     ): Response<Unit>
+
+    // ==================== Live Exam Endpoints ====================
+
+    @GET("live-exams")
+    suspend fun getLiveExams(): Response<List<LiveExamPublicResponseDto>>
+
+    @GET("live-exams/{id}")
+    suspend fun getLiveExamById(
+        @Path("id") id: String
+    ): Response<LiveExamPublicResponseDto>
+
+    @POST("live-exams/{id}/join")
+    suspend fun joinLiveExam(
+        @Path("id") id: String
+    ): Response<ExamQuestionSetDto>
 }
 

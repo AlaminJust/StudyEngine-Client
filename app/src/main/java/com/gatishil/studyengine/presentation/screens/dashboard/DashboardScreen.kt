@@ -31,8 +31,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gatishil.studyengine.core.util.NotificationPermissionHelper
 import com.gatishil.studyengine.domain.model.Book
+import com.gatishil.studyengine.domain.model.LiveExam
+import com.gatishil.studyengine.domain.model.LiveExamStatus
 import com.gatishil.studyengine.domain.model.StudySession
 import com.gatishil.studyengine.domain.model.StudySessionStatus
+import java.time.Duration
+import java.time.LocalDateTime
 import com.gatishil.studyengine.presentation.common.components.*
 import com.gatishil.studyengine.ui.theme.StudyEngineTheme
 import com.gatishil.studyengine.R
@@ -53,6 +57,7 @@ fun DashboardScreen(
     onNavigateToPublicProfile: (String) -> Unit,
     onNavigateToReminders: () -> Unit,
     onNavigateToExams: () -> Unit,
+    onNavigateToLiveExam: (String) -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -198,6 +203,31 @@ fun DashboardScreen(
                                 // Add Book card at the end
                                 item {
                                     AddBookCard(onClick = onNavigateToAddBook)
+                                }
+                            }
+                        }
+                    }
+
+                    // Live Exams Section
+                    if (uiState.liveExams.isNotEmpty()) {
+                        item {
+                            SectionHeader(
+                                title = stringResource(R.string.live_exams),
+                                actionLabel = stringResource(R.string.view_all),
+                                onAction = onNavigateToExams
+                            )
+                        }
+
+                        item {
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(uiState.liveExams) { liveExam ->
+                                    LiveExamCard(
+                                        liveExam = liveExam,
+                                        onClick = { onNavigateToLiveExam(liveExam.id) }
+                                    )
                                 }
                             }
                         }
@@ -1447,6 +1477,192 @@ private fun RecentExamCard(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+    }
+}
+
+@Composable
+private fun LiveExamCard(
+    liveExam: LiveExam,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isActive = liveExam.status == LiveExamStatus.ACTIVE
+    val now = LocalDateTime.now()
+
+    val statusColor = if (isActive) {
+        StudyEngineTheme.extendedColors.success
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
+
+    val timeText = if (isActive) {
+        val remaining = Duration.between(now, liveExam.scheduledEndTime)
+        val minutes = remaining.toMinutes()
+        if (minutes > 60) "${minutes / 60}h ${minutes % 60}m left" else "${minutes}m left"
+    } else {
+        val until = Duration.between(now, liveExam.scheduledStartTime)
+        val minutes = until.toMinutes()
+        when {
+            minutes < 0 -> ""
+            minutes < 60 -> "in ${minutes}m"
+            minutes < 1440 -> "in ${minutes / 60}h"
+            else -> "in ${minutes / 1440}d"
+        }
+    }
+
+    Card(
+        onClick = onClick,
+        modifier = modifier.width(220.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isActive) {
+                statusColor.copy(alpha = 0.1f)
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHigh
+            }
+        ),
+        border = if (isActive) {
+            androidx.compose.foundation.BorderStroke(1.5.dp, statusColor.copy(alpha = 0.4f))
+        } else null
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp)
+        ) {
+            // Status badge row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = statusColor.copy(alpha = 0.15f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (isActive) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(statusColor)
+                            )
+                        }
+                        Text(
+                            text = if (isActive) stringResource(R.string.live_exam_active)
+                            else stringResource(R.string.live_exam_scheduled),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = statusColor
+                        )
+                    }
+                }
+
+                if (timeText.isNotEmpty()) {
+                    Text(
+                        text = timeText,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = liveExam.title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            liveExam.description?.let { desc ->
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = desc,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Info chips
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Quiz,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = stringResource(R.string.live_exam_questions, liveExam.questionCount),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                liveExam.timeLimitMinutes?.let { minutes ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Timer,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.live_exam_time_limit, minutes),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Join button for active exams
+            if (isActive && !liveExam.hasAttempted) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = statusColor,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.live_exam_join),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.surface,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 6.dp)
+                    )
+                }
+            } else if (liveExam.hasAttempted) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = stringResource(R.string.live_exam_joined),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
