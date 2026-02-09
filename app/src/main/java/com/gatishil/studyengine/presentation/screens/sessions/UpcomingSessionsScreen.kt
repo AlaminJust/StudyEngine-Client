@@ -135,6 +135,8 @@ private fun SessionSummaryCard(
     plannedCount: Int,
     isPast: Boolean
 ) {
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -146,15 +148,24 @@ private fun SessionSummaryCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = if (isPast) listOf(
-                            MaterialTheme.colorScheme.secondary,
-                            MaterialTheme.colorScheme.tertiary
-                        ) else listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.tertiary
+                    brush = if (isDarkTheme) {
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surfaceContainerHigh,
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
                         )
-                    )
+                    } else {
+                        Brush.linearGradient(
+                            colors = if (isPast) listOf(
+                                MaterialTheme.colorScheme.secondary,
+                                MaterialTheme.colorScheme.tertiary
+                            ) else listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        )
+                    }
                 )
                 .padding(20.dp)
         ) {

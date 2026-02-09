@@ -243,17 +243,28 @@ fun SelectSubjectsScreen(
 
 @Composable
 private fun SelectSubjectsHeader() {
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.colorScheme.secondaryContainer
+                brush = if (isDarkTheme) {
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.surfaceContainerHigh,
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        )
                     )
-                )
+                } else {
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    )
+                }
             )
             .padding(20.dp)
     ) {

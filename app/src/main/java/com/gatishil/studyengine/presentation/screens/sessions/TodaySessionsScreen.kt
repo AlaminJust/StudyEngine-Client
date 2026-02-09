@@ -207,6 +207,7 @@ private fun TodaySummaryCard(
     totalPages: Int,
     completedPages: Int
 ) {
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -219,12 +220,21 @@ private fun TodaySummaryCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.tertiary
+                    brush = if (isDarkTheme) {
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surfaceContainerHigh,
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
                         )
-                    )
+                    } else {
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        )
+                    }
                 )
                 .padding(24.dp)
         ) {

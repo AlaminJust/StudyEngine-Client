@@ -173,15 +173,12 @@ fun StudyEngineTheme(
         SideEffect {
             val window = (view.context as Activity).window
 
-            // Ensure window draws behind system bars for proper control
+            // System handles status bar insets; transparent status bar shows window background
             WindowCompat.setDecorFitsSystemWindows(window, true)
 
-            // Set status bar color to match background for seamless look
-            val statusBarColorValue = if (darkTheme) {
-                0xFF282A36.toInt() // Dracula background
-            } else {
-                0xFFF8FAFC.toInt() // Matches BackgroundLight for seamless blend
-            }
+            // Transparent status bar - shows screen content behind it
+            @Suppress("DEPRECATION")
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
 
             // Set navigation bar color to match surface for clean edge
             val navBarColorValue = if (darkTheme) {
@@ -189,9 +186,6 @@ fun StudyEngineTheme(
             } else {
                 0xFFFFFFFF.toInt() // Clean white nav bar
             }
-
-            @Suppress("DEPRECATION")
-            window.statusBarColor = statusBarColorValue
             @Suppress("DEPRECATION")
             window.navigationBarColor = navBarColorValue
 

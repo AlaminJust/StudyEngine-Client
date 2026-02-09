@@ -391,6 +391,8 @@ private fun MultiSubjectExamCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
@@ -410,12 +412,21 @@ private fun MultiSubjectExamCard(
                     .size(56.dp)
                     .clip(CircleShape)
                     .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.tertiary
+                        brush = if (isDarkTheme) {
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    MaterialTheme.colorScheme.surfaceContainerHigh
+                                )
                             )
-                        )
+                        } else {
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.tertiary
+                                )
+                            )
+                        }
                     ),
                 contentAlignment = Alignment.Center
             ) {

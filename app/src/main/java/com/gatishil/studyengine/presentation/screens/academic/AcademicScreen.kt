@@ -226,17 +226,28 @@ private fun AcademicContent(
 
 @Composable
 private fun AcademicHeader(profile: UserAcademicProfile) {
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+
     Box(
         modifier = Modifier.fillMaxWidth().height(160.dp)
     ) {
         Box(
             modifier = Modifier.fillMaxSize().background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.tertiary,
-                        MaterialTheme.colorScheme.primary
+                brush = if (isDarkTheme) {
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.surfaceContainerHigh,
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        )
                     )
-                )
+                } else {
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.tertiary,
+                            MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
             )
         )
 

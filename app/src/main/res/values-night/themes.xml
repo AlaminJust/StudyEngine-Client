@@ -2,8 +2,9 @@
 <resources>
     <!-- Dark mode theme - matches Dracula palette -->
     <style name="Theme.StudyEngine" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="android:statusBarColor">#FF282A36</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">#FF282A36</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">#FF282A36</item>
     </style>
 </resources>

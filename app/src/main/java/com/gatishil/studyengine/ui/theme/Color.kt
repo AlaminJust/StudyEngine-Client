@@ -118,10 +118,10 @@ val SurfaceContainerLight = Color(0xFFF1F5F9)
 val SurfaceContainerHighLight = Color(0xFFE2E8F0)
 val SurfaceContainerHighestLight = Color(0xFFCBD5E1)
 
-// Dark mode: Dracula layering
-val SurfaceContainerLowestDark = Color(0xFF21222C)  // Slightly lighter than background
-val SurfaceContainerLowDark = Color(0xFF282A36)     // Same as background
-val SurfaceContainerDark = Color(0xFF2D2F3B)        // Between background and current line
+// Dark mode: Dracula layering - elevated surfaces for comfortable card distinction
+val SurfaceContainerLowestDark = Color(0xFF2E3042)  // Elevated above background for visible card distinction
+val SurfaceContainerLowDark = Color(0xFF333546)     // Distinct from background
+val SurfaceContainerDark = Color(0xFF383A4E)        // Between background and current line
 val SurfaceContainerHighDark = DraculaCurrentLine   // Current line color
 val SurfaceContainerHighestDark = Color(0xFF4D5066) // Slightly lighter than current line
 

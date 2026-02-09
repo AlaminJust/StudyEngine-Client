@@ -170,6 +170,8 @@ private fun AvailabilityContent(
 
 @Composable
 private fun AvailabilityHeaderCard() {
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -179,12 +181,21 @@ private fun AvailabilityHeaderCard() {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.tertiary
+                    brush = if (isDarkTheme) {
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surfaceContainerHigh,
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
                         )
-                    )
+                    } else {
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        )
+                    }
                 )
                 .padding(20.dp)
         ) {

@@ -319,49 +319,28 @@ private fun DashboardHeader(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        // Gradient background with rounded bottom corners
+        // Background with rounded bottom corners
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(160.dp + statusBarHeight)
+                .height(110.dp + statusBarHeight)
                 .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = if (isDarkTheme) {
-                            listOf(
-                                MaterialTheme.colorScheme.surfaceVariant,
-                                MaterialTheme.colorScheme.background
+                    if (isDarkTheme) {
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surfaceContainerHigh,
+                                MaterialTheme.colorScheme.surfaceContainerHigh
                             )
-                        } else {
-                            listOf(
+                        )
+                    } else {
+                        Brush.linearGradient(
+                            colors = listOf(
                                 MaterialTheme.colorScheme.primary,
                                 MaterialTheme.colorScheme.tertiary
                             )
-                        }
-                    )
-                )
-        )
-
-        // Subtle glow overlay
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(160.dp + statusBarHeight)
-                .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = if (isDarkTheme) {
-                            listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                                Color.Transparent
-                            )
-                        } else {
-                            listOf(
-                                Color.White.copy(alpha = 0.12f),
-                                Color.Transparent
-                            )
-                        }
-                    )
+                        )
+                    }
                 )
         )
 
@@ -369,10 +348,10 @@ private fun DashboardHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(160.dp + statusBarHeight)
-                .padding(top = statusBarHeight + 8.dp)
+                .height(110.dp + statusBarHeight)
+                .padding(top = statusBarHeight + 6.dp)
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 16.dp),
+                .padding(bottom = 10.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Top row: Welcome text and profile icon
@@ -430,9 +409,7 @@ private fun DashboardHeader(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Bottom row: Quick action chips
+            // Quick action chips
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -448,7 +425,7 @@ private fun DashboardHeader(
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -487,7 +464,7 @@ private fun DashboardHeader(
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {

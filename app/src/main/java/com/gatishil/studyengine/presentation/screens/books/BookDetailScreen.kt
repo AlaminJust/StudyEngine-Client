@@ -315,6 +315,8 @@ private fun BookDetailContent(
 
 @Composable
 private fun BookInfoCard(book: Book) {
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
@@ -325,12 +327,21 @@ private fun BookInfoCard(book: Book) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = androidx.compose.ui.graphics.Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.tertiary
+                    brush = if (isDarkTheme) {
+                        androidx.compose.ui.graphics.Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surfaceContainerHigh,
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
                         )
-                    )
+                    } else {
+                        androidx.compose.ui.graphics.Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        )
+                    }
                 )
                 .padding(20.dp)
         ) {

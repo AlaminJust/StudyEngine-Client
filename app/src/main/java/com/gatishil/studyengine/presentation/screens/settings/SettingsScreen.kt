@@ -445,6 +445,7 @@ fun SettingsScreen(
 
 @Composable
 private fun ProfileSettingsCard(onNavigateToProfile: () -> Unit) {
+    val isDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -455,12 +456,21 @@ private fun ProfileSettingsCard(onNavigateToProfile: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.tertiary
+                    brush = if (isDarkTheme) {
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surfaceContainerHigh,
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
                         )
-                    )
+                    } else {
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        )
+                    }
                 )
                 .clickable { onNavigateToProfile() }
                 .padding(20.dp)
