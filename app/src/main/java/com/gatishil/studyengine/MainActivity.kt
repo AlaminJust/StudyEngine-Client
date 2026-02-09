@@ -413,18 +413,19 @@ private fun StudyEngineBottomNavBar(
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Main navigation bar
+        // Main navigation bar with subtle top border
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
             color = MaterialTheme.colorScheme.surface,
-            shadowElevation = 8.dp
+            shadowElevation = 4.dp,
+            tonalElevation = 2.dp
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                    .padding(horizontal = 4.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -433,7 +434,7 @@ private fun StudyEngineBottomNavBar(
 
                     if (navItem.isCenter) {
                         // Spacer for center item (will be overlaid)
-                        Spacer(modifier = Modifier.width(64.dp))
+                        Spacer(modifier = Modifier.width(56.dp))
                     } else {
                         // Regular nav item
                         BottomNavItemView(
@@ -446,53 +447,43 @@ private fun StudyEngineBottomNavBar(
             }
         }
 
-        // Center Home button - elevated circular design
+        // Center Home button - clean elevated circle
         val homeSelected = currentRoute == BottomNavItem.HOME.route
 
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .offset(y = (-20).dp)
+                .offset(y = (-16).dp)
         ) {
-            // Outer decorative ring
             Surface(
-                modifier = Modifier.size(72.dp),
+                modifier = Modifier
+                    .size(56.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { onNavigate(BottomNavItem.HOME.route) }
+                    ),
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 12.dp
+                color = if (homeSelected)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.primaryContainer,
+                shadowElevation = 6.dp,
+                tonalElevation = 2.dp
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(4.dp),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    // Inner gradient button
-                    Surface(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clickable { onNavigate(BottomNavItem.HOME.route) },
-                        shape = CircleShape,
-                        color = if (homeSelected)
-                            MaterialTheme.colorScheme.primary
+                    Icon(
+                        imageVector = if (homeSelected) Icons.Filled.Home else Icons.Outlined.Home,
+                        contentDescription = stringResource(R.string.nav_home),
+                        tint = if (homeSelected)
+                            MaterialTheme.colorScheme.onPrimary
                         else
-                            MaterialTheme.colorScheme.primaryContainer
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            Icon(
-                                imageVector = if (homeSelected) Icons.Filled.Home else Icons.Outlined.Home,
-                                contentDescription = stringResource(R.string.nav_home),
-                                tint = if (homeSelected)
-                                    MaterialTheme.colorScheme.onPrimary
-                                else
-                                    MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                    }
+                            MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(26.dp)
+                    )
                 }
             }
         }
@@ -512,41 +503,41 @@ private fun BottomNavItemView(
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Selection indicator
-        if (selected) {
-            Box(
-                modifier = Modifier
-                    .width(24.dp)
-                    .height(3.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(2.dp)
-                    )
+        // Pill-shaped selection background
+        Box(
+            modifier = Modifier
+                .background(
+                    color = if (selected)
+                        MaterialTheme.colorScheme.primaryContainer
+                    else
+                        androidx.compose.ui.graphics.Color.Transparent,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .padding(horizontal = 14.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = when (navItem) {
+                    BottomNavItem.BOOKS -> if (selected) Icons.AutoMirrored.Filled.MenuBook else Icons.AutoMirrored.Outlined.MenuBook
+                    BottomNavItem.SESSIONS -> if (selected) Icons.Filled.CalendarToday else Icons.Outlined.CalendarToday
+                    BottomNavItem.EXAMS -> if (selected) Icons.Filled.Quiz else Icons.Outlined.Quiz
+                    BottomNavItem.SETTINGS -> if (selected) Icons.Filled.Settings else Icons.Outlined.Settings
+                    BottomNavItem.HOME -> Icons.Filled.Home // Won't be used, handled separately
+                },
+                contentDescription = stringResource(navItem.titleResId),
+                tint = if (selected)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(22.dp)
             )
-            Spacer(modifier = Modifier.height(4.dp))
         }
 
-        Icon(
-            imageVector = when (navItem) {
-                BottomNavItem.BOOKS -> if (selected) Icons.AutoMirrored.Filled.MenuBook else Icons.AutoMirrored.Outlined.MenuBook
-                BottomNavItem.SESSIONS -> if (selected) Icons.Filled.CalendarToday else Icons.Outlined.CalendarToday
-                BottomNavItem.EXAMS -> if (selected) Icons.Filled.Quiz else Icons.Outlined.Quiz
-                BottomNavItem.SETTINGS -> if (selected) Icons.Filled.Settings else Icons.Outlined.Settings
-                BottomNavItem.HOME -> Icons.Filled.Home // Won't be used, handled separately
-            },
-            contentDescription = stringResource(navItem.titleResId),
-            tint = if (selected)
-                MaterialTheme.colorScheme.primary
-            else
-                MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(24.dp)
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         Text(
             text = stringResource(navItem.titleResId),
@@ -555,7 +546,7 @@ private fun BottomNavItemView(
                 MaterialTheme.colorScheme.primary
             else
                 MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             maxLines = 1
         )
     }

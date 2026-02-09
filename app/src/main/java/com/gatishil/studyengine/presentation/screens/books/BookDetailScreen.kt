@@ -325,7 +325,7 @@ private fun BookInfoCard(book: Book) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                    brush = androidx.compose.ui.graphics.Brush.linearGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.primary,
                             MaterialTheme.colorScheme.tertiary

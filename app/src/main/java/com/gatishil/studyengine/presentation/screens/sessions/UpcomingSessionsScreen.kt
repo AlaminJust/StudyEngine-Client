@@ -146,7 +146,7 @@ private fun SessionSummaryCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.horizontalGradient(
+                    brush = Brush.linearGradient(
                         colors = if (isPast) listOf(
                             MaterialTheme.colorScheme.secondary,
                             MaterialTheme.colorScheme.tertiary

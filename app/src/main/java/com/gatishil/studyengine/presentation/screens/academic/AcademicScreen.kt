@@ -231,7 +231,7 @@ private fun AcademicHeader(profile: UserAcademicProfile) {
     ) {
         Box(
             modifier = Modifier.fillMaxSize().background(
-                brush = Brush.horizontalGradient(
+                brush = Brush.linearGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.tertiary,
                         MaterialTheme.colorScheme.primary

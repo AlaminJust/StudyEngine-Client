@@ -176,18 +176,18 @@ fun StudyEngineTheme(
             // Ensure window draws behind system bars for proper control
             WindowCompat.setDecorFitsSystemWindows(window, true)
 
-            // Set status bar color - Dracula background for dark mode
+            // Set status bar color to match background for seamless look
             val statusBarColorValue = if (darkTheme) {
                 0xFF282A36.toInt() // Dracula background
             } else {
-                0xFFFFFFFF.toInt() // White for light mode
+                0xFFF8FAFC.toInt() // Matches BackgroundLight for seamless blend
             }
 
-            // Set navigation bar color - Dracula background for dark mode
+            // Set navigation bar color to match surface for clean edge
             val navBarColorValue = if (darkTheme) {
                 0xFF282A36.toInt() // Dracula background
             } else {
-                0xFFFFFFFF.toInt() // White for light mode
+                0xFFFFFFFF.toInt() // Clean white nav bar
             }
 
             @Suppress("DEPRECATION")

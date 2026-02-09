@@ -318,18 +318,19 @@ private fun DashboardHeader(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp + statusBarHeight)
     ) {
-        // Gradient background - use Dracula colors for dark mode from centralized theme
+        // Gradient background with rounded bottom corners
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .height(160.dp + statusBarHeight)
+                .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
                 .background(
-                    brush = Brush.horizontalGradient(
+                    brush = Brush.linearGradient(
                         colors = if (isDarkTheme) {
                             listOf(
-                                MaterialTheme.colorScheme.background,
-                                MaterialTheme.colorScheme.surfaceVariant
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                MaterialTheme.colorScheme.background
                             )
                         } else {
                             listOf(
@@ -341,20 +342,22 @@ private fun DashboardHeader(
                 )
         )
 
-        // Subtle pattern overlay with accent color
+        // Subtle glow overlay
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .height(160.dp + statusBarHeight)
+                .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
                 .background(
                     brush = Brush.radialGradient(
                         colors = if (isDarkTheme) {
                             listOf(
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                                 Color.Transparent
                             )
                         } else {
                             listOf(
-                                Color.White.copy(alpha = 0.15f),
+                                Color.White.copy(alpha = 0.12f),
                                 Color.Transparent
                             )
                         }
@@ -365,10 +368,11 @@ private fun DashboardHeader(
         // Content
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = statusBarHeight + 4.dp)
+                .fillMaxWidth()
+                .height(160.dp + statusBarHeight)
+                .padding(top = statusBarHeight + 8.dp)
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 12.dp),
+                .padding(bottom = 16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Top row: Welcome text and profile icon
@@ -403,11 +407,11 @@ private fun DashboardHeader(
                 // Profile icon
                 Surface(
                     onClick = onProfileClick,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = CircleShape,
                     color = if (isDarkTheme) {
                         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
                     } else {
-                        Color.White.copy(alpha = 0.15f)
+                        Color.White.copy(alpha = 0.18f)
                     },
                     modifier = Modifier.size(44.dp)
                 ) {
@@ -416,7 +420,7 @@ private fun DashboardHeader(
                             imageVector = Icons.Default.Person,
                             contentDescription = stringResource(R.string.profile),
                             tint = if (isDarkTheme) {
-                                MaterialTheme.colorScheme.secondary // Dracula cyan
+                                MaterialTheme.colorScheme.secondary
                             } else {
                                 Color.White
                             },
@@ -435,11 +439,11 @@ private fun DashboardHeader(
             ) {
                 Surface(
                     onClick = onStreakClick,
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(16.dp),
                     color = if (isDarkTheme) {
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     } else {
-                        Color.White.copy(alpha = 0.2f)
+                        Color.White.copy(alpha = 0.18f)
                     },
                     modifier = Modifier.weight(1f)
                 ) {
@@ -452,7 +456,7 @@ private fun DashboardHeader(
                             imageVector = Icons.Default.Bolt,
                             contentDescription = null,
                             tint = if (isDarkTheme) {
-                                MaterialTheme.colorScheme.tertiary // Dracula orange
+                                MaterialTheme.colorScheme.tertiary
                             } else {
                                 Color.White
                             },
@@ -474,11 +478,11 @@ private fun DashboardHeader(
 
                 Surface(
                     onClick = onAcademicClick,
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(16.dp),
                     color = if (isDarkTheme) {
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     } else {
-                        Color.White.copy(alpha = 0.2f)
+                        Color.White.copy(alpha = 0.18f)
                     },
                     modifier = Modifier.weight(1f)
                 ) {
@@ -491,7 +495,7 @@ private fun DashboardHeader(
                             imageVector = Icons.Default.School,
                             contentDescription = null,
                             tint = if (isDarkTheme) {
-                                MaterialTheme.colorScheme.secondary // Dracula cyan
+                                MaterialTheme.colorScheme.secondary
                             } else {
                                 Color.White
                             },
@@ -685,18 +689,18 @@ private fun SessionCard(
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
         ) {
-            // Left accent bar
+            // Left accent bar with rounded end
             Box(
                 modifier = Modifier
                     .width(4.dp)
@@ -827,11 +831,11 @@ private fun BookCard(
             .width(160.dp)
             .height(220.dp),
         onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier
@@ -976,13 +980,13 @@ private fun AddBookCard(onClick: () -> Unit) {
             .width(160.dp)
             .height(220.dp),
         onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         ),
         border = androidx.compose.foundation.BorderStroke(
-            width = 2.dp,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            width = 1.5.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
         )
     ) {
         Column(
@@ -1023,9 +1027,11 @@ private fun EmptySessionCard() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier
@@ -1055,9 +1061,11 @@ private fun EmptyBooksCard(onAddBook: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier
@@ -1101,9 +1109,9 @@ private fun RelatedProfileCard(
             .heightIn(min = 180.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier
@@ -1291,8 +1299,9 @@ private fun ExamSectionHeader(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-        )
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier

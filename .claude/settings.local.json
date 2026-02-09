@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(powershell:*)",
+      "Bash(git -C \"e:\\\\StudyEngine\" diff --stat HEAD)",
+      "Bash(git -C \"e:\\\\StudyEngine\" diff HEAD -- \"app/src/main/java/com/gatishil/studyengine/presentation/screens/exam/StartExamScreen.kt\" --stat)",
+      "Bash(git -C \"e:\\\\StudyEngine\" diff HEAD -- \"app/src/main/java/com/gatishil/studyengine/presentation/screens/exam/StartExamViewModel.kt\")",
+      "Bash(git -C \"e:\\\\StudyEngine\" diff HEAD -- \"app/src/main/java/com/gatishil/studyengine/data/remote/api/StudyEngineApi.kt\")",
+      "Bash(git -C \"e:\\\\StudyEngine\" diff HEAD -- \"app/src/main/java/com/gatishil/studyengine/data/repository/ExamRepositoryImpl.kt\")",
+      "Bash(git -C \"e:\\\\StudyEngine\" diff HEAD -- \"app/src/main/res/values/strings.xml\")",
+      "Bash(find:*)"
+    ]
+  }
+}

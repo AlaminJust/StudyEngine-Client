@@ -33,11 +33,11 @@ val DraculaYellow = Color(0xFFF1FA8C)
 // ============================================
 // PRIMARY COLORS
 // ============================================
-// Light mode: Deep Blue for study focus
-val PrimaryLight = Color(0xFF1565C0)
+// Light mode: Modern blue for study focus
+val PrimaryLight = Color(0xFF3B82F6)
 val OnPrimaryLight = Color(0xFFFFFFFF)
-val PrimaryContainerLight = Color(0xFFD1E4FF)
-val OnPrimaryContainerLight = Color(0xFF001D36)
+val PrimaryContainerLight = Color(0xFFDBEAFE)
+val OnPrimaryContainerLight = Color(0xFF1E3A5F)
 
 // Dark mode: Dracula Purple as primary
 val PrimaryDark = DraculaPurple
@@ -48,11 +48,11 @@ val OnPrimaryContainerDark = DraculaForeground
 // ============================================
 // SECONDARY COLORS
 // ============================================
-// Light mode: Teal for accents
-val SecondaryLight = Color(0xFF00897B)
+// Light mode: Violet for harmonious accents
+val SecondaryLight = Color(0xFF8B5CF6)
 val OnSecondaryLight = Color(0xFFFFFFFF)
-val SecondaryContainerLight = Color(0xFFB2DFDB)
-val OnSecondaryContainerLight = Color(0xFF002021)
+val SecondaryContainerLight = Color(0xFFEDE9FE)
+val OnSecondaryContainerLight = Color(0xFF2E1065)
 
 // Dark mode: Dracula Cyan as secondary
 val SecondaryDark = DraculaCyan
@@ -63,11 +63,11 @@ val OnSecondaryContainerDark = DraculaForeground
 // ============================================
 // TERTIARY COLORS
 // ============================================
-// Light mode: Amber for highlights
-val TertiaryLight = Color(0xFFFFA000)
+// Light mode: Cyan for cool accent (creates smooth blue→cyan gradients)
+val TertiaryLight = Color(0xFF0891B2)
 val OnTertiaryLight = Color(0xFFFFFFFF)
-val TertiaryContainerLight = Color(0xFFFFE0B2)
-val OnTertiaryContainerLight = Color(0xFF2B1700)
+val TertiaryContainerLight = Color(0xFFCFFAFE)
+val OnTertiaryContainerLight = Color(0xFF164E63)
 
 // Dark mode: Dracula Orange as tertiary
 val TertiaryDark = DraculaOrange
@@ -78,10 +78,10 @@ val OnTertiaryContainerDark = DraculaForeground
 // ============================================
 // ERROR COLORS
 // ============================================
-val ErrorLight = Color(0xFFBA1A1A)
+val ErrorLight = Color(0xFFDC2626)
 val OnErrorLight = Color(0xFFFFFFFF)
-val ErrorContainerLight = Color(0xFFFFDAD6)
-val OnErrorContainerLight = Color(0xFF410002)
+val ErrorContainerLight = Color(0xFFFEE2E2)
+val OnErrorContainerLight = Color(0xFF450A0A)
 
 // Dark mode: Dracula Red for errors
 val ErrorDark = DraculaRed
@@ -92,13 +92,13 @@ val OnErrorContainerDark = DraculaForeground
 // ============================================
 // BACKGROUND AND SURFACE COLORS
 // ============================================
-// Light mode
-val BackgroundLight = Color(0xFFFDFBFF)
-val OnBackgroundLight = Color(0xFF1A1C1E)
-val SurfaceLight = Color(0xFFFDFBFF)
-val OnSurfaceLight = Color(0xFF1A1C1E)
-val SurfaceVariantLight = Color(0xFFE0E2EC)
-val OnSurfaceVariantLight = Color(0xFF43474E)
+// Light mode - subtle cool gray tint
+val BackgroundLight = Color(0xFFF8FAFC)
+val OnBackgroundLight = Color(0xFF0F172A)
+val SurfaceLight = Color(0xFFFFFFFF)
+val OnSurfaceLight = Color(0xFF0F172A)
+val SurfaceVariantLight = Color(0xFFF1F5F9)
+val OnSurfaceVariantLight = Color(0xFF475569)
 
 // Dark mode: Dracula Background colors
 val BackgroundDark = DraculaBackground
@@ -111,12 +111,12 @@ val OnSurfaceVariantDark = DraculaComment
 // ============================================
 // SURFACE CONTAINER COLORS (for layering)
 // ============================================
-// Light mode
+// Light mode - smooth gradient of slate grays
 val SurfaceContainerLowestLight = Color(0xFFFFFFFF)
-val SurfaceContainerLowLight = Color(0xFFF7F8FA)
-val SurfaceContainerLight = Color(0xFFF1F3F5)
-val SurfaceContainerHighLight = Color(0xFFEBEDF0)
-val SurfaceContainerHighestLight = Color(0xFFE5E7EB)
+val SurfaceContainerLowLight = Color(0xFFF8FAFC)
+val SurfaceContainerLight = Color(0xFFF1F5F9)
+val SurfaceContainerHighLight = Color(0xFFE2E8F0)
+val SurfaceContainerHighestLight = Color(0xFFCBD5E1)
 
 // Dark mode: Dracula layering
 val SurfaceContainerLowestDark = Color(0xFF21222C)  // Slightly lighter than background
@@ -128,8 +128,8 @@ val SurfaceContainerHighestDark = Color(0xFF4D5066) // Slightly lighter than cur
 // ============================================
 // OUTLINE COLORS
 // ============================================
-val OutlineLight = Color(0xFF73777F)
-val OutlineVariantLight = Color(0xFFC3C6CF)
+val OutlineLight = Color(0xFF94A3B8)
+val OutlineVariantLight = Color(0xFFE2E8F0)
 
 val OutlineDark = DraculaComment
 val OutlineVariantDark = Color(0xFF3D4050)
@@ -137,48 +137,47 @@ val OutlineVariantDark = Color(0xFF3D4050)
 // ============================================
 // STATUS COLORS (Extended)
 // ============================================
-val SuccessLight = Color(0xFF2E7D32)
+val SuccessLight = Color(0xFF16A34A)
 val SuccessDark = DraculaGreen
 
-val WarningLight = Color(0xFFE65100)
+val WarningLight = Color(0xFFEA580C)
 val WarningDark = DraculaOrange
 
-val InfoLight = Color(0xFF0288D1)
+val InfoLight = Color(0xFF0284C7)
 val InfoDark = DraculaCyan
 
 // ============================================
 // SESSION STATUS COLORS
 // ============================================
-val SessionPlannedLight = Color(0xFF1565C0)
+val SessionPlannedLight = Color(0xFF3B82F6)
 val SessionPlannedDark = DraculaPurple
 
-val SessionInProgressLight = Color(0xFFFFA000)
+val SessionInProgressLight = Color(0xFFF59E0B)
 val SessionInProgressDark = DraculaOrange
 
-val SessionCompletedLight = Color(0xFF2E7D32)
+val SessionCompletedLight = Color(0xFF16A34A)
 val SessionCompletedDark = DraculaGreen
 
-val SessionMissedLight = Color(0xFFD32F2F)
+val SessionMissedLight = Color(0xFFDC2626)
 val SessionMissedDark = DraculaRed
 
-val SessionCancelledLight = Color(0xFF616161)
+val SessionCancelledLight = Color(0xFF64748B)
 val SessionCancelledDark = DraculaComment
 
 // ============================================
 // PRIORITY COLORS
 // ============================================
-val PriorityHighLight = Color(0xFFD32F2F)
+val PriorityHighLight = Color(0xFFDC2626)
 val PriorityHighDark = DraculaRed
 
-val PriorityMediumLight = Color(0xFFFFA000)
+val PriorityMediumLight = Color(0xFFF59E0B)
 val PriorityMediumDark = DraculaOrange
 
-val PriorityLowLight = Color(0xFF388E3C)
+val PriorityLowLight = Color(0xFF16A34A)
 val PriorityLowDark = DraculaGreen
 
 // ============================================
 // STATUS BAR COLORS
 // ============================================
-val StatusBarLight = Color(0xFF1565C0)  // Primary blue
+val StatusBarLight = Color(0xFFF8FAFC)  // Matches background
 val StatusBarDark = DraculaBackground   // Dracula background
-

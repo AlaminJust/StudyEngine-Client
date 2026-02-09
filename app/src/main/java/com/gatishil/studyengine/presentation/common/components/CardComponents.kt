@@ -24,10 +24,10 @@ fun StudyCard(
             shape = RoundedCornerShape(16.dp),
             onClick = onClick,
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
             ),
             elevation = CardDefaults.cardElevation(
-                defaultElevation = 2.dp
+                defaultElevation = 1.dp
             )
         ) {
             Column(
@@ -40,10 +40,10 @@ fun StudyCard(
             modifier = modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
             ),
             elevation = CardDefaults.cardElevation(
-                defaultElevation = 2.dp
+                defaultElevation = 1.dp
             )
         ) {
             Column(
@@ -132,6 +132,7 @@ fun StudyListItem(
         Surface(
             modifier = modifier.fillMaxWidth(),
             onClick = onClick,
+            shape = RoundedCornerShape(12.dp),
             color = MaterialTheme.colorScheme.surface
         ) {
             Row(
@@ -143,6 +144,7 @@ fun StudyListItem(
     } else {
         Surface(
             modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
             color = MaterialTheme.colorScheme.surface
         ) {
             Row(
@@ -173,6 +175,9 @@ fun StatCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 0.dp
         )
     ) {
         Column(
@@ -203,4 +208,3 @@ fun StatCard(
         }
     }
 }
-

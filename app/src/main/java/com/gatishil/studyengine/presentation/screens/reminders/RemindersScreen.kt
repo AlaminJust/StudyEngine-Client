@@ -188,7 +188,7 @@ private fun RemindersHeader(onNavigateBack: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                brush = Brush.horizontalGradient(
+                brush = Brush.linearGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.primary,
                         MaterialTheme.colorScheme.tertiary

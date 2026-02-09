@@ -234,7 +234,7 @@ private fun SessionHeroCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.horizontalGradient(
+                    brush = Brush.linearGradient(
                         colors = listOf(
                             backgroundStartColor,
                             backgroundEndColor
