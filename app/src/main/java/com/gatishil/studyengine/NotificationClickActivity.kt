@@ -20,8 +20,8 @@ class NotificationClickActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val target = Intent(this, MainActivity::class.java).apply {
-            // Create/bring task to front reliably
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            // Create/bring task to front reliably without destroying a still-initializing MainActivity
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
             // Forward the original extras so MainActivity can route.
             intent?.extras?.let { putExtras(it) }

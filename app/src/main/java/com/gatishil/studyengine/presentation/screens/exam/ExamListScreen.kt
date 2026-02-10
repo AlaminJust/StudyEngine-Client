@@ -1191,7 +1191,7 @@ private fun LiveExamListCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (liveExam.hasAttempted) stringResource(R.string.exam_in_progress)
+                        text = if (liveExam.hasAttempted) stringResource(R.string.live_exam_joined)
                         else stringResource(R.string.live_exam_join),
                         fontWeight = FontWeight.Bold
                     )

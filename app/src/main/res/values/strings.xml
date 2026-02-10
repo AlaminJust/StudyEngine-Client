@@ -595,7 +595,10 @@
     <string name="exam_start_button">Start Exam</string>
     <string name="exam_exit_title">Exit Exam?</string>
     <string name="exam_exit_message">Are you sure you want to exit? Your progress will be lost and the exam will be cancelled.</string>
-    <string name="exam_exit_confirm">Exit</string>
+    <string name="exam_exit_confirm">Exit &amp; Cancel Exam</string>
+    <string name="exam_exit_silent">Back</string>
+    <string name="exam_no_questions_title">No Questions Available</string>
+    <string name="exam_no_questions_message">There are no questions available for the selected criteria. Try adjusting your filters or selecting different subjects.</string>
     <string name="exam_submit_title">Submit Exam?</string>
     <string name="exam_submit_message">Are you sure you want to submit your exam? You won\'t be able to change your answers.</string>
     <string name="exam_submit_confirm">Submit</string>

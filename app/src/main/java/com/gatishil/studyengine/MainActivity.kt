@@ -83,6 +83,9 @@ class MainActivity : AppCompatActivity() {
         private var lastAppliedLanguage: String? = null
         // Pending notification navigation route
         val pendingNotificationRoute = MutableStateFlow<String?>(null)
+        // Static flag: reset to false when process dies and restarts.
+        // Used to detect process death vs configuration change.
+        private var isProcessAlive = false
     }
 
     private val updateResultLauncher = registerForActivityResult(
@@ -93,7 +96,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
-        super.onCreate(savedInstanceState)
+
+        // Detect process death: savedInstanceState exists but our static flag was reset.
+        // On process death, pass null to prevent Compose/NavController from restoring
+        // stale back-stack entries whose ViewModel state is gone (e.g. TakeExam screen).
+        // Configuration changes (rotation, locale) keep isProcessAlive == true, so state
+        // is preserved normally in those cases.
+        val actualSavedState = if (savedInstanceState != null && !isProcessAlive) null else savedInstanceState
+        isProcessAlive = true
+
+        super.onCreate(actualSavedState)
 
         // Explicitly set the app theme to valid unintended Compat/Material issues
         setTheme(R.style.Theme_StudyEngine)

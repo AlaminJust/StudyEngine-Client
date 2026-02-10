@@ -597,7 +597,10 @@
     <string name="exam_start_button">পরীক্ষা শুরু করুন</string>
     <string name="exam_exit_title">বের হতে চান?</string>
     <string name="exam_exit_message">আপনি কি নিশ্চিত যে বের হতে চান? আপনার অগ্রগতি হারিয়ে যাবে এবং পরীক্ষা বাতিল হবে।</string>
-    <string name="exam_exit_confirm">বের হন</string>
+    <string name="exam_exit_confirm">বের হন ও পরীক্ষা বাতিল করুন</string>
+    <string name="exam_exit_silent">ফিরে যান</string>
+    <string name="exam_no_questions_title">কোন প্রশ্ন উপলব্ধ নেই</string>
+    <string name="exam_no_questions_message">নির্বাচিত মানদণ্ডের জন্য কোন প্রশ্ন উপলব্ধ নেই। আপনার ফিল্টার সামঞ্জস্য করুন বা ভিন্ন বিষয় নির্বাচন করুন।</string>
     <string name="exam_submit_title">জমা দিতে চান?</string>
     <string name="exam_submit_message">আপনি কি নিশ্চিত যে আপনার পরীক্ষা জমা দিতে চান? আপনি আপনার উত্তর পরিবর্তন করতে পারবেন না।</string>
     <string name="exam_submit_confirm">জমা দিন</string>

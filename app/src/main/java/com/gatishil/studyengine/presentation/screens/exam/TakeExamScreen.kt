@@ -70,15 +70,26 @@ fun TakeExamScreen(
         AlertDialog(
             onDismissRequest = { viewModel.hideExitConfirmation() },
             title = { Text(stringResource(R.string.exam_exit_title)) },
-            text = { Text(stringResource(R.string.exam_exit_message)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.exam_exit_message))
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "⚠️ " + stringResource(R.string.exam_exit_confirm) + " will cancel the exam permanently",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         viewModel.cancelExam()
                         onNavigateBack()
                     },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
                     Text(stringResource(R.string.exam_exit_confirm))
@@ -149,43 +160,55 @@ fun TakeExamScreen(
             }
         }
     ) { paddingValues ->
-        if (uiState.isLoading || uiState.isSubmitting) {
-            LoadingScreen()
-        } else if (uiState.exam != null) {
-            val exam = uiState.exam!!
-            val currentQuestion = exam.questions.getOrNull(uiState.currentQuestionIndex)
+        when {
+            uiState.isLoading || uiState.isSubmitting -> LoadingScreen()
+            uiState.exam != null -> {
+                val exam = uiState.exam!!
+                if (exam.questions.isEmpty()) {
+                    EmptyExamState(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                    )
+                } else {
+                    val currentQuestion = exam.questions.getOrNull(uiState.currentQuestionIndex)
 
-            Column(
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                    ) {
+                        QuestionNavigator(
+                            questions = exam.questions,
+                            currentIndex = uiState.currentQuestionIndex,
+                            answers = uiState.answers,
+                            onQuestionSelect = { viewModel.goToQuestion(it) }
+                        )
+
+                        currentQuestion?.let { question ->
+                            QuestionContent(
+                                question = question,
+                                questionNumber = uiState.currentQuestionIndex + 1,
+                                totalQuestions = exam.questions.size,
+                                selectedOptions = uiState.answers[question.id] ?: emptyList(),
+                                onOptionSelect = { optionId ->
+                                    viewModel.selectOption(
+                                        question.id,
+                                        optionId,
+                                        question.allowMultipleCorrectAnswers
+                                    )
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
+            else -> EmptyExamState(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-            ) {
-                // Question Navigator
-                QuestionNavigator(
-                    questions = exam.questions,
-                    currentIndex = uiState.currentQuestionIndex,
-                    answers = uiState.answers,
-                    onQuestionSelect = { viewModel.goToQuestion(it) }
-                )
-
-                // Question Content
-                currentQuestion?.let { question ->
-                    QuestionContent(
-                        question = question,
-                        questionNumber = uiState.currentQuestionIndex + 1,
-                        totalQuestions = exam.questions.size,
-                        selectedOptions = uiState.answers[question.id] ?: emptyList(),
-                        onOptionSelect = { optionId ->
-                            viewModel.selectOption(
-                                question.id,
-                                optionId,
-                                question.allowMultipleCorrectAnswers
-                            )
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
+            )
         }
     }
 }
@@ -624,3 +647,49 @@ private fun ExamBottomBar(
     }
 }
 
+
+@Composable
+private fun EmptyExamState(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(R.string.exam_no_questions_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = stringResource(R.string.exam_no_questions_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
