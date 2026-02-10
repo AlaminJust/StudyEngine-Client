@@ -38,9 +38,7 @@ fun PublicProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0.dp)
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         when {
             uiState.isLoading -> LoadingScreen()
             uiState.error != null -> ErrorScreen(

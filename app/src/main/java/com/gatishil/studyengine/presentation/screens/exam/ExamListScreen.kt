@@ -99,15 +99,13 @@ fun ExamListScreen(
         }
     }
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0.dp)
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = paddingValues.calculateBottomPadding())
+                .padding(paddingValues)
         ) {
             if (uiState.isLoading && uiState.subjects.isEmpty()) {
                 LoadingScreen()

@@ -76,7 +76,6 @@ class StudyEngineFcmService : FirebaseMessagingService() {
     ) {
         val channelId = getChannelId(type)
 
-        val requestCode = System.currentTimeMillis().toInt()
         val notificationId = generateNotificationId(type, payload)
 
         val intent = Intent(this, NotificationClickActivity::class.java).apply {
@@ -85,15 +84,15 @@ class StudyEngineFcmService : FirebaseMessagingService() {
             putExtra("notification_type", type)
             payload.forEach { (key, value) -> putExtra(key, value) }
 
-            // Make each PendingIntent unique
-            this.data = android.net.Uri.parse("studyengine://notif/$requestCode")
+            // Use stable notification ID for unique PendingIntent per notification
+            this.data = android.net.Uri.parse("studyengine://notif/$notificationId")
         }
 
         val pendingIntent = PendingIntent.getActivity(
             this,
-            requestCode,
+            notificationId,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val notification = NotificationCompat.Builder(this, channelId)

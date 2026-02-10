@@ -48,7 +48,6 @@ fun TodaySessionsScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.today_sessions)) },
-                windowInsets = WindowInsets(0.dp),
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer

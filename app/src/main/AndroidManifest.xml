@@ -43,7 +43,7 @@
             android:noHistory="true"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.StudyEngine.Splash">
+            android:theme="@style/Theme.StudyEngine">
             <intent-filter>
                 <action android:name="com.gatishil.studyengine.NOTIFICATION_CLICK" />
                 <category android:name="android.intent.category.DEFAULT" />

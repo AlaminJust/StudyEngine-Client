@@ -173,9 +173,6 @@ fun StudyEngineTheme(
         SideEffect {
             val window = (view.context as Activity).window
 
-            // System handles status bar insets; transparent status bar shows window background
-            WindowCompat.setDecorFitsSystemWindows(window, true)
-
             // Transparent status bar - shows screen content behind it
             @Suppress("DEPRECATION")
             window.statusBarColor = android.graphics.Color.TRANSPARENT

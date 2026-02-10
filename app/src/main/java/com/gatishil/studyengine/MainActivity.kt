@@ -22,6 +22,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -56,6 +60,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -76,6 +81,8 @@ class MainActivity : AppCompatActivity() {
     companion object {
         // Track the last language that was applied to prevent recreation loops
         private var lastAppliedLanguage: String? = null
+        // Pending notification navigation route
+        val pendingNotificationRoute = MutableStateFlow<String?>(null)
     }
 
     private val updateResultLauncher = registerForActivityResult(
@@ -130,8 +137,9 @@ class MainActivity : AppCompatActivity() {
             animatorSet.start()
         }
 
-        // Note: We don't use enableEdgeToEdge() to have better control over status bar
-        // Status bar colors are set in Theme.kt
+        // Edge-to-edge: content draws behind status bar for transparent effect
+        // Status bar colors are controlled in Theme.kt
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
 
         // Handle notification intent when app is launched from killed state
         handleNotificationIntent(intent)
@@ -305,10 +313,7 @@ class MainActivity : AppCompatActivity() {
         try {
             val isNotificationClick = intent.action == "com.gatishil.studyengine.NOTIFICATION_CLICK" ||
                 intent.action == NotificationClickActivity.ACTION_NOTIFICATION_OPEN ||
-                intent.hasExtra("google.message_id") ||
-                intent.hasExtra("notification_type") ||
-                intent.hasExtra("sessionId") ||
-                intent.hasExtra("type")
+                intent.hasExtra("notification_type")
 
             if (!isNotificationClick) return
 
@@ -327,8 +332,21 @@ class MainActivity : AppCompatActivity() {
                 "Notification open - type=$type sessionId=$sessionId bookId=$bookId action=${intent.action}"
             )
 
-            // NOTE: actual navigation should be handled inside Compose after NavController is ready.
-            // If you later want deep-links, we can store this in a SharedFlow and consume in StudyEngineApp.
+            // Navigate based on notification type
+            val route = when (type) {
+                "session_reminder", "session_start" -> sessionId?.let { "sessions/$it" }
+                "book_reminder" -> bookId?.let { "books/$it" }
+                "streak_reminder", "streak_at_risk" -> "stats"
+                "achievement" -> "stats"
+                else -> null // Opens app to current screen (Dashboard)
+            }
+
+            if (route != null) {
+                pendingNotificationRoute.value = route
+            }
+
+            // Clear notification action to prevent re-processing on config change
+            intent.action = null
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Error handling notification intent", e)
         }
@@ -365,6 +383,21 @@ fun StudyEngineApp(
         }
     }
 
+    // Handle pending notification navigation
+    val pendingRoute by MainActivity.pendingNotificationRoute.collectAsStateWithLifecycle(initialValue = null)
+    LaunchedEffect(pendingRoute) {
+        pendingRoute?.let { route ->
+            try {
+                navController.navigate(route) {
+                    launchSingleTop = true
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("StudyEngineApp", "Failed to navigate to notification route: $route", e)
+            }
+            MainActivity.pendingNotificationRoute.value = null
+        }
+    }
+
     // Determine if we should show bottom navigation
     val showBottomBar = currentDestination?.route in listOf(
         Screen.Dashboard.route,
@@ -379,6 +412,7 @@ fun StudyEngineApp(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets(0.dp),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (showBottomBar) {
@@ -400,7 +434,9 @@ fun StudyEngineApp(
         StudyEngineNavGraph(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier
+                .padding(bottom = innerPadding.calculateBottomPadding())
+                .consumeWindowInsets(WindowInsets.navigationBars)
         )
     }
 }
@@ -411,7 +447,10 @@ private fun StudyEngineBottomNavBar(
     onNavigate: (String) -> Unit
 ) {
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .navigationBarsPadding()
     ) {
         // Main navigation bar with subtle top border
         Surface(

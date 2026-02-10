@@ -60,7 +60,6 @@ fun RemindersScreen(
     }
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0.dp),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
