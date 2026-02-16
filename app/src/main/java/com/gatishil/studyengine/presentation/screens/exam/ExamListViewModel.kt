@@ -21,9 +21,12 @@ data class ExamListUiState(
     val recentAttempts: List<ExamAttemptSummary> = emptyList(),
     val currentExam: ExamQuestionSet? = null,
     val liveExams: List<LiveExam> = emptyList(),
+    val completedLiveExams: List<CompletedLiveExam> = emptyList(),
     val isJoiningLiveExam: Boolean = false,
     val joinedExam: ExamQuestionSet? = null,
     val joinError: String? = null,
+    val selectedStandings: LiveExamStandings? = null,
+    val isLoadingStandings: Boolean = false,
     val error: String? = null
 )
 
@@ -59,6 +62,9 @@ class ExamListViewModel @Inject constructor(
             // Load live exams
             val liveExamsResult = liveExamRepository.getLiveExams()
 
+            // Load completed live exams
+            val completedResult = liveExamRepository.getCompletedLiveExams()
+
             val categories = categoriesResult.getOrNull() ?: emptyList()
             val subjects = subjectsResult.getOrNull() ?: emptyList()
 
@@ -74,6 +80,7 @@ class ExamListViewModel @Inject constructor(
                 recentAttempts = (historyResult as? Resource.Success)?.data?.items ?: emptyList(),
                 currentExam = currentExamResult.getOrNull(),
                 liveExams = liveExams,
+                completedLiveExams = completedResult.getOrNull() ?: emptyList(),
                 error = when {
                     categoriesResult is Resource.Error -> categoriesResult.message ?: categoriesResult.exception.message
                     subjectsResult is Resource.Error -> subjectsResult.message ?: subjectsResult.exception.message
@@ -111,6 +118,30 @@ class ExamListViewModel @Inject constructor(
 
     fun clearJoinError() {
         _uiState.value = _uiState.value.copy(joinError = null)
+    }
+
+    fun loadStandings(examId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoadingStandings = true)
+            when (val result = liveExamRepository.getLiveExamStandings(examId)) {
+                is Resource.Success -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingStandings = false,
+                        selectedStandings = result.data
+                    )
+                }
+                is Resource.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingStandings = false
+                    )
+                }
+                else -> {}
+            }
+        }
+    }
+
+    fun dismissStandings() {
+        _uiState.value = _uiState.value.copy(selectedStandings = null)
     }
 
     fun refresh() {

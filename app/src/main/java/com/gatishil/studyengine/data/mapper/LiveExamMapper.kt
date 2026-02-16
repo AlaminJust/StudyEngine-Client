@@ -1,7 +1,13 @@
 package com.gatishil.studyengine.data.mapper
 
+import com.gatishil.studyengine.data.remote.dto.LiveExamCompletedResponseDto
 import com.gatishil.studyengine.data.remote.dto.LiveExamPublicResponseDto
+import com.gatishil.studyengine.data.remote.dto.LiveExamStandingEntryDto
+import com.gatishil.studyengine.data.remote.dto.LiveExamStandingsResponseDto
+import com.gatishil.studyengine.domain.model.CompletedLiveExam
 import com.gatishil.studyengine.domain.model.LiveExam
+import com.gatishil.studyengine.domain.model.LiveExamStandingEntry
+import com.gatishil.studyengine.domain.model.LiveExamStandings
 import com.gatishil.studyengine.domain.model.LiveExamStatus
 import com.gatishil.studyengine.domain.model.QuestionDifficulty
 import java.time.Instant
@@ -56,6 +62,39 @@ object LiveExamMapper {
             scheduledEndTime = parseDateTime(scheduledEndTime),
             status = LiveExamStatus.fromString(status),
             hasAttempted = hasAttempted
+        )
+    }
+
+    fun LiveExamCompletedResponseDto.toDomain(): CompletedLiveExam {
+        return CompletedLiveExam(
+            id = id,
+            title = title,
+            description = description,
+            questionCount = questionCount,
+            timeLimitMinutes = timeLimitMinutes,
+            difficultyFilter = difficultyFilter?.let { QuestionDifficulty.fromString(it) },
+            participantCount = participantCount,
+            scheduledStartTime = parseDateTime(scheduledStartTime),
+            scheduledEndTime = parseDateTime(scheduledEndTime)
+        )
+    }
+
+    fun LiveExamStandingsResponseDto.toDomain(): LiveExamStandings {
+        return LiveExamStandings(
+            title = title,
+            totalParticipants = totalParticipants,
+            standings = standings.map { it.toDomain() }
+        )
+    }
+
+    fun LiveExamStandingEntryDto.toDomain(): LiveExamStandingEntry {
+        return LiveExamStandingEntry(
+            rank = rank,
+            userName = userName,
+            earnedPoints = earnedPoints,
+            totalPoints = totalPoints,
+            scorePercentage = scorePercentage,
+            duration = duration
         )
     }
 }

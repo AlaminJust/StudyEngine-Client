@@ -5,8 +5,10 @@ import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.data.mapper.ExamMapper.toDomain
 import com.gatishil.studyengine.data.mapper.LiveExamMapper.toDomain
 import com.gatishil.studyengine.data.remote.api.StudyEngineApi
+import com.gatishil.studyengine.domain.model.CompletedLiveExam
 import com.gatishil.studyengine.domain.model.ExamQuestionSet
 import com.gatishil.studyengine.domain.model.LiveExam
+import com.gatishil.studyengine.domain.model.LiveExamStandings
 import com.gatishil.studyengine.domain.repository.LiveExamRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -77,6 +79,47 @@ class LiveExamRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error joining live exam", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun getCompletedLiveExams(count: Int): Resource<List<CompletedLiveExam>> {
+        return try {
+            val response = api.getCompletedLiveExams(count)
+
+            if (response.isSuccessful) {
+                val exams = response.body()?.map { it.toDomain() } ?: emptyList()
+                Resource.success(exams)
+            } else {
+                Log.e(TAG, "Failed to get completed live exams: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get completed live exams: ${response.code()}"),
+                    "Failed to load completed exams"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting completed live exams", e)
+            Resource.error(e, e.message)
+        }
+    }
+
+    override suspend fun getLiveExamStandings(id: String): Resource<LiveExamStandings> {
+        return try {
+            val response = api.getLiveExamStandings(id)
+
+            if (response.isSuccessful) {
+                response.body()?.let { dto ->
+                    Resource.success(dto.toDomain())
+                } ?: Resource.error(Exception("Standings not found"), "Standings not found")
+            } else {
+                Log.e(TAG, "Failed to get standings: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get standings: ${response.code()}"),
+                    "Failed to load standings"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting standings", e)
             Resource.error(e, e.message)
         }
     }

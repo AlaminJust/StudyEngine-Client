@@ -665,5 +665,15 @@ interface StudyEngineApi {
     suspend fun joinLiveExam(
         @Path("id") id: String
     ): Response<ExamQuestionSetDto>
+
+    @GET("live-exams/completed")
+    suspend fun getCompletedLiveExams(
+        @Query("count") count: Int = 10
+    ): Response<List<LiveExamCompletedResponseDto>>
+
+    @GET("live-exams/{id}/standings")
+    suspend fun getLiveExamStandings(
+        @Path("id") id: String
+    ): Response<LiveExamStandingsResponseDto>
 }
 

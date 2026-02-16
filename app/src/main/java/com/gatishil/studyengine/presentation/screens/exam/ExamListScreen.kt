@@ -36,6 +36,7 @@ import com.gatishil.studyengine.ui.theme.StudyEngineTheme
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,6 +100,15 @@ fun ExamListScreen(
         }
     }
 
+    // Standings bottom sheet
+    if (uiState.selectedStandings != null || uiState.isLoadingStandings) {
+        StandingsBottomSheet(
+            standings = uiState.selectedStandings,
+            isLoading = uiState.isLoadingStandings,
+            onDismiss = { viewModel.dismissStandings() }
+        )
+    }
+
     Scaffold { paddingValues ->
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
@@ -153,6 +163,30 @@ fun ExamListScreen(
                                 },
                                 modifier = Modifier.padding(horizontal = 16.dp)
                             )
+                        }
+                    }
+
+                    // Completed Live Exams Section
+                    if (uiState.completedLiveExams.isNotEmpty()) {
+                        item {
+                            SectionHeader(
+                                title = "Previous Live Exams",
+                                icon = Icons.Outlined.EmojiEvents
+                            )
+                        }
+
+                        item {
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(uiState.completedLiveExams) { exam ->
+                                    CompletedLiveExamCard(
+                                        exam = exam,
+                                        onViewStandings = { viewModel.loadStandings(exam.id) }
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -1198,6 +1232,361 @@ private fun LiveExamListCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CompletedLiveExamCard(
+    exam: CompletedLiveExam,
+    onViewStandings: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val timeFormatter = DateTimeFormatter.ofPattern("MMM dd, hh:mm a")
+
+    Card(
+        modifier = modifier.width(280.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                ) {
+                    Text(
+                        text = "Completed",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.People,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "${exam.participantCount}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = exam.title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Quiz,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${exam.questionCount}Q",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                exam.timeLimitMinutes?.let { minutes ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Timer,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "${minutes}m",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = exam.scheduledStartTime.format(timeFormatter),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedButton(
+                onClick = onViewStandings,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.EmojiEvents,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("View Standings", fontWeight = FontWeight.Medium)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun StandingsBottomSheet(
+    standings: LiveExamStandings?,
+    isLoading: Boolean,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 32.dp)
+        ) {
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (standings != null) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = standings.title,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "${standings.totalParticipants} participants",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Filled.EmojiEvents,
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                        tint = Color(0xFFFFD700)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (standings.standings.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "No standings available",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    // Column headers
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "#",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(32.dp)
+                        )
+                        Text(
+                            text = "Name",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "Score",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(70.dp),
+                            textAlign = TextAlign.End
+                        )
+                        Text(
+                            text = "Time",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(60.dp),
+                            textAlign = TextAlign.End
+                        )
+                    }
+
+                    HorizontalDivider()
+
+                    // Standings list
+                    LazyColumn(
+                        modifier = Modifier.heightIn(max = 400.dp)
+                    ) {
+                        items(standings.standings) { entry ->
+                            StandingRow(entry = entry)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StandingRow(
+    entry: LiveExamStandingEntry,
+    modifier: Modifier = Modifier
+) {
+    val rankColor = when (entry.rank) {
+        1 -> Color(0xFFFFD700)
+        2 -> Color(0xFFC0C0C0)
+        3 -> Color(0xFFCD7F32)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    val scoreColor = when {
+        entry.scorePercentage >= 80 -> StudyEngineTheme.extendedColors.success
+        entry.scorePercentage >= 50 -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.error
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Rank
+        if (entry.rank <= 3) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(rankColor.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${entry.rank}",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = rankColor
+                )
+            }
+            Spacer(modifier = Modifier.width(4.dp))
+        } else {
+            Text(
+                text = "${entry.rank}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.width(32.dp),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        // Name
+        Text(
+            text = entry.userName,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (entry.rank <= 3) FontWeight.SemiBold else FontWeight.Normal,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+
+        // Score
+        Text(
+            text = "${entry.scorePercentage.roundToInt()}%",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = scoreColor,
+            modifier = Modifier.width(70.dp),
+            textAlign = TextAlign.End
+        )
+
+        // Time
+        Text(
+            text = formatDuration(entry.duration),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(60.dp),
+            textAlign = TextAlign.End
+        )
+    }
+}
+
+private fun formatDuration(duration: String?): String {
+    if (duration == null) return "-"
+    return try {
+        val parts = duration.split(":")
+        if (parts.size >= 3) {
+            val hours = parts[0].toIntOrNull() ?: 0
+            val minutes = parts[1].toIntOrNull() ?: 0
+            val seconds = parts[2].toDoubleOrNull()?.toInt() ?: 0
+            if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m ${seconds}s"
+        } else "-"
+    } catch (e: Exception) {
+        "-"
     }
 }
 
