@@ -122,29 +122,34 @@ class MainActivity : AppCompatActivity() {
             fadeOut.interpolator = android.view.animation.AccelerateDecelerateInterpolator()
             fadeOut.duration = 300L
 
-            // Create scale animation
-            val scaleX = android.animation.ObjectAnimator.ofFloat(
-                splashScreenView.iconView,
-                android.view.View.SCALE_X,
-                1f,
-                1.2f,
-                0f
-            )
-            val scaleY = android.animation.ObjectAnimator.ofFloat(
-                splashScreenView.iconView,
-                android.view.View.SCALE_Y,
-                1f,
-                1.2f,
-                0f
-            )
-            scaleX.interpolator = android.view.animation.AccelerateInterpolator()
-            scaleY.interpolator = android.view.animation.AccelerateInterpolator()
-            scaleX.duration = 400L
-            scaleY.duration = 400L
+            val animations = mutableListOf<android.animation.Animator>(fadeOut)
+
+            // iconView can be null on some devices (e.g. cold start via notification)
+            try {
+                val iconView = splashScreenView.iconView
+                val scaleX = android.animation.ObjectAnimator.ofFloat(
+                    iconView,
+                    android.view.View.SCALE_X,
+                    1f, 1.2f, 0f
+                )
+                val scaleY = android.animation.ObjectAnimator.ofFloat(
+                    iconView,
+                    android.view.View.SCALE_Y,
+                    1f, 1.2f, 0f
+                )
+                scaleX.interpolator = android.view.animation.AccelerateInterpolator()
+                scaleY.interpolator = android.view.animation.AccelerateInterpolator()
+                scaleX.duration = 400L
+                scaleY.duration = 400L
+                animations.add(scaleX)
+                animations.add(scaleY)
+            } catch (_: Exception) {
+                // iconView not available, skip icon animation
+            }
 
             // Play animations together
             val animatorSet = android.animation.AnimatorSet()
-            animatorSet.playTogether(fadeOut, scaleX, scaleY)
+            animatorSet.playTogether(animations)
             animatorSet.doOnEnd { splashScreenView.remove() }
             animatorSet.start()
         }
