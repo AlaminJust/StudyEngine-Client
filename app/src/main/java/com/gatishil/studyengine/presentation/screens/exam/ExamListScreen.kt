@@ -1119,6 +1119,7 @@ private fun LiveExamListCard(
             ) {
                 // Left side: status badge + lock badge
                 Row(
+                    modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -1211,7 +1212,9 @@ private fun LiveExamListCard(
                         text = timeText,
                         style = MaterialTheme.typography.labelSmall,
                         color = if (isActive) statusColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal
+                        fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
