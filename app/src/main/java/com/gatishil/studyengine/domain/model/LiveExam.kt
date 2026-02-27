@@ -37,6 +37,7 @@ data class LiveExam(
     val scheduledStartTime: LocalDateTime,
     val scheduledEndTime: LocalDateTime,
     val status: LiveExamStatus,
+    val isProtected: Boolean,
     val hasAttempted: Boolean
 )
 

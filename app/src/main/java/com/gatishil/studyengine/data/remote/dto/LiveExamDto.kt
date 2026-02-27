@@ -23,8 +23,16 @@ data class LiveExamPublicResponseDto(
     val scheduledEndTime: String,
     @SerialName("status")
     val status: String,
+    @SerialName("isProtected")
+    val isProtected: Boolean = false,
     @SerialName("hasAttempted")
     val hasAttempted: Boolean
+)
+
+@Serializable
+data class JoinLiveExamRequestDto(
+    @SerialName("accessCode")
+    val accessCode: String? = null
 )
 
 @Serializable

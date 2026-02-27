@@ -5,11 +5,13 @@ import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.data.mapper.ExamMapper.toDomain
 import com.gatishil.studyengine.data.mapper.LiveExamMapper.toDomain
 import com.gatishil.studyengine.data.remote.api.StudyEngineApi
+import com.gatishil.studyengine.data.remote.dto.JoinLiveExamRequestDto
 import com.gatishil.studyengine.domain.model.CompletedLiveExam
 import com.gatishil.studyengine.domain.model.ExamQuestionSet
 import com.gatishil.studyengine.domain.model.LiveExam
 import com.gatishil.studyengine.domain.model.LiveExamStandings
 import com.gatishil.studyengine.domain.repository.LiveExamRepository
+import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -61,9 +63,9 @@ class LiveExamRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun joinLiveExam(id: String): Resource<ExamQuestionSet> {
+    override suspend fun joinLiveExam(id: String, accessCode: String?): Resource<ExamQuestionSet> {
         return try {
-            val response = api.joinLiveExam(id)
+            val response = api.joinLiveExam(id, JoinLiveExamRequestDto(accessCode = accessCode))
 
             if (response.isSuccessful) {
                 response.body()?.let { dto ->
@@ -72,10 +74,15 @@ class LiveExamRepositoryImpl @Inject constructor(
             } else {
                 val errorBody = response.errorBody()?.string()
                 Log.e(TAG, "Failed to join live exam: ${response.code()}, $errorBody")
-                Resource.error(
-                    Exception("Failed to join live exam: ${response.code()}"),
-                    errorBody ?: "Failed to join live exam"
-                )
+                val errorMessage = try {
+                    val json = JSONObject(errorBody ?: "{}")
+                    json.optString("message").takeIf { it.isNotBlank() }
+                        ?: json.optString("title").takeIf { it.isNotBlank() }
+                        ?: "Failed to join exam"
+                } catch (e: Exception) {
+                    errorBody ?: "Failed to join exam"
+                }
+                Resource.error(Exception(errorMessage), errorMessage)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error joining live exam", e)

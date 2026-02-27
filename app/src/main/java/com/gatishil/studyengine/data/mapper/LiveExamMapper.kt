@@ -61,6 +61,7 @@ object LiveExamMapper {
             scheduledStartTime = parseDateTime(scheduledStartTime),
             scheduledEndTime = parseDateTime(scheduledEndTime),
             status = LiveExamStatus.fromString(status),
+            isProtected = isProtected,
             hasAttempted = hasAttempted
         )
     }

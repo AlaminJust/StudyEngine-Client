@@ -663,7 +663,8 @@ interface StudyEngineApi {
 
     @POST("live-exams/{id}/join")
     suspend fun joinLiveExam(
-        @Path("id") id: String
+        @Path("id") id: String,
+        @Body request: JoinLiveExamRequestDto
     ): Response<ExamQuestionSetDto>
 
     @GET("live-exams/completed")

@@ -90,11 +90,11 @@ class ExamListViewModel @Inject constructor(
         }
     }
 
-    fun joinLiveExam(liveExamId: String) {
+    fun joinLiveExam(liveExamId: String, accessCode: String? = null) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isJoiningLiveExam = true, joinError = null)
 
-            when (val result = liveExamRepository.joinLiveExam(liveExamId)) {
+            when (val result = liveExamRepository.joinLiveExam(liveExamId, accessCode)) {
                 is Resource.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isJoiningLiveExam = false,

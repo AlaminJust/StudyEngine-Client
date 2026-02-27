@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
@@ -20,19 +22,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gatishil.studyengine.R
 import com.gatishil.studyengine.domain.model.*
 import com.gatishil.studyengine.presentation.common.components.LoadingScreen
 import com.gatishil.studyengine.ui.theme.StudyEngineTheme
+import kotlinx.coroutines.delay
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -49,7 +58,12 @@ fun ExamListScreen(
     viewModel: ExamListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var showJoinDialog by remember { mutableStateOf<LiveExam?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Local UI state for access code dialog
+    var pendingJoinExam by remember { mutableStateOf<LiveExam?>(null) }
+    var accessCodeInput by remember { mutableStateOf("") }
+    var accessCodeError by remember { mutableStateOf<String?>(null) }
 
     // Navigate to take exam when live exam is joined
     LaunchedEffect(uiState.joinedExam) {
@@ -59,45 +73,42 @@ fun ExamListScreen(
         }
     }
 
-    // Join confirmation dialog
-    showJoinDialog?.let { liveExam ->
-        AlertDialog(
-            onDismissRequest = { showJoinDialog = null },
-            title = { Text(stringResource(R.string.live_exam_join_confirm_title)) },
-            text = {
-                Text(stringResource(R.string.live_exam_join_confirm_message, liveExam.title))
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.joinLiveExam(liveExam.id)
-                        showJoinDialog = null
-                    },
-                    enabled = !uiState.isJoiningLiveExam
-                ) {
-                    if (uiState.isJoiningLiveExam) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Text(stringResource(R.string.live_exam_join))
-                    }
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showJoinDialog = null }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
-
-    // Join error snackbar
-    uiState.joinError?.let { error ->
-        LaunchedEffect(error) {
+    // Show error snackbar
+    LaunchedEffect(uiState.joinError) {
+        uiState.joinError?.let { error ->
+            snackbarHostState.showSnackbar(message = error, duration = SnackbarDuration.Long)
             viewModel.clearJoinError()
         }
+    }
+
+    // Access code dialog for protected exams
+    pendingJoinExam?.let { liveExam ->
+        AccessCodeDialog(
+            examTitle = liveExam.title,
+            accessCode = accessCodeInput,
+            onAccessCodeChange = {
+                accessCodeInput = it
+                accessCodeError = null
+            },
+            error = accessCodeError,
+            isJoining = uiState.isJoiningLiveExam,
+            onConfirm = {
+                val code = accessCodeInput.trim()
+                if (code.isEmpty()) {
+                    accessCodeError = "Please enter the access code"
+                } else {
+                    viewModel.joinLiveExam(liveExam.id, code)
+                    pendingJoinExam = null
+                    accessCodeInput = ""
+                    accessCodeError = null
+                }
+            },
+            onDismiss = {
+                pendingJoinExam = null
+                accessCodeInput = ""
+                accessCodeError = null
+            }
+        )
     }
 
     // Standings bottom sheet
@@ -109,7 +120,9 @@ fun ExamListScreen(
         )
     }
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
         PullToRefreshBox(
             isRefreshing = uiState.isRefreshing,
             onRefresh = { viewModel.refresh() },
@@ -155,10 +168,12 @@ fun ExamListScreen(
                                 liveExam = liveExam,
                                 isJoining = uiState.isJoiningLiveExam,
                                 onJoin = {
-                                    if (liveExam.hasAttempted) {
-                                        onNavigateToContinueExam()
+                                    if (liveExam.isProtected) {
+                                        pendingJoinExam = liveExam
+                                        accessCodeInput = ""
+                                        accessCodeError = null
                                     } else {
-                                        showJoinDialog = liveExam
+                                        viewModel.joinLiveExam(liveExam.id)
                                     }
                                 },
                                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -1029,7 +1044,6 @@ private fun LiveExamListCard(
     modifier: Modifier = Modifier
 ) {
     val isActive = liveExam.status == LiveExamStatus.ACTIVE
-    val now = LocalDateTime.now()
 
     val statusColor = if (isActive) {
         StudyEngineTheme.extendedColors.success
@@ -1037,18 +1051,44 @@ private fun LiveExamListCard(
         MaterialTheme.colorScheme.primary
     }
 
+    // Live countdown that updates every second
+    var currentTime by remember { mutableStateOf(LocalDateTime.now()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(1000L)
+            currentTime = LocalDateTime.now()
+        }
+    }
+
     val timeText = if (isActive) {
-        val remaining = Duration.between(now, liveExam.scheduledEndTime)
-        val minutes = remaining.toMinutes()
-        if (minutes > 60) "${minutes / 60}h ${minutes % 60}m remaining" else "${minutes}m remaining"
+        val remaining = Duration.between(currentTime, liveExam.scheduledEndTime)
+        if (remaining.isNegative) "Ending soon"
+        else {
+            val totalSeconds = remaining.seconds
+            val hours = totalSeconds / 3600
+            val minutes = (totalSeconds % 3600) / 60
+            val secs = totalSeconds % 60
+            when {
+                hours > 0 -> "${hours}h ${minutes}m remaining"
+                minutes > 0 -> "${minutes}m ${secs}s remaining"
+                else -> "${secs}s remaining"
+            }
+        }
     } else {
-        val until = Duration.between(now, liveExam.scheduledStartTime)
-        val minutes = until.toMinutes()
-        when {
-            minutes < 0 -> ""
-            minutes < 60 -> "Starts in ${minutes}m"
-            minutes < 1440 -> "Starts in ${minutes / 60}h ${minutes % 60}m"
-            else -> "Starts in ${minutes / 1440}d"
+        val until = Duration.between(currentTime, liveExam.scheduledStartTime)
+        if (until.isNegative) ""
+        else {
+            val totalSeconds = until.seconds
+            val days = totalSeconds / 86400
+            val hours = (totalSeconds % 86400) / 3600
+            val minutes = (totalSeconds % 3600) / 60
+            val secs = totalSeconds % 60
+            when {
+                days > 0 -> "Starts in ${days}d ${hours}h"
+                hours > 0 -> "Starts in ${hours}h ${minutes}m"
+                minutes > 0 -> "Starts in ${minutes}m ${secs}s"
+                else -> "Starts in ${secs}s"
+            }
         }
     }
 
@@ -1071,45 +1111,107 @@ private fun LiveExamListCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Top row: status + time remaining
+            // Top row: status badges + time remaining
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = statusColor.copy(alpha = 0.15f)
+                // Left side: status badge + lock badge
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                        horizontalArrangement = Arrangement.spacedBy(5.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Status badge (Live Now / Upcoming)
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = statusColor.copy(alpha = 0.15f)
                     ) {
-                        if (isActive) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(statusColor)
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (isActive) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(statusColor)
+                                )
+                            }
+                            Text(
+                                text = if (isActive) stringResource(R.string.live_exam_active)
+                                else stringResource(R.string.live_exam_scheduled),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = statusColor
                             )
                         }
-                        Text(
-                            text = if (isActive) stringResource(R.string.live_exam_active)
-                            else stringResource(R.string.live_exam_scheduled),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = statusColor
-                        )
+                    }
+
+                    // Protected badge
+                    if (liveExam.isProtected) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Lock,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(11.dp),
+                                    tint = MaterialTheme.colorScheme.tertiary
+                                )
+                                Text(
+                                    text = "Protected",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.tertiary
+                                )
+                            }
+                        }
+                    }
+
+                    // Attempted badge
+                    if (liveExam.hasAttempted) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CheckCircle,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(11.dp),
+                                    tint = MaterialTheme.colorScheme.secondary
+                                )
+                                Text(
+                                    text = "Attempted",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                        }
                     }
                 }
 
+                // Right side: countdown / time remaining
                 if (timeText.isNotEmpty()) {
                     Text(
                         text = timeText,
                         style = MaterialTheme.typography.labelSmall,
                         color = if (isActive) statusColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = if (isActive) FontWeight.Medium else FontWeight.Normal
+                        fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal
                     )
                 }
             }
@@ -1198,37 +1300,59 @@ private fun LiveExamListCard(
                 }
             }
 
-            // Join button for active exams
+            // Action button for active exams
             if (isActive) {
                 Spacer(modifier = Modifier.height(14.dp))
-                Button(
-                    onClick = onJoin,
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isJoining,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = statusColor
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    if (isJoining) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.surface
+                if (liveExam.hasAttempted) {
+                    // Already attempted - show disabled button
+                    Button(
+                        onClick = {},
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = false,
+                        colors = ButtonDefaults.buttonColors(
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.CheckCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
+                        Text("Already Attempted", fontWeight = FontWeight.Bold)
                     }
-                    Icon(
-                        imageVector = if (liveExam.hasAttempted) Icons.Default.PlayArrow else Icons.Default.Login,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (liveExam.hasAttempted) stringResource(R.string.live_exam_joined)
-                        else stringResource(R.string.live_exam_join),
-                        fontWeight = FontWeight.Bold
-                    )
+                } else {
+                    Button(
+                        onClick = onJoin,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isJoining,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = statusColor
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        if (isJoining) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.surface
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                        Icon(
+                            imageVector = if (liveExam.isProtected) Icons.Outlined.Lock else Icons.Default.Login,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (liveExam.isProtected) "Enter Code & Join"
+                            else stringResource(R.string.live_exam_join),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
@@ -1588,5 +1712,116 @@ private fun formatDuration(duration: String?): String {
     } catch (e: Exception) {
         "-"
     }
+}
+
+@Composable
+private fun AccessCodeDialog(
+    examTitle: String,
+    accessCode: String,
+    onAccessCodeChange: (String) -> Unit,
+    error: String?,
+    isJoining: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        delay(100)
+        focusRequester.requestFocus()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Outlined.Lock,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(28.dp)
+            )
+        },
+        title = {
+            Text(
+                text = "Access Code Required",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = examTitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "Enter the access code provided by your instructor.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                OutlinedTextField(
+                    value = accessCode,
+                    onValueChange = onAccessCodeChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    placeholder = { Text("Enter code", textAlign = TextAlign.Center) },
+                    textStyle = LocalTextStyle.current.copy(
+                        textAlign = TextAlign.Center,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 4.sp
+                    ),
+                    singleLine = true,
+                    isError = error != null,
+                    supportingText = error?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Characters,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { onConfirm() }),
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                enabled = !isJoining,
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                if (isJoining) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Login,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+                Text("Join Exam", fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
 }
 

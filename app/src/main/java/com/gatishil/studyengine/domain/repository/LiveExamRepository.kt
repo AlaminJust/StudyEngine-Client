@@ -12,7 +12,7 @@ interface LiveExamRepository {
 
     suspend fun getLiveExamById(id: String): Resource<LiveExam>
 
-    suspend fun joinLiveExam(id: String): Resource<ExamQuestionSet>
+    suspend fun joinLiveExam(id: String, accessCode: String? = null): Resource<ExamQuestionSet>
 
     suspend fun getCompletedLiveExams(count: Int = 10): Resource<List<CompletedLiveExam>>
 
