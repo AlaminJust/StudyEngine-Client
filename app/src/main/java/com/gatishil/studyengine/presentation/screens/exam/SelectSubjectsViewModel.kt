@@ -72,60 +72,21 @@ class SelectSubjectsViewModel @Inject constructor(
     }
 
     private fun loadData() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        viewModelScope.launch { fetchData() }
+    }
 
-            // Load categories with subjects
-            val categoriesResult = examRepository.getCategoriesWithSubjects()
-            // Also load all subjects as fallback
-            val subjectsResult = examRepository.getSubjects()
+    private suspend fun fetchData() {
+        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-            when {
-                categoriesResult is Resource.Success && categoriesResult.data.isNotEmpty() -> {
-                    val categories = categoriesResult.data
+        val categoriesResult = examRepository.getCategoriesWithSubjects()
+        val subjectsResult = examRepository.getSubjects()
 
-                    // Load chapters for each subject
-                    val categoryItems = categories.map { category ->
-                        val subjectItems = category.subjects.map { subject ->
-                            // Try to load chapters for this subject
-                            val chaptersResult = examRepository.getSubjectChapters(subject.id)
-                            val chapters = if (chaptersResult is Resource.Success) {
-                                chaptersResult.data
-                            } else {
-                                emptyList()
-                            }
-
-                            SubjectSelectionItem(
-                                subject = subject,
-                                chapters = chapters,
-                                selectedChapterIds = emptySet(),
-                                isExpanded = false,
-                                isSelected = false
-                            )
-                        }
-
-                        CategorySelectionItem(
-                            category = category,
-                            subjectItems = subjectItems,
-                            isExpanded = true
-                        )
-                    }
-
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        categoryItems = categoryItems
-                    )
-                }
-                subjectsResult is Resource.Success -> {
-                    // Load chapters for each subject
-                    val subjectItems = subjectsResult.data.map { subject ->
+        when {
+            categoriesResult is Resource.Success && categoriesResult.data.isNotEmpty() -> {
+                val categoryItems = categoriesResult.data.map { category ->
+                    val subjectItems = category.subjects.map { subject ->
                         val chaptersResult = examRepository.getSubjectChapters(subject.id)
-                        val chapters = if (chaptersResult is Resource.Success) {
-                            chaptersResult.data
-                        } else {
-                            emptyList()
-                        }
-
+                        val chapters = if (chaptersResult is Resource.Success) chaptersResult.data else emptyList()
                         SubjectSelectionItem(
                             subject = subject,
                             chapters = chapters,
@@ -134,20 +95,31 @@ class SelectSubjectsViewModel @Inject constructor(
                             isSelected = false
                         )
                     }
-
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        subjectItems = subjectItems
+                    CategorySelectionItem(category = category, subjectItems = subjectItems, isExpanded = true)
+                }
+                _uiState.value = _uiState.value.copy(isLoading = false, categoryItems = categoryItems)
+            }
+            subjectsResult is Resource.Success -> {
+                val subjectItems = subjectsResult.data.map { subject ->
+                    val chaptersResult = examRepository.getSubjectChapters(subject.id)
+                    val chapters = if (chaptersResult is Resource.Success) chaptersResult.data else emptyList()
+                    SubjectSelectionItem(
+                        subject = subject,
+                        chapters = chapters,
+                        selectedChapterIds = emptySet(),
+                        isExpanded = false,
+                        isSelected = false
                     )
                 }
-                else -> {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = (categoriesResult as? Resource.Error)?.message
-                            ?: (subjectsResult as? Resource.Error)?.message
-                            ?: "Failed to load subjects"
-                    )
-                }
+                _uiState.value = _uiState.value.copy(isLoading = false, subjectItems = subjectItems)
+            }
+            else -> {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = (categoriesResult as? Resource.Error)?.message
+                        ?: (subjectsResult as? Resource.Error)?.message
+                        ?: "Failed to load subjects"
+                )
             }
         }
     }
@@ -155,7 +127,7 @@ class SelectSubjectsViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isRefreshing = true)
-            loadData()
+            fetchData()
             _uiState.value = _uiState.value.copy(isRefreshing = false)
         }
     }

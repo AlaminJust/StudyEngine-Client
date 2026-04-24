@@ -7,6 +7,8 @@ import com.gatishil.studyengine.domain.model.*
 import com.gatishil.studyengine.domain.repository.ExamRepository
 import com.gatishil.studyengine.domain.repository.LiveExamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,31 +46,31 @@ class ExamListViewModel @Inject constructor(
     }
 
     fun loadData() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        viewModelScope.launch { fetchData() }
+    }
 
-            // Load categories with subjects
-            val categoriesResult = examRepository.getCategoriesWithSubjects()
+    private suspend fun fetchData() {
+        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-            // Load all subjects as fallback and for counting
-            val subjectsResult = examRepository.getSubjects()
+        coroutineScope {
+            // Fire all 6 requests in parallel
+            val categoriesDeferred    = async { examRepository.getCategoriesWithSubjects() }
+            val subjectsDeferred      = async { examRepository.getSubjects() }
+            val historyDeferred       = async { examRepository.getExamHistory(pageSize = 5) }
+            val currentExamDeferred   = async { examRepository.getCurrentExam() }
+            val liveExamsDeferred     = async { liveExamRepository.getLiveExams() }
+            val completedDeferred     = async { liveExamRepository.getCompletedLiveExams() }
 
-            // Load recent attempts
-            val historyResult = examRepository.getExamHistory(pageSize = 5)
-
-            // Check for in-progress exam
-            val currentExamResult = examRepository.getCurrentExam()
-
-            // Load live exams
-            val liveExamsResult = liveExamRepository.getLiveExams()
-
-            // Load completed live exams
-            val completedResult = liveExamRepository.getCompletedLiveExams()
+            val categoriesResult  = categoriesDeferred.await()
+            val subjectsResult    = subjectsDeferred.await()
+            val historyResult     = historyDeferred.await()
+            val currentExamResult = currentExamDeferred.await()
+            val liveExamsResult   = liveExamsDeferred.await()
+            val completedResult   = completedDeferred.await()
 
             val categories = categoriesResult.getOrNull() ?: emptyList()
-            val subjects = subjectsResult.getOrNull() ?: emptyList()
+            val subjects   = subjectsResult.getOrNull() ?: emptyList()
 
-            // Show active and scheduled live exams
             val liveExams = (liveExamsResult.getOrNull() ?: emptyList())
                 .filter { it.status == LiveExamStatus.ACTIVE || it.status == LiveExamStatus.SCHEDULED }
                 .sortedWith(compareBy<LiveExam> { it.status != LiveExamStatus.ACTIVE }.thenBy { it.scheduledStartTime })
@@ -147,7 +149,7 @@ class ExamListViewModel @Inject constructor(
     fun refresh() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isRefreshing = true)
-            loadData()
+            fetchData()
             _uiState.value = _uiState.value.copy(isRefreshing = false)
         }
     }
