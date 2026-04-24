@@ -599,6 +599,9 @@ interface StudyEngineApi {
 
     // ==================== Subject Chapter Endpoints ====================
 
+    @GET("subject-chapters/all")
+    suspend fun getAllSubjectChapters(): Response<List<SubjectChaptersBulkItemDto>>
+
     @GET("subject-chapters/by-subject/{subjectId}")
     suspend fun getSubjectChapters(
         @Path("subjectId") subjectId: String,

@@ -229,6 +229,28 @@ class ExamRepositoryImpl @Inject constructor(
 
     // ==================== Subject Chapter Operations ====================
 
+    override suspend fun getAllSubjectChapters(): Resource<Map<String, List<SubjectChapter>>> {
+        return try {
+            val response = api.getAllSubjectChapters()
+
+            if (response.isSuccessful) {
+                val map = response.body()
+                    ?.associate { item -> item.subjectId to item.chapters.map { it.toDomain() } }
+                    ?: emptyMap()
+                Resource.success(map)
+            } else {
+                Log.e(TAG, "Failed to get all subject chapters: ${response.code()}")
+                Resource.error(
+                    Exception("Failed to get all subject chapters: ${response.code()}"),
+                    "Failed to load chapters"
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting all subject chapters", e)
+            Resource.error(e, e.message)
+        }
+    }
+
     override suspend fun getSubjectChapters(subjectId: String, includeInactive: Boolean): Resource<List<SubjectChapter>> {
         return try {
             val response = api.getSubjectChapters(subjectId, includeInactive)

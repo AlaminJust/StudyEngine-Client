@@ -7,6 +7,9 @@ import com.gatishil.studyengine.core.util.Resource
 import com.gatishil.studyengine.domain.model.*
 import com.gatishil.studyengine.domain.repository.ExamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -119,14 +122,17 @@ class StartExamViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
+            // Fire all subject fetches in parallel
+            val results = coroutineScope {
+                subjectIds.map { subjectId ->
+                    async { subjectId to examRepository.getSubjectWithChapters(subjectId) }
+                }.awaitAll()
+            }
+
             val subjectsWithChaptersList = mutableListOf<SubjectWithChapterSelection>()
             var totalQuestions = 0
 
-            // Load each subject with its chapters
-            for (subjectId in subjectIds) {
-                val subjectWithChaptersResult = examRepository.getSubjectWithChapters(subjectId)
-
-                // Get preselected chapters for this subject
+            for ((subjectId, subjectWithChaptersResult) in results) {
                 val preselectedChapterIds = preselectedChapters[subjectId] ?: emptySet()
 
                 when (subjectWithChaptersResult) {
@@ -145,14 +151,12 @@ class StartExamViewModel @Inject constructor(
                             isActive = subjectWithChapters.isActive
                         )
 
-                        // Use preselected chapters if available
                         val selectedChapters = if (preselectedChapterIds.isNotEmpty()) {
                             preselectedChapterIds
                         } else {
-                            emptySet() // Empty means all chapters
+                            emptySet()
                         }
 
-                        // Calculate questions based on selection
                         val questionCount = if (selectedChapters.isEmpty()) {
                             subjectWithChapters.questionCount
                         } else {
@@ -166,13 +170,13 @@ class StartExamViewModel @Inject constructor(
                                 subject = subject,
                                 chapters = subjectWithChapters.chapters,
                                 selectedChapterIds = selectedChapters,
-                                isExpanded = preselectedChapterIds.isNotEmpty() // Expand if has preselected chapters
+                                isExpanded = preselectedChapterIds.isNotEmpty()
                             )
                         )
                         totalQuestions += questionCount
                     }
                     is Resource.Error -> {
-                        // Try to load just the subject
+                        // Fallback: load just the subject metadata
                         val subjectResult = examRepository.getSubjectById(subjectId)
                         if (subjectResult is Resource.Success) {
                             subjectsWithChaptersList.add(
@@ -197,7 +201,6 @@ class StartExamViewModel @Inject constructor(
                 questionCount = minOf(10, maxOf(1, totalQuestions))
             )
 
-            // Load tags based on selected subjects' categories
             val categoryIds = subjectsWithChaptersList
                 .mapNotNull { it.subject.categoryId }
                 .distinct()

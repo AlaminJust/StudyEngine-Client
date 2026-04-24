@@ -211,6 +211,14 @@ data class SubjectChapterListDto(
     val questionCount: Int
 )
 
+@Serializable
+data class SubjectChaptersBulkItemDto(
+    @SerialName("subjectId")
+    val subjectId: String,
+    @SerialName("chapters")
+    val chapters: List<SubjectChapterListDto>
+)
+
 // ==================== Question DTOs ====================
 
 @Serializable

@@ -67,6 +67,11 @@ interface ExamRepository {
     // ==================== Subject Chapter Operations ====================
 
     /**
+     * Get all active chapters for all subjects in a single call (snapshot-served)
+     */
+    suspend fun getAllSubjectChapters(): Resource<Map<String, List<SubjectChapter>>>
+
+    /**
      * Get chapters for a subject
      */
     suspend fun getSubjectChapters(subjectId: String, includeInactive: Boolean = false): Resource<List<SubjectChapter>>

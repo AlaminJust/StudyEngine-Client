@@ -10,6 +10,8 @@ import com.gatishil.studyengine.domain.model.SubjectChapter
 import com.gatishil.studyengine.domain.model.SubjectWithChapters
 import com.gatishil.studyengine.domain.repository.ExamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -78,48 +80,55 @@ class SelectSubjectsViewModel @Inject constructor(
     private suspend fun fetchData() {
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-        val categoriesResult = examRepository.getCategoriesWithSubjects()
-        val subjectsResult = examRepository.getSubjects()
+        coroutineScope {
+            val categoriesDeferred = async { examRepository.getCategoriesWithSubjects() }
+            val subjectsDeferred = async { examRepository.getSubjects() }
+            val allChaptersDeferred = async { examRepository.getAllSubjectChapters() }
 
-        when {
-            categoriesResult is Resource.Success && categoriesResult.data.isNotEmpty() -> {
-                val categoryItems = categoriesResult.data.map { category ->
-                    val subjectItems = category.subjects.map { subject ->
-                        val chaptersResult = examRepository.getSubjectChapters(subject.id)
-                        val chapters = if (chaptersResult is Resource.Success) chaptersResult.data else emptyList()
+            val categoriesResult = categoriesDeferred.await()
+            val subjectsResult = subjectsDeferred.await()
+            val allChaptersResult = allChaptersDeferred.await()
+
+            // Map of subjectId -> chapters, empty map on failure (chapters are optional)
+            val chaptersBySubject: Map<String, List<SubjectChapter>> =
+                if (allChaptersResult is Resource.Success) allChaptersResult.data else emptyMap()
+
+            when {
+                categoriesResult is Resource.Success && categoriesResult.data.isNotEmpty() -> {
+                    val categoryItems = categoriesResult.data.map { category ->
+                        val subjectItems = category.subjects.map { subject ->
+                            SubjectSelectionItem(
+                                subject = subject,
+                                chapters = chaptersBySubject[subject.id] ?: emptyList(),
+                                selectedChapterIds = emptySet(),
+                                isExpanded = false,
+                                isSelected = false
+                            )
+                        }
+                        CategorySelectionItem(category = category, subjectItems = subjectItems, isExpanded = true)
+                    }
+                    _uiState.value = _uiState.value.copy(isLoading = false, categoryItems = categoryItems)
+                }
+                subjectsResult is Resource.Success -> {
+                    val subjectItems = subjectsResult.data.map { subject ->
                         SubjectSelectionItem(
                             subject = subject,
-                            chapters = chapters,
+                            chapters = chaptersBySubject[subject.id] ?: emptyList(),
                             selectedChapterIds = emptySet(),
                             isExpanded = false,
                             isSelected = false
                         )
                     }
-                    CategorySelectionItem(category = category, subjectItems = subjectItems, isExpanded = true)
+                    _uiState.value = _uiState.value.copy(isLoading = false, subjectItems = subjectItems)
                 }
-                _uiState.value = _uiState.value.copy(isLoading = false, categoryItems = categoryItems)
-            }
-            subjectsResult is Resource.Success -> {
-                val subjectItems = subjectsResult.data.map { subject ->
-                    val chaptersResult = examRepository.getSubjectChapters(subject.id)
-                    val chapters = if (chaptersResult is Resource.Success) chaptersResult.data else emptyList()
-                    SubjectSelectionItem(
-                        subject = subject,
-                        chapters = chapters,
-                        selectedChapterIds = emptySet(),
-                        isExpanded = false,
-                        isSelected = false
+                else -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = (categoriesResult as? Resource.Error)?.message
+                            ?: (subjectsResult as? Resource.Error)?.message
+                            ?: "Failed to load subjects"
                     )
                 }
-                _uiState.value = _uiState.value.copy(isLoading = false, subjectItems = subjectItems)
-            }
-            else -> {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = (categoriesResult as? Resource.Error)?.message
-                        ?: (subjectsResult as? Resource.Error)?.message
-                        ?: "Failed to load subjects"
-                )
             }
         }
     }
